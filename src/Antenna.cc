@@ -17,13 +17,6 @@ void Antenna::updateCQIs()
 }
 
 
-int Antenna::CQIToBytes(int cqi)
-{
-    int bytes[] = {3, 3, 6, 11, 15, 20, 25, 36, 39, 50, 63, 72, 80, 93, 93};
-    return bytes[cqi-1];
-}
-
-
 UserInformation* Antenna::roundrobin()
 {
     return users[(currentUser++ + 1)%NUM_USERS];
@@ -35,22 +28,61 @@ bool Antenna::frameFull()
     return false;
 }
 
+
+void Antenna::broadcastFrame(Frame *f)
+{
+    // for simplicity just send it to every users and then the user will check
+    // if there is something for them.
+    for(int i=0; i<NUM_USERS; i++)
+    {
+        Frame *copy = f->dup();
+        send(copy, "out", i);
+    }
+    delete f;
+}
+
+
 void Antenna::downlinkPropagation()
 {
     double next_timeslot = simTime().dbl() + this->par("timeslot");
+    int currentRB = 0;
+    Frame *f = new Frame();
 
     // 1) Get updated CQIs
     updateCQIs();
 
     // 2) I guess i need to check all the queue?
+    // THIS IS ACTUALLY PSEUDO-CODE... (TBD)
     do
     {
+        int userId = currentUser;
         UserInformation *u = roundrobin();
+        double remainingBytes = u->CQIToBytes();
+
+        while(!u->getQueue()->empty())
+        {
+            Packet *p = u->getQueue()->head();
+
+            if(currentRB + ceil(p->getSize()/u->CQIToBytes()) < FRAME_SIZE)
+            {
+                // it fits
+
+            }
+        }
 
     } while(!frameFull());
 
-    // That's it...
+    // 3) send the frame to all the users
+    broadcastFrame(f);
+
+    // Schedule next iteration
     scheduleAt(next_timeslot, timer);
+}
+
+
+void Antenna::handlePacket(Packet *p)
+{
+
 }
 
 
@@ -58,5 +90,6 @@ void Antenna::handleMessage(cMessage *msg)
 {
     if(msg->isSelfMessage()) // TEMPORARY ASSUMPTION: The frame is READY before the next
         downlinkPropagation();
-
+    else
+        handlePacket(check_and_cast<Frame>(msg));
 }

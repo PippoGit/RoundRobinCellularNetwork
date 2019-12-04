@@ -13,9 +13,38 @@ UserInformation::UserInformation()
     this->FIFOQueue = new cQueue();
 }
 
+int UserInformation::CQIToBytes()
+{
+    int bytes[] = {3, 3, 6, 11, 15, 20, 25, 36, 39, 50, 63, 72, 80, 93, 93};
+    return bytes[CQI-1];
+}
+
 void UserInformation::generateCQI()
 {
     this->CQI = omnetpp::intuniform(rng, 1, 16); // tbd: per il momento facciamo uniform
+}
+
+
+cQueue* UserInformation::getQueue()
+{
+    return FIFOQueue;
+}
+
+
+std::vector<Packet*> UserInformation::getPackets(int available)
+{
+    // IDEA: return as much packets as i can fit
+    std::vector<Packet*> pkts;
+    while(!FIFOQueue->empty())
+    {
+        Packet *p = FIFOQueue->head();
+        if(available < ceil(p->getSize()/CQIToBytes(CQI))
+        {
+            pkts.push_back(FIFOQueue->pop());
+            available -= 1;
+        }
+    }
+    return pkts;
 }
 
 UserInformation::~UserInformation()
