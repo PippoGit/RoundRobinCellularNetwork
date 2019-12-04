@@ -9,7 +9,8 @@
 
 UserInformation::UserInformation()
 {
-    generateCQI();
+    this->CQI = omnetpp::intuniform(rng, 1, 16);
+    this->FIFOQueue = new cQueue();
 }
 
 void UserInformation::generateCQI()
@@ -19,6 +20,7 @@ void UserInformation::generateCQI()
 
 UserInformation::~UserInformation()
 {
-    // TODO Auto-generated destructor stub
+    // idk if this is ok (i kinda forgot most of the shit about c++)
+    delete this->FIFOQueue;
 }
 

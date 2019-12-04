@@ -14,7 +14,6 @@ public:
     UserInformation();
     virtual ~UserInformation();
     virtual void generateCQI();
-
 };
 
 #endif /* USERINFORMATION_H_ */
