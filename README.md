@@ -10,5 +10,9 @@ For each timeslot, the antenna receives from all the users a CQI (ChannelQuality
 thenthe BTS makes a frame of 25 RBs and it propagates it to all the users just before theend of the timeslot or as soon as the frame is full.
 
 Giada Anastasi
+
 Stefano Guazzelli
+
 Filippo Scotto
+
+
