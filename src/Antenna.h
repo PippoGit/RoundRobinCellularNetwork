@@ -18,7 +18,8 @@ class Antenna : public cSimpleModule
     cMessage *timer;
 
     // stuff for roundrobin
-    int currentUser;
+    // int currentUser;
+    std::vector<UserInformation>::iterator currentUser;
 
   protected:
     virtual void initialize();
@@ -29,6 +30,8 @@ class Antenna : public cSimpleModule
     virtual void             updateCQIs();
     virtual UserInformation* roundrobin();
     virtual void             broadcastFrame(Frame *f);
+    virtual bool             fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator from, std::vector<ResourceBlock>::iterator to);
+
 };
 
 #endif

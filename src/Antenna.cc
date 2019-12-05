@@ -7,8 +7,8 @@ void Antenna::initialize()
     NUM_USERS = 10; // this->getParentModule()->par("numUsers");
     timer = new cMessage("timer");
 
-    currentUser = 0;
     users.reserve(NUM_USERS);
+    currentUser = users.end(); // this will make the first call to roundrobin to set currentUser to begin()
 
     // Just fill the queues with random stuff....
     for(UserInformation u:users)
@@ -32,9 +32,10 @@ void Antenna::updateCQIs()
 }
 
 
-UserInformation* Antenna::roundrobin()
+std::vector<ResourceBlock>::iterator Antenna::roundrobin()
 {
-    return &users[(currentUser++ + 1)%NUM_USERS];
+    currentUser = (currentUser == users.end())?users.begin():currentUser+1;
+    return currentUser;
 }
 
 
@@ -52,48 +53,57 @@ void Antenna::broadcastFrame(Frame *f)
 }
 
 
+int Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator from, std::vector<ResourceBlock>::iterator to)
+{
+    cQueue *queue = currentUser->getQueue();
+
+    while(!u->getQueue()->isEmpty() || from == to)
+    {
+        cMessage *p = check_and_cast<cMessage*>(queue->front());
+        double packetSize = (double) p->par("size");
+        int requiredRBs = ceil(packetSize/u->CQIToBytes());
+
+        EV << "   packet content: " << p->getName();
+
+        // check if something is wrong with the size of the next packet
+        if(u->remainingBytes <= packetSize)
+        {
+            // the packet can be put inside last RB
+        }
+        else if (requiredRBs <= to - from)
+        {
+            // the packet can be put in the next rbs
+        }
+        else break; // not enough space (this is the most aweful piece of code ever)
+
+        // if i'm here i need to do another iteration (increment of the iterators)
+        from++;
+    }
+
+    // return final position of the frame
+    return (from - to);
+}
+
+
 void Antenna::downlinkPropagation()
 {
+    bool frameFull = false;
     double next_timeslot = simTime().dbl() + (double) this->par("timeslot");
     int currentRB = 0;
-    std::vector<ResourceBlock> frame(25); // Frame *f = new Frame();
+    std::vector<ResourceBlock> frame(FRAME_SIZE); // Frame *f = new Frame();
 
     // 1) Get updated CQIs
     updateCQIs();
 
-    // 2) I guess i need to check all the queues?
-    // THIS IS ACTUALLY PSEUDO-CODE... (TBD)
+    // 2) Round-robin over all the users...
     do
     {
-        int userId = currentUser;
-        UserInformation *u = roundrobin();
-        double remainingBytes = u->CQIToBytes();
+        // Select next queue
+        roundrobin();
 
-        while(!u->getQueue()->isEmpty())
-        {
-            // Packet *p = check_and_cast<Packet*>(u->getQueue()->front());
-            cMessage *p = check_and_cast<cMessage*>(u->getQueue()->front());
-            EV << "I don't know what i'm doing..." << endl;
-            EV << "   packet content: " << p->getName();
-
-            if(currentRB + ceil(p->par("size")/u->CQIToBytes()) < FRAME_SIZE)
-            {
-
-                //NOT DONE YET:
-                // 1) First check if there is enough space in the last occupied slot
-                // 2) Then check if there is enough space in the frame
-                // 3) Insert wherever there's enough space, and then update the currentRB index
-                // 4) Update remaining bytes too
-
-
-                // it fits
-                EV << "it fits..." << endl;
-                currentRB += ceil(p->par("size")/u->CQIToBytes());
-                remainingBytes = currentRB - p->par("size")/u->CQIToBytes();
-            }
-        }
-
-    } while(currentRB < FRAME_SIZE); // when currentRB is equal to 25 it means all frame is filled
+        // Fill the frame with current user's queue and update currentRB index
+        currentRB = fillFrameWithCurrentUser(frame.begin()+currentRB, frame.end());
+    } while(currentRB < FRAME_SIZE);
 
     // 3) send the frame to all the users
     // broadcastFrame(f);

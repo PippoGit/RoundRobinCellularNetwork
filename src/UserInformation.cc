@@ -9,8 +9,10 @@
 
 UserInformation::UserInformation()
 {
-    this->CQI = omnetpp::intuniform(rng, 1, 16);
-    this->FIFOQueue = new cQueue();
+    CQI = omnetpp::intuniform(rng, 1, 16);
+    FIFOQueue = new cQueue();
+    remainingBytes = CQIToBytes();
+    lastRB = 0;
 }
 
 int UserInformation::CQIToBytes()
@@ -21,7 +23,7 @@ int UserInformation::CQIToBytes()
 
 void UserInformation::generateCQI()
 {
-    this->CQI = omnetpp::intuniform(rng, 1, 16); // tbd: per il momento facciamo uniform
+    CQI = omnetpp::intuniform(rng, 1, 16); // tbd: per il momento facciamo uniform e con magicnumbers
 }
 
 

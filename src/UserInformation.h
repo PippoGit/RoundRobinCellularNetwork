@@ -9,13 +9,17 @@ private:
     omnetpp::cQueue *FIFOQueue;
     int CQI;
 
+public: // too much stuff
+    std::vector<ResourceBlock>::iterator lastRB;
+    double remainingBytes;
+
 
 public:
     UserInformation();
     virtual ~UserInformation();
     virtual void generateCQI();
 
-    virtual int     CQIToBytes();
+    virtual int              CQIToBytes();
     virtual omnetpp::cQueue* getQueue();
 };
 
