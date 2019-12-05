@@ -25,7 +25,7 @@ void UserInformation::generateCQI()
 }
 
 
-cQueue* UserInformation::getQueue()
+omnetpp::cQueue* UserInformation::getQueue()
 {
     return FIFOQueue;
 }

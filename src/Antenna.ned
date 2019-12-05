@@ -6,5 +6,5 @@ simple Antenna
         double timeslot = default(500);
         
     gates:
- 		output out;       
+ 		// output out;       
 }
