@@ -3,6 +3,7 @@
 
 #include <omnetpp.h>
 #include <vector>
+#include "ResourceBlock.h"
 
 class UserInformation {
 private:
@@ -12,7 +13,6 @@ private:
 public: // too much stuff
     std::vector<ResourceBlock>::iterator lastRB;
     double remainingBytes;
-
 
 public:
     UserInformation();

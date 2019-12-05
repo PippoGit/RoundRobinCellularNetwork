@@ -17,8 +17,8 @@ void Antenna::initialize()
         while(i++<100) {
             std::string name = "testPckt-" + i;
             cMessage *packet = new cMessage(name.c_str());
-            cPar     *size   = new cPar("size");
-            size->setIntValue(uniform(0, 100)); //bytes...
+            cMsgPar  *size = new cMsgPar("size");
+            size->setDoubleValue(uniform(0, 100)); //bytes...
             packet->addPar(size);
             u.getQueue()->insert(packet);
         }
@@ -32,12 +32,10 @@ void Antenna::updateCQIs()
 }
 
 
-std::vector<ResourceBlock>::iterator Antenna::roundrobin()
+void Antenna::roundrobin()
 {
     currentUser = (currentUser == users.end())?users.begin():currentUser+1;
-    return currentUser;
 }
-
 
 
 void Antenna::broadcastFrame(Frame *f)
@@ -57,16 +55,16 @@ int Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator from,
 {
     cQueue *queue = currentUser->getQueue();
 
-    while(!u->getQueue()->isEmpty() || from == to)
+    while(!queue->isEmpty() || from == to)
     {
         cMessage *p = check_and_cast<cMessage*>(queue->front());
         double packetSize = (double) p->par("size");
-        int requiredRBs = ceil(packetSize/u->CQIToBytes());
+        int requiredRBs = ceil(packetSize/currentUser->CQIToBytes());
 
         EV << "   packet content: " << p->getName();
 
         // check if something is wrong with the size of the next packet
-        if(u->remainingBytes <= packetSize)
+        if(currentUser->remainingBytes <= packetSize)
         {
             // the packet can be put inside last RB
         }
