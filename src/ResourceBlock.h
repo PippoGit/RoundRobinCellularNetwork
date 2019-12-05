@@ -1,18 +1,33 @@
 /*
  * ResourceBlock.h
  *
- *  Created on: 4 dic 2019
- *      Author: Filippo
+ *  Created on: 5 dic 2019
+ *      Author: giada
  */
 
 #ifndef RESOURCEBLOCK_H_
 #define RESOURCEBLOCK_H_
 
-#include "Packet_m.h"
+#include <omnetpp.h>
+#include <cqueue.h>
+#include <crandom.h>
 
 class ResourceBlock {
-public:
-    int recipient;
+    private:
+          int receiverID;
+          bool lastForUser;
+          double remainingPart;
+
+    public:
+        ResourceBlock();
+        virtual double getRemainingPart(int id_receiver);
+
+
+
+
+
+
 };
+
 
 #endif /* RESOURCEBLOCK_H_ */

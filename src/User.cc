@@ -11,14 +11,14 @@ void User::initialize()
 void User::handleMessage(cMessage *msg)
 {
     if(msg->selfMessage()){
-        handleTimer();
+        createNewPacket();
         this->scheduleAt(simTime() + interArrivalTime, waitMessage);
     }
 
 
 }
 
-void User:: handleTimer(){
+void User:: createNewPacket(){
     packet = new Packet();
     packet->senderID=this->userID;
     packet->creationTime=simTime();

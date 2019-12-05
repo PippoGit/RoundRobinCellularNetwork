@@ -1,8 +1,6 @@
-packet Packet {
+message Packet {
     int senderID;
     int receiverID;
-    double serviceDemand;  //dimension of packet, random (Filippo: ho messo double per fare una prova...)
-    double creationTime;
+    int serviceDemand;
+    simtime_t creationTime;
 }
-
-// Non capisco perchè non compili questo file... 

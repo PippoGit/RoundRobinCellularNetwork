@@ -16,7 +16,7 @@ class User : public cSimpleModule
   protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
-    virtual void handleTimer();
+    virtual void createNewPacket();
 };
 
 #endif
