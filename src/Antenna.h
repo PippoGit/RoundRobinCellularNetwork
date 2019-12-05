@@ -29,8 +29,6 @@ class Antenna : public cSimpleModule
     virtual void             updateCQIs();
     virtual UserInformation* roundrobin();
     virtual void             broadcastFrame(Frame *f);
-    virtual bool             frameFull();
-
 };
 
 #endif
