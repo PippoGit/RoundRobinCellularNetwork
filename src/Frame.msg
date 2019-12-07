@@ -7,5 +7,4 @@ class noncobject ResourceBlock;
 
 message Frame {
     ResourceBlock RBFrame[FRAME_SIZE];
-    int last;
 }

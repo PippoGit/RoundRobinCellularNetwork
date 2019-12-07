@@ -26,11 +26,11 @@ class Antenna : public cSimpleModule
     virtual void handlePacket(Packet *p);
     virtual void downlinkPropagation();
 
-    virtual void updateCQIs();
-    virtual void roundrobin();
-    virtual void broadcastFrame(Frame *f);
-    virtual void fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &from, std::vector<ResourceBlock>::iterator to);
-
+    virtual void   updateCQIs();
+    virtual void   roundrobin();
+    virtual void   broadcastFrame(Frame *f);
+    virtual void   fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &from, std::vector<ResourceBlock>::iterator to);
+    virtual Frame* vectorToFrame(std::vector<ResourceBlock> &v);
 };
 
 #endif

@@ -10,10 +10,47 @@
 
 ResourceBlock::ResourceBlock(){}
 
-double ResourceBlock::getRemainingPart(int id_receiver)
+ResourceBlock::ResourceBlock(int sender, int recipient)
 {
-    if (id_receiver == this->receiverID)
-      return this->remainingPart;
-    else return 0;
+    this->sender = sender;
+    this->recipient = recipient;
 }
+
+
+ResourceBlock::ResourceBlock(const ResourceBlock &b)
+{
+    this->sender = b.getSender();
+    this->recipient = b.getRecipient();
+}
+
+
+void ResourceBlock::setRecipient(int id)
+{
+    recipient = id;
+}
+
+
+void ResourceBlock::setSender(int id)
+{
+    sender = id;
+}
+
+
+int ResourceBlock::getSender() const
+{
+    return sender;
+}
+
+
+int ResourceBlock::getRecipient() const
+{
+    return recipient;
+}
+
+//double ResourceBlock::getRemainingPart(int id_receiver)
+//{
+//    if (id_receiver == this->receiverID)
+//      return this->remainingPart;
+//    else return 0;
+//}
 

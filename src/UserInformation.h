@@ -17,6 +17,7 @@ public: // too much stuff
     std::vector<ResourceBlock>::iterator lastRB;
     double remainingBytes;
 
+
 public:
     UserInformation();
     virtual ~UserInformation();

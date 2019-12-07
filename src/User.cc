@@ -29,4 +29,6 @@ void User:: createNewPacket(){
 
     int numUsers = 10; //this->getParentModule()->par("numUsers");
     packet->setReceiverID(omnetpp::intuniform(getRNG(SEED_RECIPIENT), MIN_USERS, numUsers));
+
+    send(packet, "out");
 }

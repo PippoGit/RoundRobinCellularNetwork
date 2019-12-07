@@ -5,7 +5,7 @@ Define_Module(Antenna);
 void Antenna::initialize()
 {
     EV_DEBUG << "[ANTENNA-INITIALIZE] Initializing antenna..." << endl;
-    NUM_USERS = 10; // this->getParentModule()->par("numUsers");
+    NUM_USERS = 2; // this->getParentModule()->par("numUsers");
     timer = new cMessage("timer");
 
     EV_DEBUG << "[ANTENNA-INITIALIZE] Building UserInformation datastructure" << endl;
@@ -54,6 +54,15 @@ void Antenna::roundrobin()
 }
 
 
+Frame* Antenna::vectorToFrame(std::vector<ResourceBlock> &v)
+{
+    Frame *f = new Frame();
+    for(auto it=v.begin(); it != v.end(); ++it)
+        f->setRBFrame(it - v.begin(), *it);
+    return f;
+}
+
+
 void Antenna::broadcastFrame(Frame *f)
 {
     // for simplicity just send it to every users and then each user will check
@@ -74,20 +83,27 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
     while(!(queue->isEmpty() || from == to))
     {
         Packet *p          = check_and_cast<Packet*>(queue->front());
+        std::vector<UserInformation>::iterator recipient = users.begin() + p->getReceiverID();
         double packetSize  = p->getServiceDemand();
         int    rCQI        = currentUser->CQIToBytes();
         int    requiredRBs = ceil(packetSize/rCQI);
 
-        if(packetSize <= currentUser->remainingBytes)
+        if(packetSize <= recipient->remainingBytes)
         {
             // the packet can be put inside last RB
             EV_DEBUG << "[ROUND-ROBIN] This packet fits the remaining bytes of previous RB" << endl;
-            currentUser->remainingBytes -= packetSize;
+            recipient->remainingBytes -= packetSize;
+            from->setRecipient(p->getReceiverID());
         }
         else if (requiredRBs <= to - from)
         {
             // the packet can be put in the next rbs
             EV_DEBUG << "[ROUND-ROBIN] This packet can be put in the frame somewhere" << endl;
+
+            // frame.set()
+            ResourceBlock b(p->getSenderID(), p->getReceiverID());
+            for(auto it = from; it != from + requiredRBs; ++it)
+                *from = b;
 
             // increment pointers
             from += requiredRBs;
@@ -132,7 +148,7 @@ void Antenna::downlinkPropagation()
     } while(currentRB != frame.end() && numIterations < 2);
 
     // 3) send the frame to all the users
-    // broadcastFrame(f);
+    broadcastFrame(vectorToFrame(frame));
     EV_DEBUG << "[ANTENNA] Broadcast propagation of the frame" << endl;
 
     // Schedule next iteration
@@ -143,7 +159,7 @@ void Antenna::downlinkPropagation()
 
 void Antenna::handlePacket(Packet *p)
 {
-
+    // TBD
 }
 
 

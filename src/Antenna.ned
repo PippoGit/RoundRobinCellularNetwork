@@ -6,5 +6,7 @@ simple Antenna
         double timeslot @unit(s) = default(0.5s);
         
     gates:
- 		// output out;       
+ 		// output out;   
+ 		input in[];
+ 		output out[];    
 }

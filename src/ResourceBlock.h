@@ -12,13 +12,23 @@
 
 class ResourceBlock {
     private:
-          int receiverID;
-          bool lastForUser;
-          double remainingPart;
+          int sender; // this is probably useless...
+          int recipient;
+
+          // bool lastForUser;
+          // double remainingPart;
 
     public:
         ResourceBlock();
-        virtual double getRemainingPart(int id_receiver);
+        ResourceBlock(int sender, int recipient);
+        ResourceBlock(const ResourceBlock &b);
+
+        virtual void setSender(int id);
+        virtual void setRecipient(int id);
+        virtual int  getSender() const;
+        virtual int  getRecipient() const;
+
+        // virtual double getRemainingPart(int id_receiver);
 };
 
 
