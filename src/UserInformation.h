@@ -10,7 +10,7 @@ class UserInformation {
 private:
     static int NEXT_USER_ID;
     int id;
-    omnetpp::cQueue *FIFOQueue;
+    omnetpp::cQueue FIFOQueue;
     int CQI;
 
 public: // too much stuff

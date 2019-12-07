@@ -29,7 +29,7 @@ class Antenna : public cSimpleModule
     virtual void updateCQIs();
     virtual void roundrobin();
     virtual void broadcastFrame(Frame *f);
-    virtual int  fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator from, std::vector<ResourceBlock>::iterator to);
+    virtual void fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &from, std::vector<ResourceBlock>::iterator to);
 
 };
 

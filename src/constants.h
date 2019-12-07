@@ -6,7 +6,7 @@
 
 #define FRAME_SIZE 25
 
-#define SEED_CQI 100
+#define SEED_CQI 1
 #define SEED_SERVICE_DEMAND 2
 #define SEED_RECIPIENT 3
 

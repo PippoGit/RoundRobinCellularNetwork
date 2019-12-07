@@ -11,8 +11,6 @@ int UserInformation::NEXT_USER_ID;
 UserInformation::UserInformation()
 {
     id = NEXT_USER_ID++; // this thing should work because stuff don't change over time... (iguess)
-    FIFOQueue = new omnetpp::cQueue();
-    remainingBytes = CQIToBytes();
     CQI = 0; //before FIRST utilization the CQI should be generated
 }
 
@@ -32,18 +30,19 @@ int UserInformation::CQIToBytes()
 void UserInformation::generateCQI(omnetpp::cRNG*seedCQI)
 {
     CQI = omnetpp::intuniform(seedCQI, MIN_CQI, MAX_CQI);
+    remainingBytes = CQIToBytes();
 }
 
 
 omnetpp::cQueue* UserInformation::getQueue()
 {
-    return FIFOQueue;
+    return &FIFOQueue;
 }
 
 
 UserInformation::~UserInformation()
 {
     // idk if this is ok (i kinda forgot most of the shit about c++)
-    delete this->FIFOQueue;
+    // delete this->FIFOQueue;
 }
 
