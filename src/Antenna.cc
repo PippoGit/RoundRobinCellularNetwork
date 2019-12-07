@@ -103,7 +103,7 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
             // frame.set()
             ResourceBlock b(p->getSenderID(), p->getReceiverID());
             for(auto it = from; it != from + requiredRBs; ++it)
-                *from = b;
+                *it = b;
 
             // increment pointers
             from += requiredRBs;
@@ -112,12 +112,7 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
 
         // If i get to this point it means the packet was put somewhere in the
         // frame so we can pop it from its queue.
-        // remove the packet from the queue to put it somewhere?
-
-        EV_DEBUG << "Removing packet " << p->getName() << " from the queue" << endl;
         queue->remove(p);
-        EV_DEBUG << "... new queue size: " << queue->getLength() << endl;
-
     }
 }
 
