@@ -11,18 +11,21 @@ void Antenna::initialize()
     currentUser = users.end(); // this will make the first call to roundrobin to set currentUser to begin()
 
     // Just fill the queues with random stuff....
-    for(UserInformation u:users)
+    for(std::vector<UserInformation>::iterator it = users.begin(); it != users.end(); it++)
     {
         int i = uniform(0, 100);
         while(i++<100) {
-            std::string name = "testPckt-" + std::to_string(i);
-            cMessage *packet = new cMessage(name.c_str());
-            cMsgPar  *size = new cMsgPar("size");
-            size->setDoubleValue(uniform(0, 100)); //bytes...
-            packet->addPar(size);
-            u.getQueue()->insert(packet);
+            std::string name = "testPkt-" + std::to_string(it->getUserId()) + "-" + std::to_string(i);
+            Packet *pkt = new Packet(name.c_str());
+            pkt->setSenderID(it->getUserId());
+            pkt->setReceiverID(omnetpp::intuniform(getRNG(1), 0, NUM_USERS)); // just a test... it doesn't need to be accurate
+            pkt->setServiceDemand(omnetpp::intuniform(getRNG(1), 0, NUM_USERS));
+            it->getQueue()->insert(pkt);
         }
     }
+
+    // test
+    downlinkPropagation();
 }
 
 void Antenna::updateCQIs()
