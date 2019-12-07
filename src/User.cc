@@ -14,6 +14,16 @@ void User::handleMessage(cMessage *msg)
         createNewPacket();
         this->scheduleAt(simTime() + interArrivalTime, waitMessage);
     }
+    else
+    {
+        Frame *f = check_and_cast<Frame*>(msg);
+        EV << "[USER] I have received a frame... Here is the content:" << endl;
+
+        for(int i =0; i<FRAME_SIZE; i++) {
+            EV << "     " << i << ") => Recipient: " << f->getRBFrame(i).getRecipient() << ", Sender: " << f->getRBFrame(i).getSender() << endl;
+        }
+
+    }
 
 
 }

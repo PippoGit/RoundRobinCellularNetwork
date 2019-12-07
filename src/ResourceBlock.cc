@@ -8,7 +8,11 @@
 #include "ResourceBlock.h"
 
 
-ResourceBlock::ResourceBlock(){}
+ResourceBlock::ResourceBlock()
+{
+    this->sender    = -1;
+    this->recipient = -1;
+}
 
 ResourceBlock::ResourceBlock(int sender, int recipient)
 {

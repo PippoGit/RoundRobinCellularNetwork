@@ -4,6 +4,7 @@
 #include <omnetpp.h>
 #include "Packet_m.h"
 #include "constants.h"
+#include "Frame_m.h"
 
 using namespace omnetpp;
 
