@@ -10,7 +10,6 @@ int UserInformation::NEXT_USER_ID;
 
 UserInformation::UserInformation()
 {
-
     id = NEXT_USER_ID++; // this thing should work because stuff don't change over time... (iguess)
     FIFOQueue = new omnetpp::cQueue();
     remainingBytes = CQIToBytes();

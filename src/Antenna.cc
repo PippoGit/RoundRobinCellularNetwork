@@ -4,17 +4,26 @@ Define_Module(Antenna);
 
 void Antenna::initialize()
 {
+    EV_DEBUG << "[ANTENNA] Initializing antenna..." << endl;
     NUM_USERS = 10; // this->getParentModule()->par("numUsers");
     timer = new cMessage("timer");
 
+    EV_DEBUG << "[ANTENNA-INITIALIZE] Building UserInformation datastructure" << endl;
     users.reserve(NUM_USERS);
+    for(int i=0; i < NUM_USERS; i++)
+        users.push_back(UserInformation());
+
+    EV_DEBUG << "[ANTENNA-INITIALIZE] Initializing first iterator" << endl;
     currentUser = users.end(); // this will make the first call to roundrobin to set currentUser to begin()
 
+    EV_DEBUG << "[ANTENNA-INITIALIZE] Creating a random bunch of packets..." << endl;
     // Just fill the queues with random stuff....
     for(std::vector<UserInformation>::iterator it = users.begin(); it != users.end(); it++)
     {
-        int i = uniform(0, 100);
-        while(i++<100) {
+        int i = uniform(0, NUM_USERS);
+        EV_DEBUG << "[ANTENNA-INITIALIZE] Allocating " << i << " packets for: " << it->getUserId() << endl;
+
+        while(i++<10) {
             std::string name = "testPkt-" + std::to_string(it->getUserId()) + "-" + std::to_string(i);
             Packet *pkt = new Packet(name.c_str());
             pkt->setSenderID(it->getUserId());
@@ -41,6 +50,7 @@ void Antenna::updateCQIs()
 void Antenna::roundrobin()
 {
     currentUser = (currentUser == users.end())?users.begin():currentUser+1;
+    EV_DEBUG << "[ROUND_ROBIN] it's the turn of " << currentUser->getUserId();
 }
 
 
@@ -63,9 +73,10 @@ int Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator from,
 
     while(!queue->isEmpty() || from == to)
     {
-        cMessage *p = check_and_cast<cMessage*>(queue->front());
-        double packetSize = (double) p->par("size");
-        int requiredRBs = ceil(packetSize/currentUser->CQIToBytes());
+        Packet *p          = check_and_cast<Packet*>(queue->front());
+        double packetSize  = p->getServiceDemand();
+        int    rCQI        = currentUser->CQIToBytes();
+        int    requiredRBs = ceil(packetSize/rCQI);
 
         EV << "   packet content: " << p->getName();
 
