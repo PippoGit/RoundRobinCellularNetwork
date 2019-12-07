@@ -14,7 +14,7 @@ void Antenna::initialize()
         users.push_back(UserInformation());
 
     EV_DEBUG << "[ANTENNA-INITIALIZE] Initializing first iterator" << endl;
-    currentUser = users.end(); // this will make the first call to roundrobin to set currentUser to begin()
+    currentUser = users.end()-1; // this will make the first call to roundrobin to set currentUser to begin()
 
     EV_DEBUG << "[ANTENNA-INITIALIZE] Creating a random bunch of packets..." << endl;
     // Just fill the queues with random stuff....
@@ -49,8 +49,8 @@ void Antenna::updateCQIs()
 
 void Antenna::roundrobin()
 {
-    currentUser = (currentUser == users.begin()+NUM_USERS)?users.begin():currentUser+1;
-    EV_DEBUG << "[ROUND_ROBIN] it's the turn of " << currentUser->getUserId();
+    currentUser = (currentUser == users.end()-1)?users.begin():currentUser+1;
+    EV_DEBUG << "[ROUND_ROBIN] it's the turn of " << currentUser->getUserId() << endl;
 }
 
 
