@@ -2,7 +2,8 @@
 #define __ROUNDROBINCELLULARNETWORK_USER_H_
 
 #include <omnetpp.h>
-#include "Packet.msg"
+#include "Packet_m.h"
+#include "constants.h"
 
 using namespace omnetpp;
 
@@ -11,8 +12,8 @@ class User : public cSimpleModule
   private:
     simtime_t interArrivalTime; // exponential
     cMessage* waitMessage;
-    Packet* packet;
     int userID;
+
   protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);

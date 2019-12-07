@@ -181,6 +181,7 @@ Register_Class(Frame)
 
 Frame::Frame(const char *name, short kind) : ::omnetpp::cMessage(name,kind)
 {
+    this->last = 0;
 }
 
 Frame::Frame(const Frame& other) : ::omnetpp::cMessage(other)
@@ -202,37 +203,50 @@ Frame& Frame::operator=(const Frame& other)
 
 void Frame::copy(const Frame& other)
 {
-    for (unsigned int i=0; i<25; i++)
-        this->RBs[i] = other.RBs[i];
+    for (unsigned int i=0; i<FRAME_SIZE; i++)
+        this->RBFrame[i] = other.RBFrame[i];
+    this->last = other.last;
 }
 
 void Frame::parsimPack(omnetpp::cCommBuffer *b) const
 {
     ::omnetpp::cMessage::parsimPack(b);
-    doParsimArrayPacking(b,this->RBs,25);
+    doParsimArrayPacking(b,this->RBFrame,FRAME_SIZE);
+    doParsimPacking(b,this->last);
 }
 
 void Frame::parsimUnpack(omnetpp::cCommBuffer *b)
 {
     ::omnetpp::cMessage::parsimUnpack(b);
-    doParsimArrayUnpacking(b,this->RBs,25);
+    doParsimArrayUnpacking(b,this->RBFrame,FRAME_SIZE);
+    doParsimUnpacking(b,this->last);
 }
 
-unsigned int Frame::getRBsArraySize() const
+unsigned int Frame::getRBFrameArraySize() const
 {
-    return 25;
+    return FRAME_SIZE;
 }
 
-ResourceBlock& Frame::getRBs(unsigned int k)
+ResourceBlock& Frame::getRBFrame(unsigned int k)
 {
-    if (k>=25) throw omnetpp::cRuntimeError("Array of size 25 indexed by %lu", (unsigned long)k);
-    return this->RBs[k];
+    if (k>=FRAME_SIZE) throw omnetpp::cRuntimeError("Array of size FRAME_SIZE indexed by %lu", (unsigned long)k);
+    return this->RBFrame[k];
 }
 
-void Frame::setRBs(unsigned int k, const ResourceBlock& RBs)
+void Frame::setRBFrame(unsigned int k, const ResourceBlock& RBFrame)
 {
-    if (k>=25) throw omnetpp::cRuntimeError("Array of size 25 indexed by %lu", (unsigned long)k);
-    this->RBs[k] = RBs;
+    if (k>=FRAME_SIZE) throw omnetpp::cRuntimeError("Array of size FRAME_SIZE indexed by %lu", (unsigned long)k);
+    this->RBFrame[k] = RBFrame;
+}
+
+int Frame::getLast() const
+{
+    return this->last;
+}
+
+void Frame::setLast(int last)
+{
+    this->last = last;
 }
 
 class FrameDescriptor : public omnetpp::cClassDescriptor
@@ -300,7 +314,7 @@ const char *FrameDescriptor::getProperty(const char *propertyname) const
 int FrameDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 1+basedesc->getFieldCount() : 1;
+    return basedesc ? 2+basedesc->getFieldCount() : 2;
 }
 
 unsigned int FrameDescriptor::getFieldTypeFlags(int field) const
@@ -313,8 +327,9 @@ unsigned int FrameDescriptor::getFieldTypeFlags(int field) const
     }
     static unsigned int fieldTypeFlags[] = {
         FD_ISARRAY | FD_ISCOMPOUND,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<1) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<2) ? fieldTypeFlags[field] : 0;
 }
 
 const char *FrameDescriptor::getFieldName(int field) const
@@ -326,16 +341,18 @@ const char *FrameDescriptor::getFieldName(int field) const
         field -= basedesc->getFieldCount();
     }
     static const char *fieldNames[] = {
-        "RBs",
+        "RBFrame",
+        "last",
     };
-    return (field>=0 && field<1) ? fieldNames[field] : nullptr;
+    return (field>=0 && field<2) ? fieldNames[field] : nullptr;
 }
 
 int FrameDescriptor::findField(const char *fieldName) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount() : 0;
-    if (fieldName[0]=='R' && strcmp(fieldName, "RBs")==0) return base+0;
+    if (fieldName[0]=='R' && strcmp(fieldName, "RBFrame")==0) return base+0;
+    if (fieldName[0]=='l' && strcmp(fieldName, "last")==0) return base+1;
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
@@ -349,8 +366,9 @@ const char *FrameDescriptor::getFieldTypeString(int field) const
     }
     static const char *fieldTypeStrings[] = {
         "ResourceBlock",
+        "int",
     };
-    return (field>=0 && field<1) ? fieldTypeStrings[field] : nullptr;
+    return (field>=0 && field<2) ? fieldTypeStrings[field] : nullptr;
 }
 
 const char **FrameDescriptor::getFieldPropertyNames(int field) const
@@ -389,7 +407,7 @@ int FrameDescriptor::getFieldArraySize(void *object, int field) const
     }
     Frame *pp = (Frame *)object; (void)pp;
     switch (field) {
-        case 0: return 25;
+        case 0: return FRAME_SIZE;
         default: return 0;
     }
 }
@@ -418,7 +436,8 @@ std::string FrameDescriptor::getFieldValueAsString(void *object, int field, int 
     }
     Frame *pp = (Frame *)object; (void)pp;
     switch (field) {
-        case 0: {std::stringstream out; out << pp->getRBs(i); return out.str();}
+        case 0: {std::stringstream out; out << pp->getRBFrame(i); return out.str();}
+        case 1: return long2string(pp->getLast());
         default: return "";
     }
 }
@@ -433,6 +452,7 @@ bool FrameDescriptor::setFieldValueAsString(void *object, int field, int i, cons
     }
     Frame *pp = (Frame *)object; (void)pp;
     switch (field) {
+        case 1: pp->setLast(string2long(value)); return true;
         default: return false;
     }
 }
@@ -461,7 +481,7 @@ void *FrameDescriptor::getFieldStructValuePointer(void *object, int field, int i
     }
     Frame *pp = (Frame *)object; (void)pp;
     switch (field) {
-        case 0: return (void *)(&pp->getRBs(i)); break;
+        case 0: return (void *)(&pp->getRBFrame(i)); break;
         default: return nullptr;
     }
 }

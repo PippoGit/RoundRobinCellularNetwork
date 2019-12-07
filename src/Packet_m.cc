@@ -179,15 +179,14 @@ inline std::ostream& operator<<(std::ostream& out, const std::vector<T,A>& vec)
 
 Register_Class(Packet)
 
-Packet::Packet(const char *name, short kind) : ::omnetpp::cPacket(name,kind)
+Packet::Packet(const char *name, short kind) : ::omnetpp::cMessage(name,kind)
 {
     this->senderID = 0;
     this->receiverID = 0;
     this->serviceDemand = 0;
-    this->creationTime = 0;
 }
 
-Packet::Packet(const Packet& other) : ::omnetpp::cPacket(other)
+Packet::Packet(const Packet& other) : ::omnetpp::cMessage(other)
 {
     copy(other);
 }
@@ -199,7 +198,7 @@ Packet::~Packet()
 Packet& Packet::operator=(const Packet& other)
 {
     if (this==&other) return *this;
-    ::omnetpp::cPacket::operator=(other);
+    ::omnetpp::cMessage::operator=(other);
     copy(other);
     return *this;
 }
@@ -209,25 +208,22 @@ void Packet::copy(const Packet& other)
     this->senderID = other.senderID;
     this->receiverID = other.receiverID;
     this->serviceDemand = other.serviceDemand;
-    this->creationTime = other.creationTime;
 }
 
 void Packet::parsimPack(omnetpp::cCommBuffer *b) const
 {
-    ::omnetpp::cPacket::parsimPack(b);
+    ::omnetpp::cMessage::parsimPack(b);
     doParsimPacking(b,this->senderID);
     doParsimPacking(b,this->receiverID);
     doParsimPacking(b,this->serviceDemand);
-    doParsimPacking(b,this->creationTime);
 }
 
 void Packet::parsimUnpack(omnetpp::cCommBuffer *b)
 {
-    ::omnetpp::cPacket::parsimUnpack(b);
+    ::omnetpp::cMessage::parsimUnpack(b);
     doParsimUnpacking(b,this->senderID);
     doParsimUnpacking(b,this->receiverID);
     doParsimUnpacking(b,this->serviceDemand);
-    doParsimUnpacking(b,this->creationTime);
 }
 
 int Packet::getSenderID() const
@@ -250,24 +246,14 @@ void Packet::setReceiverID(int receiverID)
     this->receiverID = receiverID;
 }
 
-double Packet::getServiceDemand() const
+int Packet::getServiceDemand() const
 {
     return this->serviceDemand;
 }
 
-void Packet::setServiceDemand(double serviceDemand)
+void Packet::setServiceDemand(int serviceDemand)
 {
     this->serviceDemand = serviceDemand;
-}
-
-double Packet::getCreationTime() const
-{
-    return this->creationTime;
-}
-
-void Packet::setCreationTime(double creationTime)
-{
-    this->creationTime = creationTime;
 }
 
 class PacketDescriptor : public omnetpp::cClassDescriptor
@@ -300,7 +286,7 @@ class PacketDescriptor : public omnetpp::cClassDescriptor
 
 Register_ClassDescriptor(PacketDescriptor)
 
-PacketDescriptor::PacketDescriptor() : omnetpp::cClassDescriptor("Packet", "omnetpp::cPacket")
+PacketDescriptor::PacketDescriptor() : omnetpp::cClassDescriptor("Packet", "omnetpp::cMessage")
 {
     propertynames = nullptr;
 }
@@ -335,7 +321,7 @@ const char *PacketDescriptor::getProperty(const char *propertyname) const
 int PacketDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 4+basedesc->getFieldCount() : 4;
+    return basedesc ? 3+basedesc->getFieldCount() : 3;
 }
 
 unsigned int PacketDescriptor::getFieldTypeFlags(int field) const
@@ -350,9 +336,8 @@ unsigned int PacketDescriptor::getFieldTypeFlags(int field) const
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
-        FD_ISEDITABLE,
     };
-    return (field>=0 && field<4) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<3) ? fieldTypeFlags[field] : 0;
 }
 
 const char *PacketDescriptor::getFieldName(int field) const
@@ -367,9 +352,8 @@ const char *PacketDescriptor::getFieldName(int field) const
         "senderID",
         "receiverID",
         "serviceDemand",
-        "creationTime",
     };
-    return (field>=0 && field<4) ? fieldNames[field] : nullptr;
+    return (field>=0 && field<3) ? fieldNames[field] : nullptr;
 }
 
 int PacketDescriptor::findField(const char *fieldName) const
@@ -379,7 +363,6 @@ int PacketDescriptor::findField(const char *fieldName) const
     if (fieldName[0]=='s' && strcmp(fieldName, "senderID")==0) return base+0;
     if (fieldName[0]=='r' && strcmp(fieldName, "receiverID")==0) return base+1;
     if (fieldName[0]=='s' && strcmp(fieldName, "serviceDemand")==0) return base+2;
-    if (fieldName[0]=='c' && strcmp(fieldName, "creationTime")==0) return base+3;
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
@@ -394,10 +377,9 @@ const char *PacketDescriptor::getFieldTypeString(int field) const
     static const char *fieldTypeStrings[] = {
         "int",
         "int",
-        "double",
-        "double",
+        "int",
     };
-    return (field>=0 && field<4) ? fieldTypeStrings[field] : nullptr;
+    return (field>=0 && field<3) ? fieldTypeStrings[field] : nullptr;
 }
 
 const char **PacketDescriptor::getFieldPropertyNames(int field) const
@@ -466,8 +448,7 @@ std::string PacketDescriptor::getFieldValueAsString(void *object, int field, int
     switch (field) {
         case 0: return long2string(pp->getSenderID());
         case 1: return long2string(pp->getReceiverID());
-        case 2: return double2string(pp->getServiceDemand());
-        case 3: return double2string(pp->getCreationTime());
+        case 2: return long2string(pp->getServiceDemand());
         default: return "";
     }
 }
@@ -484,8 +465,7 @@ bool PacketDescriptor::setFieldValueAsString(void *object, int field, int i, con
     switch (field) {
         case 0: pp->setSenderID(string2long(value)); return true;
         case 1: pp->setReceiverID(string2long(value)); return true;
-        case 2: pp->setServiceDemand(string2double(value)); return true;
-        case 3: pp->setCreationTime(string2double(value)); return true;
+        case 2: pp->setServiceDemand(string2long(value)); return true;
         default: return false;
     }
 }

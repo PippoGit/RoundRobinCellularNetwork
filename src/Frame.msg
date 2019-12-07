@@ -1,11 +1,11 @@
 cplusplus {{
 #include "ResourceBlock.h"
-typedef ResourceBlock* ResourceBlockPointer;
+#include "constants.h"
 }}
+
 class noncobject ResourceBlock;
 
 message Frame {
-    int dimensionFrame = 25;
-    ResourceBlockPointer RBFrame[dimensionFrame];
+    ResourceBlock RBFrame[FRAME_SIZE];
     int last;
 }

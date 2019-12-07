@@ -1,17 +1,12 @@
-../out/clang-release/src/Antenna.o: Antenna.cc Antenna.h \
+../out/clang-release/src/UserInformation.o: UserInformation.cc \
+  UserInformation.h \
   C:/Users/Filippo/Desktop/PerformanceEvaluation/omnetpp-5.5.1/include\omnetpp.h \
-  UserInformation.h ResourceBlock.h constants.h Packet_m.h Frame_m.h
-
-Antenna.h:
-
-C:/Users/Filippo/Desktop/PerformanceEvaluation/omnetpp-5.5.1/include\omnetpp.h:
+  ResourceBlock.h constants.h
 
 UserInformation.h:
+
+C:/Users/Filippo/Desktop/PerformanceEvaluation/omnetpp-5.5.1/include\omnetpp.h:
 
 ResourceBlock.h:
 
 constants.h:
-
-Packet_m.h:
-
-Frame_m.h:

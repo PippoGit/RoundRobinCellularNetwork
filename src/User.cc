@@ -10,7 +10,7 @@ void User::initialize()
 
 void User::handleMessage(cMessage *msg)
 {
-    if(msg->selfMessage()){
+    if(msg->isSelfMessage()){
         createNewPacket();
         this->scheduleAt(simTime() + interArrivalTime, waitMessage);
     }
@@ -19,11 +19,14 @@ void User::handleMessage(cMessage *msg)
 }
 
 void User:: createNewPacket(){
-    packet = new Packet();
-    packet->senderID=this->userID;
-    packet->creationTime=simTime();
-    //for assumption: packet dimension between 1 and 75 bytes
-    packet->serviceDemand=omnetpp::intuniform(rng, 1, 76);
-    int numUsers=10; //this->getParentModule()->par("numUsers");
-    packet->receiverID=omnetpp::intuniform(rng, 1, numUser+1);
+    Packet *packet = new Packet();
+
+
+    packet->setSenderID(this->userID);
+
+    //for assumption: packet dimension between 1 and 75 bytes (La intuniform prende ENTRAMBI gli estremi)
+    packet->setServiceDemand(omnetpp::intuniform(getRNG(SEED_SERVICE_DEMAND), MIN_SERVICE_DEMAND, MAX_SERVICE_DEMAND)); //F: secondo me dovrebbe essere un double
+
+    int numUsers = 10; //this->getParentModule()->par("numUsers");
+    packet->setReceiverID(omnetpp::intuniform(getRNG(SEED_RECIPIENT), MIN_USERS, numUsers));
 }

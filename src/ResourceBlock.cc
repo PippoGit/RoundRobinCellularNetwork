@@ -17,9 +17,3 @@ double ResourceBlock::getRemainingPart(int id_receiver)
     else return 0;
 }
 
-ResourceBlock::~ResourceBlock()
-{
-    // TODO Auto-generated destructor stub
-}
-
-

@@ -6,13 +6,13 @@
 #include "ResourceBlock.h"
 #include "Packet_m.h"
 #include "Frame_m.h"
+#include "constants.h"
 
 using namespace omnetpp;
 
 class Antenna : public cSimpleModule
 {
   private:
-    const int FRAME_SIZE = 25;
     int NUM_USERS;
     std::vector<UserInformation> users;
     cMessage *timer;

@@ -19,22 +19,25 @@
 
 
 // cplusplus {{
-#include "ResourceBlock.h"	
+#include "ResourceBlock.h"
+#include "constants.h"
 // }}
 
 /**
- * Class generated from <tt>Frame.msg:7</tt> by nedtool.
+ * Class generated from <tt>Frame.msg:8</tt> by nedtool.
  * <pre>
  * message Frame
  * {
- *     ResourceBlock RBs[25];
+ *     ResourceBlock RBFrame[FRAME_SIZE];
+ *     int last;
  * }
  * </pre>
  */
 class Frame : public ::omnetpp::cMessage
 {
   protected:
-    ResourceBlock RBs[25];
+    ResourceBlock RBFrame[FRAME_SIZE];
+    int last;
 
   private:
     void copy(const Frame& other);
@@ -53,10 +56,12 @@ class Frame : public ::omnetpp::cMessage
     virtual void parsimUnpack(omnetpp::cCommBuffer *b) override;
 
     // field getter/setter methods
-    virtual unsigned int getRBsArraySize() const;
-    virtual ResourceBlock& getRBs(unsigned int k);
-    virtual const ResourceBlock& getRBs(unsigned int k) const {return const_cast<Frame*>(this)->getRBs(k);}
-    virtual void setRBs(unsigned int k, const ResourceBlock& RBs);
+    virtual unsigned int getRBFrameArraySize() const;
+    virtual ResourceBlock& getRBFrame(unsigned int k);
+    virtual const ResourceBlock& getRBFrame(unsigned int k) const {return const_cast<Frame*>(this)->getRBFrame(k);}
+    virtual void setRBFrame(unsigned int k, const ResourceBlock& RBFrame);
+    virtual int getLast() const;
+    virtual void setLast(int last);
 };
 
 inline void doParsimPacking(omnetpp::cCommBuffer *b, const Frame& obj) {obj.parsimPack(b);}

@@ -4,6 +4,7 @@
 #include <omnetpp.h>
 #include <vector>
 #include "ResourceBlock.h"
+#include "constants.h"
 
 class UserInformation {
 private:

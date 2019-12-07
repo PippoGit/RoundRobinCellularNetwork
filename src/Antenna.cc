@@ -79,7 +79,7 @@ int Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator from,
     }
 
     // return final position of the frame
-    return (from - to);
+    return (from - to); // THIS IS WRONG! It is not actually doing what is supposed to do.
 }
 
 

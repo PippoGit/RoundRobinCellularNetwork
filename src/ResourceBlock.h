@@ -9,8 +9,6 @@
 #define RESOURCEBLOCK_H_
 
 #include <omnetpp.h>
-#include <cqueue.h>
-#include <crandom.h>
 
 class ResourceBlock {
     private:
@@ -21,12 +19,6 @@ class ResourceBlock {
     public:
         ResourceBlock();
         virtual double getRemainingPart(int id_receiver);
-
-
-
-
-
-
 };
 
 

@@ -21,22 +21,20 @@
 /**
  * Class generated from <tt>Packet.msg:1</tt> by nedtool.
  * <pre>
- * packet Packet
+ * message Packet
  * {
  *     int senderID;
  *     int receiverID;
- *     double serviceDemand;  //dimension of packet, random (Filippo: ho messo double per fare una prova...)
- *     double creationTime;
+ *     int serviceDemand;
  * }
  * </pre>
  */
-class Packet : public ::omnetpp::cPacket
+class Packet : public ::omnetpp::cMessage
 {
   protected:
     int senderID;
     int receiverID;
-    double serviceDemand;
-    double creationTime;
+    int serviceDemand;
 
   private:
     void copy(const Packet& other);
@@ -59,10 +57,8 @@ class Packet : public ::omnetpp::cPacket
     virtual void setSenderID(int senderID);
     virtual int getReceiverID() const;
     virtual void setReceiverID(int receiverID);
-    virtual double getServiceDemand() const;
-    virtual void setServiceDemand(double serviceDemand);
-    virtual double getCreationTime() const;
-    virtual void setCreationTime(double creationTime);
+    virtual int getServiceDemand() const;
+    virtual void setServiceDemand(int serviceDemand);
 };
 
 inline void doParsimPacking(omnetpp::cCommBuffer *b, const Packet& obj) {obj.parsimPack(b);}
