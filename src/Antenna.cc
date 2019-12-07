@@ -15,7 +15,7 @@ void Antenna::initialize()
     {
         int i = uniform(0, 100);
         while(i++<100) {
-            std::string name = "testPckt-" + i;
+            std::string name = "testPckt-" + std::to_string(i);
             cMessage *packet = new cMessage(name.c_str());
             cMsgPar  *size = new cMsgPar("size");
             size->setDoubleValue(uniform(0, 100)); //bytes...
@@ -27,8 +27,11 @@ void Antenna::initialize()
 
 void Antenna::updateCQIs()
 {
-    for(UserInformation u : users)
-        u.generateCQI();
+    for(std::vector<UserInformation>::iterator it = users.begin(); it != users.end(); it++)
+    {
+        cRNG *seedUser = getRNG(SEED_CQI + it->getUserId());
+        it->generateCQI(seedUser);
+    }
 }
 
 
