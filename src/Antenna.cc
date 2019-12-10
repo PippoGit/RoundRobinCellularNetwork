@@ -5,7 +5,7 @@ Define_Module(Antenna);
 void Antenna::initialize()
 {
     EV_DEBUG << "[ANTENNA-INITIALIZE] Initializing antenna..." << endl;
-    NUM_USERS = 2; // this->getParentModule()->par("numUsers");
+    NUM_USERS = this->getParentModule()->par("nUsers");
     timer = new cMessage("timer");
 
     EV_DEBUG << "[ANTENNA-INITIALIZE] Building UserInformation datastructure" << endl;
@@ -16,9 +16,11 @@ void Antenna::initialize()
     EV_DEBUG << "[ANTENNA-INITIALIZE] Initializing first iterator" << endl;
     currentUser = users.end()-1; // this will make the first call to roundrobin to set currentUser to begin()
 
+    /*
     EV_DEBUG << "[ANTENNA-INITIALIZE] Creating a random bunch of packets..." << endl;
+
     // Just fill the queues with random stuff....
-    for(std::vector<UserInformation>::iterator it = users.begin(); it != users.end(); ++it)
+    for(auto it = users.begin(); it != users.end(); ++it)
     {
         int i = uniform(0, NUM_USERS);
         EV_DEBUG << "[ANTENNA-INITIALIZE] Allocating " << i << " packets for: " << it->getUserId() << endl;
@@ -27,11 +29,12 @@ void Antenna::initialize()
             std::string name = "testPkt-" + std::to_string(it->getUserId()) + "-" + std::to_string(i);
             Packet *pkt = new Packet(name.c_str());
             pkt->setSenderID(it->getUserId());
-            pkt->setReceiverID(omnetpp::intuniform(getRNG(1), 0, NUM_USERS)); // just a test... it doesn't need to be accurate
-            pkt->setServiceDemand(omnetpp::intuniform(getRNG(1), 0, NUM_USERS));
+            pkt->setReceiverID(omnetpp::intuniform(getRNG(1), 0, NUM_USERS-1)); // just a test... it doesn't need to be accurate
+            pkt->setServiceDemand(omnetpp::intuniform(getRNG(1), 0, NUM_USERS-1));
             it->getQueue()->insert(pkt);
         }
     }
+    */
 
     // schedule first iteration of RR algorithm
     scheduleAt(simTime(), timer);
@@ -82,6 +85,7 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
 
     while(!(queue->isEmpty() || from == to))
     {
+         EV << " LA CODA NON è VUOTAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA  " << endl;
         Packet *p          = check_and_cast<Packet*>(queue->front());
         std::vector<UserInformation>::iterator recipient = users.begin() + p->getReceiverID();
         double packetSize  = p->getServiceDemand();
@@ -94,6 +98,7 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
             EV_DEBUG << "[ROUND-ROBIN] This packet fits the remaining bytes of previous RB" << endl;
             recipient->remainingBytes -= packetSize;
             from->setRecipient(p->getReceiverID());
+            from->appendPacket(p);
         }
         else if (requiredRBs <= to - from)
         {
@@ -103,7 +108,12 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
             // frame.set()
             ResourceBlock b(p->getSenderID(), p->getReceiverID());
             for(auto it = from; it != from + requiredRBs; ++it)
+            {
                 *it = b;
+                it->appendPacket(p);
+            }
+
+            recipient->remainingBytes -= packetSize;
 
             // increment pointers
             from += requiredRBs;
@@ -126,6 +136,7 @@ void Antenna::downlinkPropagation()
     std::vector<ResourceBlock> frame(FRAME_SIZE); // Frame *f = new Frame();
     std::vector<ResourceBlock>::iterator currentRB = frame.begin();
 
+    EV << " ******************** INIZIO ROUND ROBIN ********************** " <<endl;
 
     // 1) Get updated CQIs
     updateCQIs();
@@ -135,6 +146,8 @@ void Antenna::downlinkPropagation()
     {
         // Select next queue
         roundrobin();
+
+        EV << "************ è il turno di " << currentUser - users.begin() << " ******************" << endl;
 
         // Fill the frame with current user's queue and update currentRB index
         fillFrameWithCurrentUser(currentRB, frame.end());
@@ -154,13 +167,15 @@ void Antenna::downlinkPropagation()
 
 void Antenna::handlePacket(Packet *p)
 {
-    // TBD
+    int userId = p->getSenderID();
+    EV_DEBUG << "[ANTENNA] New packet to be sent to " << userId << endl;
+    users[userId].getQueue()->insert(p);
 }
 
 
 void Antenna::handleMessage(cMessage *msg)
 {
-    if(msg->isSelfMessage()) // TEMPORARY ASSUMPTION: The current frame is READY before the next
+    if(msg->isSelfMessage())
         downlinkPropagation();
     else
         handlePacket(check_and_cast<Packet*>(msg));

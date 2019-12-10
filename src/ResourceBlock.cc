@@ -20,6 +20,17 @@ ResourceBlock::ResourceBlock(int sender, int recipient)
     this->recipient = recipient;
 }
 
+void ResourceBlock::appendPacket(Packet *p)
+{
+    contents.push_back(p);
+}
+
+
+Packet* ResourceBlock::getPacket(int i)
+{
+    return contents[i];
+}
+
 
 ResourceBlock::ResourceBlock(const ResourceBlock &b)
 {

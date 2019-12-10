@@ -1,9 +1,12 @@
+package roundrobincellularnetwork.simulations.RoundRobinSimulation;
 
-package roundrobincellularnetwork;
+import roundrobincellularnetwork.Antenna;
+import roundrobincellularnetwork.User;
+
 network CellularNetwork
 {
     parameters:
-        int nUsers;
+        int nUsers = default(10);
     submodules:
         antenna: Antenna {
             // 
@@ -14,7 +17,8 @@ network CellularNetwork
         }
     connections:
         for i=0..nUsers-1 {
-            user[i].inData_p <-- antenna.outData_p[i];
+            user[i].in <-- antenna.out++;
+            user[i].out --> antenna.in++;
         }
 
 
