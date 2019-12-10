@@ -28,6 +28,7 @@ void ResourceBlock::appendPacket(Packet *p)
 
 Packet* ResourceBlock::getPacket(int i)
 {
+    if(contents.size() == 0) return nullptr;
     return contents[i];
 }
 

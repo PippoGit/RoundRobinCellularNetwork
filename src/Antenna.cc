@@ -53,7 +53,7 @@ void Antenna::updateCQIs()
 void Antenna::roundrobin()
 {
     currentUser = (currentUser == users.end()-1)?users.begin():currentUser+1;
-    EV_DEBUG << "[ROUND_ROBIN] it's the turn of " << currentUser->getUserId() << endl;
+    EV_DEBUG << "[ROUND_ROBIN] it's the turn of " << (users.begin()-currentUser) << endl;
 }
 
 
@@ -85,7 +85,7 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
 
     while(!(queue->isEmpty() || from == to))
     {
-         EV << " LA CODA NON è VUOTAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA  " << endl;
+        EV_DEBUG << " LA CODA NON è vuota...  " << endl;
         Packet *p          = check_and_cast<Packet*>(queue->front());
         std::vector<UserInformation>::iterator recipient = users.begin() + p->getReceiverID();
         double packetSize  = p->getServiceDemand();
@@ -136,18 +136,18 @@ void Antenna::downlinkPropagation()
     std::vector<ResourceBlock> frame(FRAME_SIZE); // Frame *f = new Frame();
     std::vector<ResourceBlock>::iterator currentRB = frame.begin();
 
-    EV << " ******************** INIZIO ROUND ROBIN ********************** " <<endl;
+    EV_DEBUG << " ******************** INIZIO ROUND ROBIN ********************** " <<endl;
 
     // 1) Get updated CQIs
     updateCQIs();
 
-    // 2) Round-robin over all the users...
+    // 2) Round-robin over  allthe users...
     do
     {
         // Select next queue
         roundrobin();
 
-        EV << "************ è il turno di " << currentUser - users.begin() << " ******************" << endl;
+        EV_DEBUG << "************ è il turno di " << currentUser - users.begin() << " ******************" << endl;
 
         // Fill the frame with current user's queue and update currentRB index
         fillFrameWithCurrentUser(currentRB, frame.end());

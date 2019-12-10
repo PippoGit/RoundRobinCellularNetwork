@@ -11,6 +11,7 @@ using namespace omnetpp;
 class User : public cSimpleModule
 {
   private:
+    static int NEXT_USER_ID;
     simtime_t interArrivalTime; // exponential
     cMessage* waitMessage;
     int userID;

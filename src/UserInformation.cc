@@ -6,18 +6,20 @@
  */
 
 #include "UserInformation.h"
-int UserInformation::NEXT_USER_ID;
+// int UserInformation::NEXT_USER_ID;
 
 UserInformation::UserInformation()
 {
-    id = NEXT_USER_ID++; // this thing should work because stuff don't change over time... (iguess)
+    // id = NEXT_USER_ID++; // this thing should work because stuff don't change over time... (iguess)
     CQI = 0; //before FIRST utilization the CQI should be generated
 }
 
+/*
 int UserInformation::getUserId()
 {
     return id;
 }
+*/
 
 
 int UserInformation::CQIToBytes()
