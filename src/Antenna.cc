@@ -16,26 +16,6 @@ void Antenna::initialize()
     EV_DEBUG << "[ANTENNA-INITIALIZE] Initializing first iterator" << endl;
     currentUser = users.end()-1; // this will make the first call to roundrobin to set currentUser to begin()
 
-    /*
-    EV_DEBUG << "[ANTENNA-INITIALIZE] Creating a random bunch of packets..." << endl;
-
-    // Just fill the queues with random stuff....
-    for(auto it = users.begin(); it != users.end(); ++it)
-    {
-        int i = uniform(0, NUM_USERS);
-        EV_DEBUG << "[ANTENNA-INITIALIZE] Allocating " << i << " packets for: " << it->getUserId() << endl;
-
-        while(i++<20) {
-            std::string name = "testPkt-" + std::to_string(it->getUserId()) + "-" + std::to_string(i);
-            Packet *pkt = new Packet(name.c_str());
-            pkt->setSenderID(it->getUserId());
-            pkt->setReceiverID(omnetpp::intuniform(getRNG(1), 0, NUM_USERS-1)); // just a test... it doesn't need to be accurate
-            pkt->setServiceDemand(omnetpp::intuniform(getRNG(1), 0, NUM_USERS-1));
-            it->getQueue()->insert(pkt);
-        }
-    }
-    */
-
     // schedule first iteration of RR algorithm
     scheduleAt(simTime(), timer);
 }
