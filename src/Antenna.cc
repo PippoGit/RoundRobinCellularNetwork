@@ -52,9 +52,10 @@ Frame* Antenna::vectorToFrame(std::vector<ResourceBlock> &v)
 Frame* Antenna::duplicateFrame(Frame *f)
 {
     Frame *copy = f->dup();
+
     for(int i=0; i<FRAME_SIZE; ++i)
     {
-        ResourceBlock rbi(f->getRBFrame(i)); // duplicate the rbi
+        ResourceBlock rbi(f->getRBFrame(i));
         copy->setRBFrame(i, rbi);
     }
     return copy;
@@ -62,10 +63,8 @@ Frame* Antenna::duplicateFrame(Frame *f)
 
 void Antenna::destroyFrame(Frame *f)
 {
-
-    // for(int i=0; i<FRAME_SIZE; ++i)
-    //    f->getRBFrame(i).deletePackets();
-      // I THINK THIS IS IMPOSSIBLE TO BE DONE. NOSENSE.
+    for(int i=0; i<FRAME_SIZE; ++i)
+        f->getRBFrame(i).deletePackets();
     delete f;
 }
 
@@ -107,13 +106,12 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
             // the packet can be put in the next rbs
             EV_DEBUG << "[DOWNLINK] This packet can be put in the frame somewhere" << endl;
 
-            // frame.set()
+            // TODO: Questa cosa ANDREBBE CAMBIATA! Si potrebbe trovare un modo
+            // migliore di gestire questa cosa. Invece che copiare n volte sempre tutti
+            // i pacchetti, che non è la soluzione più elegante...
             ResourceBlock b(p->getSenderID(), p->getReceiverID());
             for(auto it = from; it != from + requiredRBs; ++it)
-            {
-                *it = b;
-                it->appendPacket(p);
-            }
+                *it = ResourceBlock(b);
 
             recipient->remainingBytes -= packetSize;
 
@@ -133,9 +131,7 @@ void Antenna::downlinkPropagation()
 {
     int numIterations = 0;
     std::vector<UserInformation>::iterator firstUser = currentUser;
-
-    // double next_timeslot = simTime().dbl() + (double) this->par("timeslot");
-    std::vector<ResourceBlock> frame(FRAME_SIZE); // Frame *f = new Frame();
+    std::vector<ResourceBlock> frame(FRAME_SIZE);
     std::vector<ResourceBlock>::iterator currentRB = frame.begin();
 
     EV_DEBUG << "[DOWNLINK] Updating CQI..." <<endl;
@@ -171,6 +167,7 @@ void Antenna::handlePacket(Packet *p)
 {
     int userId = p->getSenderID();
     EV_DEBUG << "[UPLINK] Received a new packet to be put into the queue of " << userId << endl;
+
     users[userId].getQueue()->insert(p);
 }
 

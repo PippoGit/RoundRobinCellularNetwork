@@ -76,7 +76,7 @@ int ResourceBlock::getNumPackets()
     return contents.size();
 }
 
-std::vector<Packet*> ResourceBlock::getPackets() const // is it really const?????
+std::vector<Packet*> ResourceBlock::getPackets() const
 {
     return contents;
 }
@@ -90,23 +90,3 @@ void ResourceBlock::deletePackets()
     }
     contents.empty();
 }
-
-/*
-ResourceBlock::~ResourceBlock()
-{
-    //for(auto it:v)
-    //{
-        for(auto it:contents)
-            delete it;
-        //it.getPackets().clear();
-    //}
-}
-*/
-
-//double ResourceBlock::getRemainingPart(int id_receiver)
-//{
-//    if (id_receiver == this->receiverID)
-//      return this->remainingPart;
-//    else return 0;
-//}
-
