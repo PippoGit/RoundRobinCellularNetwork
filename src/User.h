@@ -20,6 +20,8 @@ class User : public cSimpleModule
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
     virtual void createNewPacket();
+    virtual void handleTimer();
+    virtual void handleFrame(Frame* f);
 };
 
 #endif

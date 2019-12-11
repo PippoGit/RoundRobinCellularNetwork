@@ -14,27 +14,39 @@ void User::initialize()
 void User::handleMessage(cMessage *msg)
 {
     if(msg->isSelfMessage()){
-        createNewPacket();
-        cRNG *seed = getRNG(SEED_INTERARRIVAL);
-        interArrivalTime = omnetpp::exponential(seed, SimTime(0.25));
-        this->scheduleAt(simTime() + interArrivalTime, waitMessage);
+        handleTimer();
     }
     else
     {
         Frame *f = check_and_cast<Frame*>(msg);
-        EV << "[USER] I have received a frame... Here is the content:" << endl;
-
-
-        for(int i =0; i<FRAME_SIZE; i++) {
-            EV << "     " << i << ") => Recipient: " << f->getRBFrame(i).getRecipient() << ", Sender: " << f->getRBFrame(i).getSender() << endl;
-            if(f->getRBFrame(i).getPacket(0) != nullptr)
-                EV << " extracting something from RB: SENDER: " << f->getRBFrame(i).getPacket(0)->getSenderID() << endl;
-        }
-
-
+        handleFrame(f);
     }
 
 
+}
+
+void User::handleTimer()
+{
+    createNewPacket();
+    cRNG *seed = getRNG(SEED_INTERARRIVAL);
+    interArrivalTime = omnetpp::exponential(seed, SimTime(0.25));
+    this->scheduleAt(simTime() + interArrivalTime, waitMessage);
+
+}
+
+void User::handleFrame(Frame* f)
+{
+
+    EV << "[USER] I have received a frame... Here is the content:" << endl;
+
+    for(int i =0; i<FRAME_SIZE; i++)
+    {
+        EV << "     " << i << ") => Recipient: " << f->getRBFrame(i).getRecipient() << ", Sender: " << f->getRBFrame(i).getSender() << endl;
+        if(f->getRBFrame(i).getRecipient()==userID)
+            EV << " RB for me: SENDER: " << f->getRBFrame(i).getPacket(0)->getSenderID() << endl;
+    }
+    //delete frame after checking if there are packet for me
+    delete(f);
 }
 
 void User::createNewPacket(){
