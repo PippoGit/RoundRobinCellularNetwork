@@ -8,13 +8,13 @@ void Antenna::initialize()
     NUM_USERS = this->getParentModule()->par("nUsers");
     timer = new cMessage("timer");
 
-    EV_DEBUG << "[ANTENNA-INITIALIZE] Building UserInformation datastructure" << endl;
+    EV_DEBUG << "[ANTENNA-INITIALIZE] Building UserInformation data structure" << endl;
     users.reserve(NUM_USERS);
     for(int i=0; i < NUM_USERS; i++)
         users.push_back(UserInformation());
 
     EV_DEBUG << "[ANTENNA-INITIALIZE] Initializing first iterator" << endl;
-    currentUser = users.end()-1; // this will make the first call to roundrobin to set currentUser to begin()
+    currentUser = users.end()-1; // this will make the first call to roundrobin() to set currentUser to begin()
 
     // schedule first iteration of RR algorithm
     scheduleAt(simTime(), timer);
@@ -24,7 +24,7 @@ void Antenna::updateCQIs()
 {
     for(std::vector<UserInformation>::iterator it = users.begin(); it != users.end(); ++it)
     {
-        cRNG *seedUser = getRNG(SEED_CQI /*+ it->getUserId()*/);
+        cRNG *seedUser = getRNG(SEED_CQI);
         it->generateCQI(seedUser);
     }
 }
@@ -65,7 +65,7 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
 
     while(!(queue->isEmpty() || from == to))
     {
-        EV_DEBUG << " LA CODA NON è vuota...  " << endl;
+        EV_DEBUG << "[ANTENNA] Non empty queue" << endl;
         Packet *p          = check_and_cast<Packet*>(queue->front());
         std::vector<UserInformation>::iterator recipient = users.begin() + p->getReceiverID();
         double packetSize  = p->getServiceDemand();
