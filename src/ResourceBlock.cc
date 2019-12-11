@@ -63,6 +63,21 @@ int ResourceBlock::getRecipient() const
     return recipient;
 }
 
+
+int ResourceBlock::getNumPackets()
+{
+    return contents.size();
+}
+
+
+void ResourceBlock::~ResourceBlock()
+{
+    for(auto it:contents)
+        delete it;
+    contents.clear();
+}
+
+
 //double ResourceBlock::getRemainingPart(int id_receiver)
 //{
 //    if (id_receiver == this->receiverID)

@@ -31,8 +31,9 @@ class ResourceBlock {
         virtual int     getRecipient() const;
         virtual void    appendPacket(Packet* pkt);
         virtual Packet* getPacket(int i);
+        virtual int     getNumPackets();
 
-
+        virtual ~ResourceBlock();
         // virtual double getRemainingPart(int id_receiver);
 };
 
