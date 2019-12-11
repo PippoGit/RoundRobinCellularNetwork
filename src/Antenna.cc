@@ -62,11 +62,10 @@ Frame* Antenna::duplicateFrame(Frame *f)
 
 void Antenna::destroyFrame(Frame *f)
 {
-    /*
-    for(int i=0; i<FRAME_SIZE; ++i)
-        f->getRBFrame(i).deletePackets();
-      I THINK THIS IS IMPOSSIBLE TO BE DONE. NOSENSE.
-    */
+
+    // for(int i=0; i<FRAME_SIZE; ++i)
+    //    f->getRBFrame(i).deletePackets();
+      // I THINK THIS IS IMPOSSIBLE TO BE DONE. NOSENSE.
     delete f;
 }
 
