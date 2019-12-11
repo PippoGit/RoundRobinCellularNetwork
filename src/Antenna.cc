@@ -65,7 +65,7 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
 
     while(!(queue->isEmpty() || from == to))
     {
-        EV_DEBUG << "[ANTENNA] Non empty queue" << endl;
+        EV_DEBUG << "[DOWNLINK] Non empty queue" << endl;
         Packet *p          = check_and_cast<Packet*>(queue->front());
         std::vector<UserInformation>::iterator recipient = users.begin() + p->getReceiverID();
         double packetSize  = p->getServiceDemand();
@@ -75,7 +75,7 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
         if(packetSize <= recipient->remainingBytes)
         {
             // the packet can be put inside last RB
-            EV_DEBUG << "[ROUND-ROBIN] This packet fits the remaining bytes of previous RB" << endl;
+            EV_DEBUG << "[DOWNLINK] This packet fits the remaining bytes of previous RB" << endl;
             recipient->remainingBytes -= packetSize;
             from->setRecipient(p->getReceiverID());
             from->appendPacket(p);
@@ -83,7 +83,7 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
         else if (requiredRBs <= to - from)
         {
             // the packet can be put in the next rbs
-            EV_DEBUG << "[ROUND-ROBIN] This packet can be put in the frame somewhere" << endl;
+            EV_DEBUG << "[DOWNLINK] This packet can be put in the frame somewhere" << endl;
 
             // frame.set()
             ResourceBlock b(p->getSenderID(), p->getReceiverID());
@@ -116,7 +116,7 @@ void Antenna::downlinkPropagation()
     std::vector<ResourceBlock> frame(FRAME_SIZE); // Frame *f = new Frame();
     std::vector<ResourceBlock>::iterator currentRB = frame.begin();
 
-    EV_DEBUG << " ******************** INIZIO ROUND ROBIN ********************** " <<endl;
+    EV_DEBUG << "[DOWNLINK] Updating CQI..." <<endl;
 
     // 1) Get updated CQIs
     updateCQIs();
@@ -127,7 +127,7 @@ void Antenna::downlinkPropagation()
         // Select next queue
         roundrobin();
 
-        EV_DEBUG << "************ è il turno di " << currentUser - users.begin() << " ******************" << endl;
+        EV_DEBUG << "[DOWNLINK] It's the turn of: " << currentUser - users.begin() << endl;
 
         // Fill the frame with current user's queue and update currentRB index
         fillFrameWithCurrentUser(currentRB, frame.end());
@@ -137,7 +137,7 @@ void Antenna::downlinkPropagation()
 
     // 3) send the frame to all the users
     broadcastFrame(vectorToFrame(frame));
-    EV_DEBUG << "[ANTENNA] Broadcast propagation of the frame" << endl;
+    EV_DEBUG << "[DOWNLINK] Broadcast propagation of the frame" << endl;
 
     // Schedule next iteration
     simtime_t timeslot_dt = par("timeslot");
@@ -148,7 +148,7 @@ void Antenna::downlinkPropagation()
 void Antenna::handlePacket(Packet *p)
 {
     int userId = p->getSenderID();
-    EV_DEBUG << "[ANTENNA] New packet to be sent to " << userId << endl;
+    EV_DEBUG << "[UPLINK] Received a new packet to be put into the queue of " << userId << endl;
     users[userId].getQueue()->insert(p);
 }
 
