@@ -41,31 +41,44 @@ Frame* Antenna::vectorToFrame(std::vector<ResourceBlock> &v)
 {
     Frame *f = new Frame();
     for(auto it=v.begin(); it != v.end(); ++it)
-        f->setRBFrame(it - v.begin(), *it);
-
-    for(auto it:v)
     {
-        for(auto ti:it.getPackets())
-            delete ti;
-        it.getPackets().clear();
+        f->setRBFrame(it - v.begin(), *it);
     }
-
-    v.clear();
     return f;
+}
+
+
+
+Frame* Antenna::duplicateFrame(Frame *f)
+{
+    Frame *copy = f->dup();
+    for(int i=0; i<FRAME_SIZE; ++i)
+    {
+        ResourceBlock rbi(f->getRBFrame(i)); // duplicate the rbi
+        copy->setRBFrame(i, rbi);
+    }
+    return copy;
+}
+
+void Antenna::destroyFrame(Frame *f)
+{
+    /*
+    for(int i=0; i<FRAME_SIZE; ++i)
+        f->getRBFrame(i).deletePackets();
+      I THINK THIS IS IMPOSSIBLE TO BE DONE. NOSENSE.
+    */
+    delete f;
 }
 
 
 void Antenna::broadcastFrame(Frame *f)
 {
-    // for simplicity just send it to every users and then each user will check
-    // if there is something for them.
     for(int i=0; i<NUM_USERS; ++i)
     {
-        Frame *copy = f->dup();
+        Frame *copy = duplicateFrame(f);
         send(copy, "out", i);
     }
-
-    delete f;
+    destroyFrame(f);
 }
 
 

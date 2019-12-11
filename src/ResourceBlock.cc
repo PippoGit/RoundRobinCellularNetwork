@@ -37,6 +37,13 @@ ResourceBlock::ResourceBlock(const ResourceBlock &b)
 {
     this->sender = b.getSender();
     this->recipient = b.getRecipient();
+
+    // duplicate all the packets in contents
+    for(auto it:b.getPackets())
+    {
+        Packet* pkt = it->dup();
+        contents.push_back(pkt);
+    }
 }
 
 
@@ -69,11 +76,20 @@ int ResourceBlock::getNumPackets()
     return contents.size();
 }
 
-std::vector<Packet*> ResourceBlock::getPackets()
+std::vector<Packet*> ResourceBlock::getPackets() const // is it really const?????
 {
     return contents;
 }
 
+
+void ResourceBlock::deletePackets()
+{
+    for(auto it:contents)
+    {
+        delete it;
+    }
+    contents.empty();
+}
 
 /*
 ResourceBlock::~ResourceBlock()

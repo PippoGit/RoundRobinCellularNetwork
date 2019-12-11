@@ -17,9 +17,6 @@ class ResourceBlock {
           int recipient;
           std::vector<Packet*> contents;
 
-          // bool lastForUser;
-          // double remainingPart;
-
     public:
         ResourceBlock();
         ResourceBlock(int sender, int recipient);
@@ -32,10 +29,9 @@ class ResourceBlock {
         virtual void    appendPacket(Packet* pkt);
         virtual Packet* getPacket(int i);
         virtual int     getNumPackets();
-        virtual std::vector<Packet*> getPackets();
+        virtual void    deletePackets();
 
-        /* virtual ~ResourceBlock(); */
-        // virtual double getRemainingPart(int id_receiver);
+        virtual std::vector<Packet*> getPackets() const;
 };
 
 
