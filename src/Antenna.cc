@@ -42,6 +42,15 @@ Frame* Antenna::vectorToFrame(std::vector<ResourceBlock> &v)
     Frame *f = new Frame();
     for(auto it=v.begin(); it != v.end(); ++it)
         f->setRBFrame(it - v.begin(), *it);
+
+    for(auto it:v)
+    {
+        for(auto ti:it.getPackets())
+            delete ti;
+        it.getPackets().clear();
+    }
+
+    v.clear();
     return f;
 }
 
@@ -55,6 +64,7 @@ void Antenna::broadcastFrame(Frame *f)
         Frame *copy = f->dup();
         send(copy, "out", i);
     }
+
     delete f;
 }
 

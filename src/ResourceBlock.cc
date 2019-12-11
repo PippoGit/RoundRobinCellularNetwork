@@ -69,14 +69,23 @@ int ResourceBlock::getNumPackets()
     return contents.size();
 }
 
-
-void ResourceBlock::~ResourceBlock()
+std::vector<Packet*> ResourceBlock::getPackets()
 {
-    for(auto it:contents)
-        delete it;
-    contents.clear();
+    return contents;
 }
 
+
+/*
+ResourceBlock::~ResourceBlock()
+{
+    //for(auto it:v)
+    //{
+        for(auto it:contents)
+            delete it;
+        //it.getPackets().clear();
+    //}
+}
+*/
 
 //double ResourceBlock::getRemainingPart(int id_receiver)
 //{

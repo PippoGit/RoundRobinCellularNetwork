@@ -36,22 +36,21 @@ void User::handleTimer()
 
 void User::handleFrame(Frame* f)
 {
-
     EV << "[USER] I have received a frame... Here is the content:" << endl;
-
     for(int i =0; i<FRAME_SIZE; i++)
     {
-        EV << "     " << i << ") => Recipient: " << f->getRBFrame(i).getRecipient() << ", Sender: " << f->getRBFrame(i).getSender() << endl;
         if(f->getRBFrame(i).getRecipient()==userID)
-            EV << " RB for me: SENDER: " << f->getRBFrame(i).getPacket(0)->getSenderID() << endl;
+        {
+            EV << "[USER] There are " << f->getRBFrame(i).getNumPackets() << " packets for me" << endl;
+            for(int j = 0; j < f->getRBFrame(i).getNumPackets(); j++)
+                EV << " RB for me: SENDER: " << f->getRBFrame(i).getPacket(j)->getSenderID() << endl;
+        }
     }
-    //delete frame after checking if there are packet for me
     delete(f);
 }
 
 void User::createNewPacket(){
     Packet *packet = new Packet();
-
 
     packet->setSenderID(this->userID);
 
