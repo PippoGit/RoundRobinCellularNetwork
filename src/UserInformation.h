@@ -8,7 +8,6 @@
 
 class UserInformation {
 private:
-    // static int NEXT_USER_ID;
     // int id;
     omnetpp::cQueue FIFOQueue;
     int CQI;
@@ -25,7 +24,6 @@ public:
 
     virtual int              CQIToBytes();
     virtual omnetpp::cQueue* getQueue();
-    // virtual int              getUserId();
 };
 
 #endif /* USERINFORMATION_H_ */

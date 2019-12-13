@@ -17,6 +17,7 @@ void Antenna::initialize()
     currentUser = users.end()-1; // this will make the first call to roundrobin() to set currentUser to begin()
 
     // schedule first iteration of RR algorithm
+    frame = nullptr;
     scheduleAt(simTime(), timer);
 }
 
@@ -48,35 +49,14 @@ Frame* Antenna::vectorToFrame(std::vector<ResourceBlock> &v)
 }
 
 
-
-Frame* Antenna::duplicateFrame(Frame *f)
-{
-    Frame *copy = f->dup();
-
-    for(int i=0; i<FRAME_SIZE; ++i)
-    {
-        ResourceBlock rbi(f->getRBFrame(i));
-        copy->setRBFrame(i, rbi);
-    }
-    return copy;
-}
-
-void Antenna::destroyFrame(Frame *f)
-{
-    for(int i=0; i<FRAME_SIZE; ++i)
-        f->getRBFrame(i).deletePackets();
-    delete f;
-}
-
-
 void Antenna::broadcastFrame(Frame *f)
 {
     for(int i=0; i<NUM_USERS; ++i)
     {
-        Frame *copy = duplicateFrame(f);
+        Frame *copy = f->dup();
         send(copy, "out", i);
     }
-    destroyFrame(f);
+    delete f;
 }
 
 
@@ -86,7 +66,7 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
 
     while(!(queue->isEmpty() || from == to))
     {
-        EV_DEBUG << "[DOWNLINK] Non empty queue" << endl;
+        EV_DEBUG << "[CREATE_FRAME RR] Non empty queue" << endl;
         Packet *p          = check_and_cast<Packet*>(queue->front());
         std::vector<UserInformation>::iterator recipient = users.begin() + p->getReceiverID();
         double packetSize  = p->getServiceDemand();
@@ -96,23 +76,26 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
         if(packetSize <= recipient->remainingBytes)
         {
             // the packet can be put inside last RB
-            EV_DEBUG << "[DOWNLINK] This packet fits the remaining bytes of previous RB" << endl;
+            EV_DEBUG << "[CREATE_FRAME RR] This packet fits the remaining bytes of previous RB" << endl;
             recipient->remainingBytes -= packetSize;
             from->setRecipient(p->getReceiverID());
-            from->appendPacket(p);
+            from->appendFragment(p, packetSize/rCQI);
         }
         else if (requiredRBs <= to - from)
         {
             // the packet can be put in the next rbs
-            EV_DEBUG << "[DOWNLINK] This packet can be put in the frame somewhere" << endl;
+            EV_DEBUG << "[CREATE_FRAME RR] This packet can be put in the frame somewhere" << endl;
 
-            // TODO: Questa cosa ANDREBBE CAMBIATA! Si potrebbe trovare un modo
-            // migliore di gestire questa cosa. Invece che copiare n volte sempre tutti
-            // i pacchetti, che non è la soluzione più elegante...
-            ResourceBlock b(p->getSenderID(), p->getReceiverID());
+            // if the packet needs more RB it means that each RB will have
+            // a fragment with size rCQI (except for last one)
             for(auto it = from; it != from + requiredRBs; ++it)
-                *it = ResourceBlock(b);
-
+            {
+                int index = (it - from);
+                ResourceBlock b(p->getSenderID(), p->getReceiverID());
+                double fragmentSize = (index == requiredRBs-1)?packetSize-(index*rCQI):rCQI;
+                b.appendFragment(p, fragmentSize);
+                *it = b;
+            }
             recipient->remainingBytes -= packetSize;
 
             // increment pointers
@@ -127,14 +110,14 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
 }
 
 
-void Antenna::downlinkPropagation()
+void Antenna::createFrame()
 {
     int numIterations = 0;
     std::vector<UserInformation>::iterator firstUser = currentUser;
-    std::vector<ResourceBlock> frame(FRAME_SIZE);
-    std::vector<ResourceBlock>::iterator currentRB = frame.begin();
+    std::vector<ResourceBlock> vframe(FRAME_SIZE);
+    std::vector<ResourceBlock>::iterator currentRB = vframe.begin();
 
-    EV_DEBUG << "[DOWNLINK] Updating CQI..." <<endl;
+    EV_DEBUG << "[CREATE_FRAME] Updating CQI..." <<endl;
 
     // 1) Get updated CQIs
     updateCQIs();
@@ -145,17 +128,16 @@ void Antenna::downlinkPropagation()
         // Select next queue
         roundrobin();
 
-        EV_DEBUG << "[DOWNLINK] It's the turn of: " << currentUser - users.begin() << endl;
+        EV_DEBUG << "[CREATE_FRAME] It's the turn of: " << currentUser - users.begin() << endl;
 
         // Fill the frame with current user's queue and update currentRB index
-        fillFrameWithCurrentUser(currentRB, frame.end());
+        fillFrameWithCurrentUser(currentRB, vframe.end());
 
         numIterations += (currentUser == firstUser);
-    } while(currentRB != frame.end() && numIterations < 2);
+    } while(currentRB != vframe.end() && numIterations < 2);
 
-    // 3) send the frame to all the users
-    broadcastFrame(vectorToFrame(frame));
-    EV_DEBUG << "[DOWNLINK] Broadcast propagation of the frame" << endl;
+    // 3) send the frame to all the users DURING NEXT TIMESLOT!
+    this->frame = vectorToFrame(vframe);
 
     // Schedule next iteration
     simtime_t timeslot_dt = par("timeslot");
@@ -172,10 +154,22 @@ void Antenna::handlePacket(Packet *p)
 }
 
 
+void Antenna::downlinkPropagation()
+{
+    if(frame == nullptr) return; // first iteration...
+
+    broadcastFrame(frame);
+    EV_DEBUG << "[DOWNLINK] Broadcast propagation of the frame" << endl;
+}
+
+
 void Antenna::handleMessage(cMessage *msg)
 {
     if(msg->isSelfMessage())
+    {
         downlinkPropagation();
+        createFrame();
+    }
     else
         handlePacket(check_and_cast<Packet*>(msg));
 }

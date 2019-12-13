@@ -20,30 +20,28 @@ ResourceBlock::ResourceBlock(int sender, int recipient)
     this->recipient = recipient;
 }
 
-void ResourceBlock::appendPacket(Packet *p)
+void ResourceBlock::appendFragment(Packet *p, double fragmentSize)
 {
-    contents.push_back(p);
+    fragment_t fragment = {
+        .id = p->getId(),
+        .packetSize = p->getServiceDemand(),
+        .fragmentSize = fragmentSize
+    };
+    fragments.push_back(fragment);
 }
 
 
-Packet* ResourceBlock::getPacket(int i)
+ResourceBlock::fragment_t ResourceBlock::getFragment(int i)
 {
-    if(contents.size() == 0) return nullptr;
-    return contents[i];
+    return fragments[i];
 }
 
 
 ResourceBlock::ResourceBlock(const ResourceBlock &b)
 {
-    this->sender = b.getSender();
+    this->sender    = b.getSender();
     this->recipient = b.getRecipient();
-
-    // duplicate all the packets in contents
-    for(auto it:b.getPackets())
-    {
-        Packet* pkt = it->dup();
-        contents.push_back(pkt);
-    }
+    this->fragments = b.getFragments();
 }
 
 
@@ -71,22 +69,12 @@ int ResourceBlock::getRecipient() const
 }
 
 
-int ResourceBlock::getNumPackets()
+int ResourceBlock::getNumFragments()
 {
-    return contents.size();
+    return fragments.size();
 }
 
-std::vector<Packet*> ResourceBlock::getPackets() const
+std::vector<ResourceBlock::fragment_t> ResourceBlock::getFragments() const
 {
-    return contents;
-}
-
-
-void ResourceBlock::deletePackets()
-{
-    for(auto it:contents)
-    {
-        delete it;
-    }
-    contents.empty();
+    return fragments;
 }

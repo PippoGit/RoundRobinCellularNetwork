@@ -19,20 +19,20 @@ class Antenna : public cSimpleModule
 
     // stuff for roundrobin
     std::vector<UserInformation>::iterator currentUser;
+    Frame *frame;
 
   protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
     virtual void handlePacket(Packet *p);
     virtual void downlinkPropagation();
+    virtual void createFrame();
 
     virtual void   updateCQIs();
     virtual void   roundrobin();
     virtual void   broadcastFrame(Frame *f);
     virtual void   fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &from, std::vector<ResourceBlock>::iterator to);
     virtual Frame* vectorToFrame(std::vector<ResourceBlock> &v);
-    virtual void   destroyFrame(Frame *f);
-    virtual Frame* duplicateFrame(Frame *f);
 };
 
 #endif

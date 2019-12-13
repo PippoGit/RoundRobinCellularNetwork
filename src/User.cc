@@ -41,9 +41,13 @@ void User::handleFrame(Frame* f)
     {
         if(f->getRBFrame(i).getRecipient()==userID)
         {
-            EV << "[USER] There are " << f->getRBFrame(i).getNumPackets() << " packets for me" << endl;
-            for(int j = 0; j < f->getRBFrame(i).getNumPackets(); j++)
-                EV << " RB for me: SENDER: " << f->getRBFrame(i).getPacket(j)->getSenderID() << endl;
+            EV << "[USER] There are " << f->getRBFrame(i).getNumFragments() << " fragments" << endl;
+            for(int j = 0; j < f->getRBFrame(i).getNumFragments(); j++)
+            {
+                EV << "   ID PKT: " << f->getRBFrame(i).getFragment(j).id << endl;
+                EV << "   PKT SIZE: " <<  f->getRBFrame(i).getFragment(j).packetSize << endl;
+                EV << "   FRG SIZE: " <<  f->getRBFrame(i).getFragment(j).fragmentSize << endl;
+            }
         }
     }
     delete(f);

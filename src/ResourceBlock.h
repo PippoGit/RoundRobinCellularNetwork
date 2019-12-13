@@ -12,10 +12,17 @@
 #include "Packet_m.h"
 
 class ResourceBlock {
+    public:
+        struct fragment_t {
+            long   id;
+            int    packetSize;
+            double fragmentSize;
+        };
+
     private:
-          int sender; // this is probably useless...
-          int recipient;
-          std::vector<Packet*> contents;
+        int sender;
+        int recipient;
+        std::vector<fragment_t> fragments;
 
     public:
         ResourceBlock();
@@ -26,12 +33,11 @@ class ResourceBlock {
         virtual void    setRecipient(int id);
         virtual int     getSender() const;
         virtual int     getRecipient() const;
-        virtual void    appendPacket(Packet* pkt);
-        virtual Packet* getPacket(int i);
-        virtual int     getNumPackets();
-        virtual void    deletePackets();
 
-        virtual std::vector<Packet*> getPackets() const;
+        virtual void                      appendFragment(Packet* pkt, double fragmentSize);
+        virtual int                       getNumFragments();
+        virtual std::vector<fragment_t>   getFragments() const;
+        virtual ResourceBlock::fragment_t getFragment(int i);
 };
 
 
