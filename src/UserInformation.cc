@@ -45,6 +45,6 @@ omnetpp::cQueue* UserInformation::getQueue()
 UserInformation::~UserInformation()
 {
     // idk if this is ok (i kinda forgot most of the shit about c++)
-    // delete this->FIFOQueue;
+    //delete this->FIFOQueue;
 }
 

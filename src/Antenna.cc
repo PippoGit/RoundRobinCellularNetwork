@@ -34,7 +34,7 @@ void Antenna::updateCQIs()
 void Antenna::roundrobin()
 {
     currentUser = (currentUser == users.end()-1)?users.begin():currentUser+1;
-    EV_DEBUG << "[ROUND_ROBIN] it's the turn of " << (users.begin()-currentUser) << endl;
+    EV_DEBUG << "[ROUND_ROBIN] it's the turn of " << (currentUser - users.begin()) << endl;
 }
 
 
@@ -68,52 +68,84 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
     {
         EV_DEBUG << "[CREATE_FRAME RR] Non empty queue" << endl;
         Packet *p          = check_and_cast<Packet*>(queue->front());
+
+        // TODO: CHECK IF THIS IS ACTUALLY THE RECIPIENT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         std::vector<UserInformation>::iterator recipient = users.begin() + p->getReceiverID();
-        double packetSize  = p->getServiceDemand();
-        int    rCQI        = currentUser->CQIToBytes();
-        int    requiredRBs = ceil(packetSize/rCQI);
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-        if(packetSize <= recipient->remainingBytes)
-        {
-            // the packet can be put inside last RB
-            EV_DEBUG << "[CREATE_FRAME RR] This packet fits the remaining bytes of previous RB" << endl;
-            recipient->remainingBytes -= packetSize;
-            from->setRecipient(p->getReceiverID());
-            from->appendFragment(p, packetSize);
-        }
-        else if (requiredRBs <= (to - ++from))
-        {
-            // the packet can be put in the next rbs
-            EV_DEBUG << "[CREATE_FRAME RR] This packet can be put in the frame somewhere" << endl;
-            EV_DEBUG << "    REQUIRED:   " << requiredRBs << endl;
-            EV_DEBUG << "    REMAINING:  " << (to - from) << endl;
-            EV_DEBUG << "    INDEX:      " << (FRAME_SIZE) - (to - from) << endl;
+        double packetSize   = p->getServiceDemand();
+        double residualPacketSize = packetSize;
+        int    rCQI         = currentUser->CQIToBytes();
+        int    requiredRBs  = ceil(packetSize/rCQI);
+        int    remainingRBs = (to-from);
 
-            // if the packet needs more RB it means that each RB will have
-            // a fragment with size rCQI (except for last one)
-            EV_DEBUG << "[CREATE_FRAME RR] inserting one fragment of the packet... I need " << requiredRBs << " RBs to fit it..." << endl;
-            for(auto it = from; it != from + requiredRBs; ++it)
+        // IF THERE is ENOUGH SPACE FOR THE WHOLE PACKET!
+        double totalRemainingBytes = (remainingRBs * rCQI) + recipient->remainingBytes;
+
+        if(packetSize <= totalRemainingBytes)
+        {
+            // THE PACKET CAN BE PUT SOMEWHERE
+
+            // 1) fill the lastRB
+            if(recipient->remainingBytes > 0)
             {
-                int index = (it - from);
-                EV_DEBUG << "... Inserting first fragment at RB: " << index << endl;
-                ResourceBlock b(p->getSenderID(), p->getReceiverID());
-                double fragmentSize = (index == requiredRBs-1)?packetSize-(index*rCQI):rCQI;
-                EV_DEBUG << "... The size for the fragment is: " << fragmentSize << endl;
+                EV_DEBUG << "[CREATE_FRAME RR] Putting " << recipient->remainingBytes << " in last RB" << endl;
+                EV_DEBUG << "     Inserting at index: " << (FRAME_SIZE) - (to - recipient->lastRB) << endl;
 
-                b.appendFragment(p, fragmentSize);
-                *it = b;
+                if(recipient->lastRB == to) recipient->lastRB = from; // to is just another name for .end()
+
+                recipient->remainingBytes -= (packetSize < recipient->remainingBytes)? packetSize : recipient->remainingBytes;
+                recipient->lastRB->setRecipient(p->getReceiverID());
+                recipient->lastRB->appendFragment(p, packetSize);
+
+                residualPacketSize -= recipient->remainingBytes;
+                requiredRBs--;
             }
-            recipient->remainingBytes -= packetSize;
 
-            // increment pointers
-            from += requiredRBs;
+            // 2) If there are still some bytes to write, put them at "from"
+            if(residualPacketSize > 0)
+            {
+                EV_DEBUG << "[CREATE_FRAME RR] Put remaining bytes at " << (FRAME_SIZE) - remainingRBs << endl;
+                EV_DEBUG << "    RESIDUAL SIZE:  " << residualPacketSize << endl;
+                EV_DEBUG << "    REQUIRED RBs:   " << requiredRBs << endl;
+                EV_DEBUG << "    REMAINING:      " << (to - from) << endl;
+                EV_DEBUG << "    INDEX:          " << (FRAME_SIZE) - (to - from) << endl;
+
+                if (recipient->lastRB == from) from++;
+
+                double fragmentSize;
+                for(auto it = from; it != from + requiredRBs; ++it)
+                {
+                    int index = (it - from); // relative index to see if it is the last required RB...
+                    EV_DEBUG << "    Inserting fragment at RB: " << (FRAME_SIZE) - (to - from) << endl;
+                    fragmentSize = (index == requiredRBs-1)?residualPacketSize:rCQI;
+                    EV_DEBUG << "    The size for the fragment is: " << fragmentSize << endl;
+
+                    it->setRecipient(p->getReceiverID());
+                    it->setSender(p->getSenderID());
+                    it->appendFragment(p, fragmentSize);
+
+                    residualPacketSize -= fragmentSize;
+                }
+
+                // increment pointers and update lastRB
+                from += requiredRBs;
+                recipient->lastRB = from;
+                recipient->remainingBytes = rCQI - fragmentSize;
+            }
+
+            // 3) The packet was put somewhere...
+            queue->remove(p);
         }
-        else break; // not enough space (this is the most aweful piece of code ever)
-
-        // If i get to this point it means the packet was put somewhere in the
-        // frame so we can pop it from its queue.
-        queue->remove(p);
+        else break;
     }
+}
+
+
+void Antenna::initUsersLastRBs(std::vector<ResourceBlock>::iterator end)
+{
+    for(auto it = users.begin(); it != users.end(); ++it)
+        it->lastRB = end;
 }
 
 
@@ -123,6 +155,8 @@ void Antenna::createFrame()
     std::vector<UserInformation>::iterator firstUser = currentUser;
     std::vector<ResourceBlock> vframe(FRAME_SIZE);
     std::vector<ResourceBlock>::iterator currentRB = vframe.begin();
+
+    initUsersLastRBs(vframe.end());
 
     EV_DEBUG << "[CREATE_FRAME] Updating CQI..." <<endl;
 
@@ -134,8 +168,6 @@ void Antenna::createFrame()
     {
         // Select next queue
         roundrobin();
-
-        EV_DEBUG << "[CREATE_FRAME] It's the turn of: " << currentUser - users.begin() << endl;
 
         // Fill the frame with current user's queue and update currentRB index
         fillFrameWithCurrentUser(currentRB, vframe.end());
