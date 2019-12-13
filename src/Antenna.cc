@@ -79,20 +79,27 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
             EV_DEBUG << "[CREATE_FRAME RR] This packet fits the remaining bytes of previous RB" << endl;
             recipient->remainingBytes -= packetSize;
             from->setRecipient(p->getReceiverID());
-            from->appendFragment(p, packetSize/rCQI);
+            from->appendFragment(p, packetSize);
         }
-        else if (requiredRBs <= to - from)
+        else if (requiredRBs <= (to - ++from))
         {
             // the packet can be put in the next rbs
             EV_DEBUG << "[CREATE_FRAME RR] This packet can be put in the frame somewhere" << endl;
+            EV_DEBUG << "    REQUIRED:   " << requiredRBs << endl;
+            EV_DEBUG << "    REMAINING:  " << (to - from) << endl;
+            EV_DEBUG << "    INDEX:      " << (FRAME_SIZE) - (to - from) << endl;
 
             // if the packet needs more RB it means that each RB will have
             // a fragment with size rCQI (except for last one)
+            EV_DEBUG << "[CREATE_FRAME RR] inserting one fragment of the packet... I need " << requiredRBs << " RBs to fit it..." << endl;
             for(auto it = from; it != from + requiredRBs; ++it)
             {
                 int index = (it - from);
+                EV_DEBUG << "... Inserting first fragment at RB: " << index << endl;
                 ResourceBlock b(p->getSenderID(), p->getReceiverID());
                 double fragmentSize = (index == requiredRBs-1)?packetSize-(index*rCQI):rCQI;
+                EV_DEBUG << "... The size for the fragment is: " << fragmentSize << endl;
+
                 b.appendFragment(p, fragmentSize);
                 *it = b;
             }

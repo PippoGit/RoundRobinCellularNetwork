@@ -41,8 +41,11 @@ void User::handleFrame(Frame* f)
     {
         if(f->getRBFrame(i).getRecipient()==userID)
         {
-            EV << "[USER] There are " << f->getRBFrame(i).getNumFragments() << " fragments" << endl;
-            for(int j = 0; j < f->getRBFrame(i).getNumFragments(); j++)
+            int numFragments = f->getRBFrame(i).getNumFragments();
+            if (numFragments > 1)
+                EV << "*** MIRACOLODISANGENNARO! ***";
+            EV << "[USER] There are " << numFragments << " fragments" << endl;
+            for(int j = 0; j < numFragments; j++)
             {
                 EV << "   ID PKT: " << f->getRBFrame(i).getFragment(j).id << endl;
                 EV << "   PKT SIZE: " <<  f->getRBFrame(i).getFragment(j).packetSize << endl;
