@@ -19,6 +19,7 @@ void Antenna::initialize()
     // schedule first iteration of RR algorithm
     frame = nullptr;
     scheduleAt(simTime(), timer);
+
     //signals
     responseTime_s=registerSignal("responseTime");
 
@@ -70,11 +71,10 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
     while(!(queue->isEmpty() || from == to))
     {
         EV_DEBUG << "[CREATE_FRAME RR] Non empty queue" << endl;
-        Packet *p          = check_and_cast<Packet*>(queue->front());
+        Packet *p = check_and_cast<Packet*>(queue->front());
 
         //IF IT'S THE FIRST TIME YOU CONSIDER THE PACKET, UPDATE ITS START-SERVICE-TIME VARIABLE
-        if(p->getStartServiceTime()==0)
-            p->setStartServiceTime(simTime());
+        packetsInformation[p->getId()].departureTime = simTime();
 
         std::vector<UserInformation>::iterator recipient = users.begin() + p->getReceiverID();
         // (I have checked: believe it or not, this is the right recipient)
@@ -91,16 +91,12 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
 
         if(packetSize <= totalRemainingBytes)
         {
-            // THE PACKET CAN BE PUT SOMEWHERE
+            // If there is space, it means that i'm going to put the packet somewhere!
+            // SO the packet will become "pending"
+            pendingPackets.push_back(p->getId());
 
             //WHEN A PACKET INSERTED IN FRAME, START-FRAME-TIME
-            p->setStartFrameTime(simTime());
-
-            //UPDATE ALL PARAMETERS TO CALCULATE MEAN RESPONSE TIME AT THE END
-            this->frame->setSumWaitingTimes(this->frame->getSumWaitingTimes() + (p->getArrivalTime()-p->getStartServiceTime()));
-            this->frame->setSumServiceTimes(this->frame->getSumServiceTimes() + (p->getStartFrameTime()-p->getStartFrameTime()));
-            this->frame->setNumPackets(this->frame->getNumPackets()+1);
-
+            packetsInformation[p->getId()].frameTime = simTime();
 
             // 1) fill the lastRB
             if(recipient->remainingBytes > 0)
@@ -178,12 +174,6 @@ void Antenna::createFrame()
     std::vector<ResourceBlock> vframe(FRAME_SIZE);
     std::vector<ResourceBlock>::iterator currentRB = vframe.begin();
 
-    //INITIALIZE FRAME PARAMETERS FOR RESPONSE TIME
-    this->frame->setNumPackets(0);
-    this->frame->setSumServiceTimes(0);
-    this->frame->setSumWaitingTimes(0);
-
-
     initUsersLastRBs(vframe.end());
 
     EV_DEBUG << "[CREATE_FRAME] Updating CQI..." <<endl;
@@ -207,9 +197,10 @@ void Antenna::createFrame()
     this->frame = vectorToFrame(vframe);
 
     // COMPUTE RESPONSE TIME
-    simtime_t timeslot = par("timeslot");
-    simtime_t meanResponseTime = (this->frame->getSumServiceTimes()+this->frame->getSumWaitingTimes()+timeslot)/this->frame->getNumPackets();
-    emit(responseTime_s, meanResponseTime);
+    // simtime_t timeslot = par("timeslot");
+
+    // simtime_t meanResponseTime = (this->frame->getSumServiceTimes()+this->frame->getSumWaitingTimes()+timeslot)/this->frame->getNumPackets();
+    // emit(responseTime_s, meanResponseTime);
 
     // Schedule next iteration
     simtime_t timeslot_dt = par("timeslot");
@@ -222,6 +213,10 @@ void Antenna::handlePacket(Packet *p)
     int userId = p->getSenderID();
     EV_DEBUG << "[UPLINK] Received a new packet to be put into the queue of " << userId << endl;
 
+    // this is a new packet! so we are going to keep its info somewhere!
+    Antenna::packet_info_t i;
+    i.arrivalTime = simTime();
+    packetsInformation.insert(std::pair<long, Antenna::packet_info_t>(p->getId(), i));
     users[userId].getQueue()->insert(p);
 }
 
@@ -230,8 +225,22 @@ void Antenna::downlinkPropagation()
 {
     if(frame == nullptr) return; // first iteration...
 
+    // Update the info about the packet being in the frame
+    for(long id : pendingPackets)
+    {
+        Antenna::packet_info_t info = packetsInformation.at(id);
+        info.propagationTime = simTime();
+
+        //    here is where GIADA or STEFANO should emit the signals! (using the info structure)
+        // ->
+        //    ^  THERE
+        packetsInformation.erase(id); // remove the packet from the hash table
+    }
+
     broadcastFrame(frame);
     EV_DEBUG << "[DOWNLINK] Broadcast propagation of the frame" << endl;
+
+    pendingPackets.clear(); // clear the pending packets data structure...
 }
 
 

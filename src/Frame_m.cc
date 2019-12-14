@@ -181,9 +181,6 @@ Register_Class(Frame)
 
 Frame::Frame(const char *name, short kind) : ::omnetpp::cMessage(name,kind)
 {
-    this->sumWaitingTimes = 0;
-    this->sumServiceTimes = 0;
-    this->numPackets = 0;
 }
 
 Frame::Frame(const Frame& other) : ::omnetpp::cMessage(other)
@@ -207,27 +204,18 @@ void Frame::copy(const Frame& other)
 {
     for (unsigned int i=0; i<FRAME_SIZE; i++)
         this->RBFrame[i] = other.RBFrame[i];
-    this->sumWaitingTimes = other.sumWaitingTimes;
-    this->sumServiceTimes = other.sumServiceTimes;
-    this->numPackets = other.numPackets;
 }
 
 void Frame::parsimPack(omnetpp::cCommBuffer *b) const
 {
     ::omnetpp::cMessage::parsimPack(b);
     doParsimArrayPacking(b,this->RBFrame,FRAME_SIZE);
-    doParsimPacking(b,this->sumWaitingTimes);
-    doParsimPacking(b,this->sumServiceTimes);
-    doParsimPacking(b,this->numPackets);
 }
 
 void Frame::parsimUnpack(omnetpp::cCommBuffer *b)
 {
     ::omnetpp::cMessage::parsimUnpack(b);
     doParsimArrayUnpacking(b,this->RBFrame,FRAME_SIZE);
-    doParsimUnpacking(b,this->sumWaitingTimes);
-    doParsimUnpacking(b,this->sumServiceTimes);
-    doParsimUnpacking(b,this->numPackets);
 }
 
 unsigned int Frame::getRBFrameArraySize() const
@@ -245,36 +233,6 @@ void Frame::setRBFrame(unsigned int k, const ResourceBlock& RBFrame)
 {
     if (k>=FRAME_SIZE) throw omnetpp::cRuntimeError("Array of size FRAME_SIZE indexed by %lu", (unsigned long)k);
     this->RBFrame[k] = RBFrame;
-}
-
-::omnetpp::simtime_t Frame::getSumWaitingTimes() const
-{
-    return this->sumWaitingTimes;
-}
-
-void Frame::setSumWaitingTimes(::omnetpp::simtime_t sumWaitingTimes)
-{
-    this->sumWaitingTimes = sumWaitingTimes;
-}
-
-::omnetpp::simtime_t Frame::getSumServiceTimes() const
-{
-    return this->sumServiceTimes;
-}
-
-void Frame::setSumServiceTimes(::omnetpp::simtime_t sumServiceTimes)
-{
-    this->sumServiceTimes = sumServiceTimes;
-}
-
-int Frame::getNumPackets() const
-{
-    return this->numPackets;
-}
-
-void Frame::setNumPackets(int numPackets)
-{
-    this->numPackets = numPackets;
 }
 
 class FrameDescriptor : public omnetpp::cClassDescriptor
@@ -342,7 +300,7 @@ const char *FrameDescriptor::getProperty(const char *propertyname) const
 int FrameDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 4+basedesc->getFieldCount() : 4;
+    return basedesc ? 1+basedesc->getFieldCount() : 1;
 }
 
 unsigned int FrameDescriptor::getFieldTypeFlags(int field) const
@@ -355,11 +313,8 @@ unsigned int FrameDescriptor::getFieldTypeFlags(int field) const
     }
     static unsigned int fieldTypeFlags[] = {
         FD_ISARRAY | FD_ISCOMPOUND,
-        FD_ISEDITABLE,
-        FD_ISEDITABLE,
-        FD_ISEDITABLE,
     };
-    return (field>=0 && field<4) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<1) ? fieldTypeFlags[field] : 0;
 }
 
 const char *FrameDescriptor::getFieldName(int field) const
@@ -372,11 +327,8 @@ const char *FrameDescriptor::getFieldName(int field) const
     }
     static const char *fieldNames[] = {
         "RBFrame",
-        "sumWaitingTimes",
-        "sumServiceTimes",
-        "numPackets",
     };
-    return (field>=0 && field<4) ? fieldNames[field] : nullptr;
+    return (field>=0 && field<1) ? fieldNames[field] : nullptr;
 }
 
 int FrameDescriptor::findField(const char *fieldName) const
@@ -384,9 +336,6 @@ int FrameDescriptor::findField(const char *fieldName) const
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount() : 0;
     if (fieldName[0]=='R' && strcmp(fieldName, "RBFrame")==0) return base+0;
-    if (fieldName[0]=='s' && strcmp(fieldName, "sumWaitingTimes")==0) return base+1;
-    if (fieldName[0]=='s' && strcmp(fieldName, "sumServiceTimes")==0) return base+2;
-    if (fieldName[0]=='n' && strcmp(fieldName, "numPackets")==0) return base+3;
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
@@ -400,11 +349,8 @@ const char *FrameDescriptor::getFieldTypeString(int field) const
     }
     static const char *fieldTypeStrings[] = {
         "ResourceBlock",
-        "simtime_t",
-        "simtime_t",
-        "int",
     };
-    return (field>=0 && field<4) ? fieldTypeStrings[field] : nullptr;
+    return (field>=0 && field<1) ? fieldTypeStrings[field] : nullptr;
 }
 
 const char **FrameDescriptor::getFieldPropertyNames(int field) const
@@ -473,9 +419,6 @@ std::string FrameDescriptor::getFieldValueAsString(void *object, int field, int 
     Frame *pp = (Frame *)object; (void)pp;
     switch (field) {
         case 0: {std::stringstream out; out << pp->getRBFrame(i); return out.str();}
-        case 1: return simtime2string(pp->getSumWaitingTimes());
-        case 2: return simtime2string(pp->getSumServiceTimes());
-        case 3: return long2string(pp->getNumPackets());
         default: return "";
     }
 }
@@ -490,9 +433,6 @@ bool FrameDescriptor::setFieldValueAsString(void *object, int field, int i, cons
     }
     Frame *pp = (Frame *)object; (void)pp;
     switch (field) {
-        case 1: pp->setSumWaitingTimes(string2simtime(value)); return true;
-        case 2: pp->setSumServiceTimes(string2simtime(value)); return true;
-        case 3: pp->setNumPackets(string2long(value)); return true;
         default: return false;
     }
 }

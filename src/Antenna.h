@@ -12,6 +12,16 @@ using namespace omnetpp;
 
 class Antenna : public cSimpleModule
 {
+  public:
+    struct packet_info_t
+    {
+        simtime_t arrivalTime;     // inserted into the queue
+        simtime_t departureTime;   // removed from the queue
+        simtime_t frameTime;       // inserted into the frame
+        simtime_t propagationTime; // left the antenna
+        // maybe other stuff??
+    };
+
   private:
     int NUM_USERS;
     std::vector<UserInformation> users;
@@ -21,9 +31,12 @@ class Antenna : public cSimpleModule
     std::vector<UserInformation>::iterator currentUser;
     Frame *frame;
 
+    // Information that are useful for performance evaluation
+    std::vector<long> pendingPackets; // a list of the packet being in the current frame
+    std::map<long, Antenna::packet_info_t> packetsInformation;
+
     // Signal
     simsignal_t responseTime_s;
-
 
   protected:
     virtual void initialize();
