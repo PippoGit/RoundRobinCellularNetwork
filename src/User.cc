@@ -42,8 +42,6 @@ void User::handleFrame(Frame* f)
         if(f->getRBFrame(i).getRecipient()==userID)
         {
             int numFragments = f->getRBFrame(i).getNumFragments();
-            if (numFragments > 1)
-                EV << "*** MIRACOLODISANGENNARO! ***";
             EV << "[USER] There are " << numFragments << " fragments" << endl;
             for(int j = 0; j < numFragments; j++)
             {

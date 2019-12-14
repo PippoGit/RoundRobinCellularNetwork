@@ -69,9 +69,8 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
         EV_DEBUG << "[CREATE_FRAME RR] Non empty queue" << endl;
         Packet *p          = check_and_cast<Packet*>(queue->front());
 
-        // TODO: CHECK IF THIS IS ACTUALLY THE RECIPIENT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         std::vector<UserInformation>::iterator recipient = users.begin() + p->getReceiverID();
-        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        // (I have checked: beieve it or not, this is the right recipient)
 
         double packetSize           = p->getServiceDemand();
         double residualPacketSize   = packetSize;
@@ -108,7 +107,7 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
             // 2) If there are still some bytes to write, put them at "from"
             if(residualPacketSize > 0)
             {
-                EV_DEBUG << "[CREATE_FRAME RR] Put remaining bytes at " << (FRAME_SIZE) - remainingRBs << endl;
+                EV_DEBUG << "[CREATE_FRAME RR] Puting remaining bytes... " << endl;
                 EV_DEBUG << "    RESIDUAL SIZE:  " << residualPacketSize << endl;
                 EV_DEBUG << "    REQUIRED RBs:   " << residualRequiredRBs << endl;
                 EV_DEBUG << "    REMAINING:      " << (to - from) << endl;
@@ -122,7 +121,7 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
                     int currentIndex = FRAME_SIZE - (to - from);
 
                     EV_DEBUG << "    Inserting fragment at RB: " << currentIndex << endl;
-                    fragmentSize = std::min(residualPacketSize, (double) rCQI);
+                    fragmentSize = std::min(residualPacketSize, static_cast<double>(rCQI));
                     EV_DEBUG << "    The size for the fragment is: " << fragmentSize << endl;
 
                     from->setRecipient(p->getReceiverID());
