@@ -19,6 +19,9 @@ void Antenna::initialize()
     // schedule first iteration of RR algorithm
     frame = nullptr;
     scheduleAt(simTime(), timer);
+    //signals
+    waitTime_s=registerSignal("waitTime");
+
 }
 
 void Antenna::updateCQIs()
@@ -140,6 +143,8 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
             // 3) The packet was put somewhere...
             queue->remove(p);
             delete p; // also delete the packet!
+            //Signal
+            //emit(waitTime_s,)
         }
         else break;
     }

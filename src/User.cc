@@ -9,6 +9,9 @@ void User::initialize()
     waitMessage=new cMessage("waitMessage");
     scheduleAt(simTime(), waitMessage);
     userID = NEXT_USER_ID++;
+
+    //Statistics
+
 }
 
 void User::handleMessage(cMessage *msg)
@@ -20,6 +23,8 @@ void User::handleMessage(cMessage *msg)
     {
         Frame *f = check_and_cast<Frame*>(msg);
         handleFrame(f);
+        //emit Signal
+
     }
 
 

@@ -21,6 +21,10 @@ class Antenna : public cSimpleModule
     std::vector<UserInformation>::iterator currentUser;
     Frame *frame;
 
+    // Signal
+    simsignal_t waitTime_s;
+
+
   protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);

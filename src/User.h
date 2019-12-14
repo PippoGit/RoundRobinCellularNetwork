@@ -15,6 +15,9 @@ class User : public cSimpleModule
     simtime_t interArrivalTime; // exponential
     cMessage* waitMessage;
     int userID;
+    //signals
+
+
 
   protected:
     virtual void initialize();

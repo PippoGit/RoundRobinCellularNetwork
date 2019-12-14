@@ -184,6 +184,10 @@ Packet::Packet(const char *name, short kind) : ::omnetpp::cMessage(name,kind)
     this->senderID = 0;
     this->receiverID = 0;
     this->serviceDemand = 0;
+    this->arrivalTime = 0;
+    this->startTime = 0;
+    this->FrameTime = 0;
+    this->EndService = 0;
 }
 
 Packet::Packet(const Packet& other) : ::omnetpp::cMessage(other)
@@ -208,6 +212,10 @@ void Packet::copy(const Packet& other)
     this->senderID = other.senderID;
     this->receiverID = other.receiverID;
     this->serviceDemand = other.serviceDemand;
+    this->arrivalTime = other.arrivalTime;
+    this->startTime = other.startTime;
+    this->FrameTime = other.FrameTime;
+    this->EndService = other.EndService;
 }
 
 void Packet::parsimPack(omnetpp::cCommBuffer *b) const
@@ -216,6 +224,10 @@ void Packet::parsimPack(omnetpp::cCommBuffer *b) const
     doParsimPacking(b,this->senderID);
     doParsimPacking(b,this->receiverID);
     doParsimPacking(b,this->serviceDemand);
+    doParsimPacking(b,this->arrivalTime);
+    doParsimPacking(b,this->startTime);
+    doParsimPacking(b,this->FrameTime);
+    doParsimPacking(b,this->EndService);
 }
 
 void Packet::parsimUnpack(omnetpp::cCommBuffer *b)
@@ -224,6 +236,10 @@ void Packet::parsimUnpack(omnetpp::cCommBuffer *b)
     doParsimUnpacking(b,this->senderID);
     doParsimUnpacking(b,this->receiverID);
     doParsimUnpacking(b,this->serviceDemand);
+    doParsimUnpacking(b,this->arrivalTime);
+    doParsimUnpacking(b,this->startTime);
+    doParsimUnpacking(b,this->FrameTime);
+    doParsimUnpacking(b,this->EndService);
 }
 
 int Packet::getSenderID() const
@@ -254,6 +270,46 @@ int Packet::getServiceDemand() const
 void Packet::setServiceDemand(int serviceDemand)
 {
     this->serviceDemand = serviceDemand;
+}
+
+::omnetpp::simtime_t Packet::getArrivalTime() const
+{
+    return this->arrivalTime;
+}
+
+void Packet::setArrivalTime(::omnetpp::simtime_t arrivalTime)
+{
+    this->arrivalTime = arrivalTime;
+}
+
+::omnetpp::simtime_t Packet::getStartTime() const
+{
+    return this->startTime;
+}
+
+void Packet::setStartTime(::omnetpp::simtime_t startTime)
+{
+    this->startTime = startTime;
+}
+
+::omnetpp::simtime_t Packet::getFrameTime() const
+{
+    return this->FrameTime;
+}
+
+void Packet::setFrameTime(::omnetpp::simtime_t FrameTime)
+{
+    this->FrameTime = FrameTime;
+}
+
+::omnetpp::simtime_t Packet::getEndService() const
+{
+    return this->EndService;
+}
+
+void Packet::setEndService(::omnetpp::simtime_t EndService)
+{
+    this->EndService = EndService;
 }
 
 class PacketDescriptor : public omnetpp::cClassDescriptor
@@ -321,7 +377,7 @@ const char *PacketDescriptor::getProperty(const char *propertyname) const
 int PacketDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 3+basedesc->getFieldCount() : 3;
+    return basedesc ? 7+basedesc->getFieldCount() : 7;
 }
 
 unsigned int PacketDescriptor::getFieldTypeFlags(int field) const
@@ -336,8 +392,12 @@ unsigned int PacketDescriptor::getFieldTypeFlags(int field) const
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<3) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<7) ? fieldTypeFlags[field] : 0;
 }
 
 const char *PacketDescriptor::getFieldName(int field) const
@@ -352,8 +412,12 @@ const char *PacketDescriptor::getFieldName(int field) const
         "senderID",
         "receiverID",
         "serviceDemand",
+        "arrivalTime",
+        "startTime",
+        "FrameTime",
+        "EndService",
     };
-    return (field>=0 && field<3) ? fieldNames[field] : nullptr;
+    return (field>=0 && field<7) ? fieldNames[field] : nullptr;
 }
 
 int PacketDescriptor::findField(const char *fieldName) const
@@ -363,6 +427,10 @@ int PacketDescriptor::findField(const char *fieldName) const
     if (fieldName[0]=='s' && strcmp(fieldName, "senderID")==0) return base+0;
     if (fieldName[0]=='r' && strcmp(fieldName, "receiverID")==0) return base+1;
     if (fieldName[0]=='s' && strcmp(fieldName, "serviceDemand")==0) return base+2;
+    if (fieldName[0]=='a' && strcmp(fieldName, "arrivalTime")==0) return base+3;
+    if (fieldName[0]=='s' && strcmp(fieldName, "startTime")==0) return base+4;
+    if (fieldName[0]=='F' && strcmp(fieldName, "FrameTime")==0) return base+5;
+    if (fieldName[0]=='E' && strcmp(fieldName, "EndService")==0) return base+6;
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
@@ -378,8 +446,12 @@ const char *PacketDescriptor::getFieldTypeString(int field) const
         "int",
         "int",
         "int",
+        "simtime_t",
+        "simtime_t",
+        "simtime_t",
+        "simtime_t",
     };
-    return (field>=0 && field<3) ? fieldTypeStrings[field] : nullptr;
+    return (field>=0 && field<7) ? fieldTypeStrings[field] : nullptr;
 }
 
 const char **PacketDescriptor::getFieldPropertyNames(int field) const
@@ -449,6 +521,10 @@ std::string PacketDescriptor::getFieldValueAsString(void *object, int field, int
         case 0: return long2string(pp->getSenderID());
         case 1: return long2string(pp->getReceiverID());
         case 2: return long2string(pp->getServiceDemand());
+        case 3: return simtime2string(pp->getArrivalTime());
+        case 4: return simtime2string(pp->getStartTime());
+        case 5: return simtime2string(pp->getFrameTime());
+        case 6: return simtime2string(pp->getEndService());
         default: return "";
     }
 }
@@ -466,6 +542,10 @@ bool PacketDescriptor::setFieldValueAsString(void *object, int field, int i, con
         case 0: pp->setSenderID(string2long(value)); return true;
         case 1: pp->setReceiverID(string2long(value)); return true;
         case 2: pp->setServiceDemand(string2long(value)); return true;
+        case 3: pp->setArrivalTime(string2simtime(value)); return true;
+        case 4: pp->setStartTime(string2simtime(value)); return true;
+        case 5: pp->setFrameTime(string2simtime(value)); return true;
+        case 6: pp->setEndService(string2simtime(value)); return true;
         default: return false;
     }
 }

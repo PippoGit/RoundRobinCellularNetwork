@@ -26,6 +26,10 @@
  *     int senderID;
  *     int receiverID;
  *     int serviceDemand;
+ *     simtime_t arrivalTime;
+ *     simtime_t startTime;
+ *     simtime_t FrameTime;
+ *     simtime_t EndService;
  * }
  * </pre>
  */
@@ -35,6 +39,10 @@ class Packet : public ::omnetpp::cMessage
     int senderID;
     int receiverID;
     int serviceDemand;
+    ::omnetpp::simtime_t arrivalTime;
+    ::omnetpp::simtime_t startTime;
+    ::omnetpp::simtime_t FrameTime;
+    ::omnetpp::simtime_t EndService;
 
   private:
     void copy(const Packet& other);
@@ -59,6 +67,14 @@ class Packet : public ::omnetpp::cMessage
     virtual void setReceiverID(int receiverID);
     virtual int getServiceDemand() const;
     virtual void setServiceDemand(int serviceDemand);
+    virtual ::omnetpp::simtime_t getArrivalTime() const;
+    virtual void setArrivalTime(::omnetpp::simtime_t arrivalTime);
+    virtual ::omnetpp::simtime_t getStartTime() const;
+    virtual void setStartTime(::omnetpp::simtime_t startTime);
+    virtual ::omnetpp::simtime_t getFrameTime() const;
+    virtual void setFrameTime(::omnetpp::simtime_t FrameTime);
+    virtual ::omnetpp::simtime_t getEndService() const;
+    virtual void setEndService(::omnetpp::simtime_t EndService);
 };
 
 inline void doParsimPacking(omnetpp::cCommBuffer *b, const Packet& obj) {obj.parsimPack(b);}
