@@ -29,7 +29,7 @@ void User::handleTimer()
 {
     createNewPacket();
     cRNG *seed = getRNG(SEED_INTERARRIVAL);
-    interArrivalTime = omnetpp::exponential(seed, SimTime(0.25));
+    interArrivalTime = omnetpp::exponential(seed, SimTime(0.5));
     this->scheduleAt(simTime() + interArrivalTime, waitMessage);
 
 }

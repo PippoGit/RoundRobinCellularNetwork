@@ -139,6 +139,7 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
 
             // 3) The packet was put somewhere...
             queue->remove(p);
+            delete p; // also delete the packet!
         }
         else break;
     }
