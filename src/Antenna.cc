@@ -20,7 +20,7 @@ void Antenna::initialize()
     frame = nullptr;
     scheduleAt(simTime(), timer);
     //signals
-    waitTime_s=registerSignal("waitTime");
+    responseTime_s=registerSignal("responseTime");
 
 }
 
@@ -72,8 +72,12 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
         EV_DEBUG << "[CREATE_FRAME RR] Non empty queue" << endl;
         Packet *p          = check_and_cast<Packet*>(queue->front());
 
+        //IF IT'S THE FIRST TIME YOU CONSIDER THE PACKET, UPDATE ITS START-SERVICE-TIME VARIABLE
+        if(p->getStartServiceTime()==0)
+            p->setStartServiceTime(simTime());
+
         std::vector<UserInformation>::iterator recipient = users.begin() + p->getReceiverID();
-        // (I have checked: beieve it or not, this is the right recipient)
+        // (I have checked: believe it or not, this is the right recipient)
 
         double packetSize           = p->getServiceDemand();
         double residualPacketSize   = packetSize;
@@ -88,6 +92,15 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
         if(packetSize <= totalRemainingBytes)
         {
             // THE PACKET CAN BE PUT SOMEWHERE
+
+            //WHEN A PACKET INSERTED IN FRAME, START-FRAME-TIME
+            p->setStartFrameTime(simTime());
+
+            //UPDATE ALL PARAMETERS TO CALCULATE MEAN RESPONSE TIME AT THE END
+            this->frame->setSumWaitingTimes(this->frame->getSumWaitingTimes() + (p->getArrivalTime()-p->getStartServiceTime()));
+            this->frame->setSumServiceTimes(this->frame->getSumServiceTimes() + (p->getStartFrameTime()-p->getStartFrameTime()));
+            this->frame->setNumPackets(this->frame->getNumPackets()+1);
+
 
             // 1) fill the lastRB
             if(recipient->remainingBytes > 0)
@@ -165,6 +178,12 @@ void Antenna::createFrame()
     std::vector<ResourceBlock> vframe(FRAME_SIZE);
     std::vector<ResourceBlock>::iterator currentRB = vframe.begin();
 
+    //INITIALIZE FRAME PARAMETERS FOR RESPONSE TIME
+    this->frame->setNumPackets(0);
+    this->frame->setSumServiceTimes(0);
+    this->frame->setSumWaitingTimes(0);
+
+
     initUsersLastRBs(vframe.end());
 
     EV_DEBUG << "[CREATE_FRAME] Updating CQI..." <<endl;
@@ -186,6 +205,11 @@ void Antenna::createFrame()
 
     // 3) send the frame to all the users DURING NEXT TIMESLOT!
     this->frame = vectorToFrame(vframe);
+
+    // COMPUTE RESPONSE TIME
+    simtime_t timeslot = par("timeslot");
+    simtime_t meanResponseTime = (this->frame->getSumServiceTimes()+this->frame->getSumWaitingTimes()+timeslot)/this->frame->getNumPackets();
+    emit(responseTime_s, meanResponseTime);
 
     // Schedule next iteration
     simtime_t timeslot_dt = par("timeslot");

@@ -22,7 +22,7 @@ class Antenna : public cSimpleModule
     Frame *frame;
 
     // Signal
-    simsignal_t waitTime_s;
+    simsignal_t responseTime_s;
 
 
   protected:

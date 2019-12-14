@@ -29,6 +29,9 @@
  * message Frame
  * {
  *     ResourceBlock RBFrame[FRAME_SIZE];
+ *     simtime_t sumWaitingTimes;
+ *     simtime_t sumServiceTimes;
+ *     int numPackets;
  * }
  * </pre>
  */
@@ -36,6 +39,9 @@ class Frame : public ::omnetpp::cMessage
 {
   protected:
     ResourceBlock RBFrame[FRAME_SIZE];
+    ::omnetpp::simtime_t sumWaitingTimes;
+    ::omnetpp::simtime_t sumServiceTimes;
+    int numPackets;
 
   private:
     void copy(const Frame& other);
@@ -58,6 +64,12 @@ class Frame : public ::omnetpp::cMessage
     virtual ResourceBlock& getRBFrame(unsigned int k);
     virtual const ResourceBlock& getRBFrame(unsigned int k) const {return const_cast<Frame*>(this)->getRBFrame(k);}
     virtual void setRBFrame(unsigned int k, const ResourceBlock& RBFrame);
+    virtual ::omnetpp::simtime_t getSumWaitingTimes() const;
+    virtual void setSumWaitingTimes(::omnetpp::simtime_t sumWaitingTimes);
+    virtual ::omnetpp::simtime_t getSumServiceTimes() const;
+    virtual void setSumServiceTimes(::omnetpp::simtime_t sumServiceTimes);
+    virtual int getNumPackets() const;
+    virtual void setNumPackets(int numPackets);
 };
 
 inline void doParsimPacking(omnetpp::cCommBuffer *b, const Frame& obj) {obj.parsimPack(b);}

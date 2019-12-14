@@ -5,5 +5,4 @@ message Packet {
     simtime_t arrivalTime;
     simtime_t startServiceTime;
     simtime_t startFrameTime;
-    simtime_t endFrameTime;
 }
