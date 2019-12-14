@@ -73,14 +73,15 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
         std::vector<UserInformation>::iterator recipient = users.begin() + p->getReceiverID();
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-        double packetSize   = p->getServiceDemand();
-        double residualPacketSize = packetSize;
-        int    rCQI         = currentUser->CQIToBytes();
-        int    requiredRBs  = ceil(packetSize/rCQI);
-        int    remainingRBs = (to-from);
+        double packetSize           = p->getServiceDemand();
+        double residualPacketSize   = packetSize;
+        int    rCQI                 = recipient->CQIToBytes(); // Is this wrong??
+        double residualRequiredRBs  = packetSize/rCQI;
+        int    remainingRBs         = (to-from);
 
         // IF THERE is ENOUGH SPACE FOR THE WHOLE PACKET!
-        double totalRemainingBytes = (remainingRBs * rCQI) + recipient->remainingBytes;
+        double totalRemainingBytes = (remainingRBs * rCQI) + (recipient->remainingBytes < rCQI)*recipient->remainingBytes;
+        // I have to put the remainingBytes ONLY if that slot is half-full
 
         if(packetSize <= totalRemainingBytes)
         {
@@ -94,12 +95,14 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
 
                 if(recipient->lastRB == to) recipient->lastRB = from; // to is just another name for .end()
 
-                recipient->remainingBytes -= (packetSize < recipient->remainingBytes)? packetSize : recipient->remainingBytes;
-                recipient->lastRB->setRecipient(p->getReceiverID());
-                recipient->lastRB->appendFragment(p, packetSize);
+                double fragmentSize = std::min(packetSize, recipient->remainingBytes);
 
-                residualPacketSize -= recipient->remainingBytes;
-                requiredRBs--;
+                residualPacketSize  -= fragmentSize;
+                residualRequiredRBs  = residualPacketSize/rCQI;
+
+                recipient->lastRB->setRecipient(p->getReceiverID());
+                recipient->lastRB->appendFragment(p, fragmentSize);
+                recipient->remainingBytes -= fragmentSize;
             }
 
             // 2) If there are still some bytes to write, put them at "from"
@@ -107,31 +110,32 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
             {
                 EV_DEBUG << "[CREATE_FRAME RR] Put remaining bytes at " << (FRAME_SIZE) - remainingRBs << endl;
                 EV_DEBUG << "    RESIDUAL SIZE:  " << residualPacketSize << endl;
-                EV_DEBUG << "    REQUIRED RBs:   " << requiredRBs << endl;
+                EV_DEBUG << "    REQUIRED RBs:   " << residualRequiredRBs << endl;
                 EV_DEBUG << "    REMAINING:      " << (to - from) << endl;
                 EV_DEBUG << "    INDEX:          " << (FRAME_SIZE) - (to - from) << endl;
 
-                if (recipient->lastRB == from) from++;
+                // if (recipient->lastRB == from) from++; // if lastRB was equal to from i have to move to the following RB
 
                 double fragmentSize;
-                for(auto it = from; it != from + requiredRBs; ++it)
+                while(residualPacketSize > 0)
                 {
-                    int index = (it - from); // relative index to see if it is the last required RB...
-                    EV_DEBUG << "    Inserting fragment at RB: " << (FRAME_SIZE) - (to - from) << endl;
-                    fragmentSize = (index == requiredRBs-1)?residualPacketSize:rCQI;
+                    int currentIndex = FRAME_SIZE - (to - from);
+
+                    EV_DEBUG << "    Inserting fragment at RB: " << currentIndex << endl;
+                    fragmentSize = std::min(residualPacketSize, (double) rCQI);
                     EV_DEBUG << "    The size for the fragment is: " << fragmentSize << endl;
 
-                    it->setRecipient(p->getReceiverID());
-                    it->setSender(p->getSenderID());
-                    it->appendFragment(p, fragmentSize);
+                    from->setRecipient(p->getReceiverID());
+                    from->setSender(p->getSenderID());
+                    from->appendFragment(p, fragmentSize);
 
                     residualPacketSize -= fragmentSize;
+                    ++from;
                 }
 
-                // increment pointers and update lastRB
-                from += requiredRBs;
-                recipient->lastRB = from;
-                recipient->remainingBytes = rCQI - fragmentSize;
+                // Update lastRB for recipient
+                recipient->lastRB = from-1; // i guess?
+                recipient->remainingBytes = rCQI - fragmentSize; // last fragment size
             }
 
             // 3) The packet was put somewhere...

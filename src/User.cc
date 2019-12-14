@@ -65,7 +65,7 @@ void User::createNewPacket(){
     packet->setServiceDemand(omnetpp::intuniform(getRNG(SEED_SERVICE_DEMAND), MIN_SERVICE_DEMAND, MAX_SERVICE_DEMAND)); //F: secondo me dovrebbe essere un double
 
     int numUsers = this->getParentModule()->par("nUsers");
-    packet->setReceiverID(omnetpp::intuniform(getRNG(SEED_RECIPIENT), MIN_USERS, numUsers));
+    packet->setReceiverID(omnetpp::intuniform(getRNG(SEED_RECIPIENT), MIN_USERS, numUsers - 1)); // la INT UNIFORM prende anche gli estremi!
 
     send(packet, "out");
 }
