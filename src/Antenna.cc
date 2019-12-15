@@ -75,8 +75,11 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
         Packet *p = check_and_cast<Packet*>(queue->front());
 
         //IF IT'S THE FIRST TIME YOU CONSIDER THE PACKET, UPDATE ITS START-SERVICE-TIME VARIABLE
-        packetsInformation[p->getId()].servedTime = simTime();
-
+        if(!packetsInformation[p->getId()].isServed)
+            {
+            packetsInformation[p->getId()].servedTime = simTime();
+            packetsInformation[p->getId()].isServed=true;
+            }
         std::vector<UserInformation>::iterator recipient = users.begin() + p->getReceiverID();
         // (I have checked: believe it or not, this is the right recipient)
 
@@ -231,6 +234,7 @@ void Antenna::handlePacket(Packet *p)
     // this is a new packet! so we are going to keep its info somewhere!
     Antenna::packet_info_t i;
     i.arrivalTime = simTime();
+    i.isServed=false;
     packetsInformation.insert(std::pair<long, Antenna::packet_info_t>(p->getId(), i));
     users[userId].getQueue()->insert(p);
 }

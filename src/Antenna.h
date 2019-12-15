@@ -19,6 +19,7 @@ class Antenna : public cSimpleModule
         simtime_t servedTime;   // removed from the queue
         simtime_t frameTime;       // inserted into the frame
         simtime_t propagationTime; // left the antenna
+        bool isServed; // false quando salvo arrivalTIme
         // maybe other stuff??
     };
 
