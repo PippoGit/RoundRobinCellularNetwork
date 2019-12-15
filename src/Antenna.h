@@ -16,7 +16,7 @@ class Antenna : public cSimpleModule
     struct packet_info_t
     {
         simtime_t arrivalTime;     // inserted into the queue
-        simtime_t departureTime;   // removed from the queue
+        simtime_t servedTime;   // removed from the queue
         simtime_t frameTime;       // inserted into the frame
         simtime_t propagationTime; // left the antenna
         // maybe other stuff??

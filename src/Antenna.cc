@@ -75,7 +75,7 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
         Packet *p = check_and_cast<Packet*>(queue->front());
 
         //IF IT'S THE FIRST TIME YOU CONSIDER THE PACKET, UPDATE ITS START-SERVICE-TIME VARIABLE
-        packetsInformation[p->getId()].departureTime = simTime();
+        packetsInformation[p->getId()].servedTime = simTime();
 
         std::vector<UserInformation>::iterator recipient = users.begin() + p->getReceiverID();
         // (I have checked: believe it or not, this is the right recipient)
@@ -154,9 +154,9 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
             queue->remove(p);
             delete p; // also delete the packet!
             //Signal
-            Antenna::packet_info_t i;
+
             //SIGNAL
-            emit(waitTime_s,i.frameTime - i.arrivalTime);
+            emit(waitTime_s,packetsInformation[p->getId()].frameTime - packetsInformation[p->getId()].arrivalTime);
             // COMPUTE RESPONSE TIME
              simtime_t timeslot = par("timeslot");
              // SIGNAL
@@ -168,9 +168,9 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
         else
         {
             // COMPUTE RESPONSE TIME
-                Antenna::packet_info_t i;
+
                 simtime_t timeslot = par("timeslot");
-                simtime_t St = timeslot + (i.propagationTime - i.frameTime);
+                simtime_t St = timeslot + (packetsInformation[p->getId()].propagationTime - packetsInformation[p->getId()].frameTime);
                 emit(responseTime_s, waitTime_s+St);
                 break;
         }
