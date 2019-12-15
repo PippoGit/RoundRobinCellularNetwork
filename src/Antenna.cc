@@ -22,6 +22,7 @@ void Antenna::initialize()
 
     //signals
     responseTime_s=registerSignal("responseTime");
+    waitTime_s= registerSignal("waitTime");
 
 }
 
