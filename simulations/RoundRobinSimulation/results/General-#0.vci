@@ -1,14 +1,15 @@
+file 522 1576403577                                             
 version 2
-run General-0-20191215-10:45:08-14972
+run General-0-20191215-10:52:44-2000
 attr configname General
-attr datetime 20191215-10:45:08
+attr datetime 20191215-10:52:44
 attr experiment General
 attr inifile omnetpp.ini
 attr iterationvars ""
 attr iterationvarsf ""
 attr measurement ""
 attr network CellularNetwork
-attr processid 14972
+attr processid 2000
 attr repetition 0
 attr replication #0
 attr resultdir results
@@ -17,8 +18,7 @@ attr seedset 0
 param **.nUsers 15
 param **.antenna.timeslot 1s
 
-scalar CellularNetwork.antenna waitTime:mean nan
-attr source waitTime
-scalar CellularNetwork.antenna responseTime:mean nan
+vector 0 CellularNetwork.antenna responseTime:vector ETV
 attr source responseTime
+0	511 9 1 1 0 0 1 1 1 1 1
 

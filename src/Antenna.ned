@@ -7,11 +7,13 @@ simple Antenna
     	
     	
     	//signals
-    	@signal[responseTime](type=double);
+
+        @signal[waitTime](type=double);
+    	@statistic[waitTime](source="waitTime"; record=mean,vector);  
+    	  
+        @signal[responseTime](type=double);
     	@statistic[responseTime](source="responseTime"; record=mean,vector);    
        
-        @signal[waitTime](type=double);
-    	@statistic[waitTime](source="waitTime"; record=mean,vector);    
        
     gates:
  		// output out;   

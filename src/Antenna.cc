@@ -154,7 +154,8 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
             delete p; // also delete the packet!
             //Signal
             Antenna::packet_info_t i;
-            emit(waitTime_s,i.departureTime - i.arrivalTime);
+            //SIGNAL
+            emit(waitTime_s,i.frameTime - i.arrivalTime);
         }
         else break;
     }
@@ -197,11 +198,12 @@ void Antenna::createFrame()
     // 3) send the frame to all the users DURING NEXT TIMESLOT!
     this->frame = vectorToFrame(vframe);
 
-    // COMPUTE RESPONSE TIME
-    // simtime_t timeslot = par("timeslot");
-
     // simtime_t meanResponseTime = (this->frame->getSumServiceTimes()+this->frame->getSumWaitingTimes()+timeslot)/this->frame->getNumPackets();
-    // emit(responseTime_s, meanResponseTime);
+
+    // COMPUTE RESPONSE TIME
+     simtime_t timeslot = par("timeslot");
+     // SIGNAL
+    emit(responseTime_s, waitTime_s+timeslot);
 
     // Schedule next iteration
     simtime_t timeslot_dt = par("timeslot");

@@ -36,8 +36,8 @@ class Antenna : public cSimpleModule
     std::map<long, Antenna::packet_info_t> packetsInformation;
 
     // Signal
-    simsignal_t responseTime_s;
     simsignal_t waitTime_s;
+    simsignal_t responseTime_s;
 
   protected:
     virtual void initialize();
