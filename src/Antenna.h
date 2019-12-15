@@ -37,6 +37,7 @@ class Antenna : public cSimpleModule
 
     // Signal
     simsignal_t responseTime_s;
+    simsignal_t waitTime_s;
 
   protected:
     virtual void initialize();

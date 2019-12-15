@@ -153,7 +153,8 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
             queue->remove(p);
             delete p; // also delete the packet!
             //Signal
-            //emit(waitTime_s,)
+            Antenna::packet_info_t i;
+            emit(waitTime_s,i.departureTime - i.arrivalTime);
         }
         else break;
     }
