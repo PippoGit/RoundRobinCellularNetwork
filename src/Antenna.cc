@@ -156,8 +156,23 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
             Antenna::packet_info_t i;
             //SIGNAL
             emit(waitTime_s,i.frameTime - i.arrivalTime);
+            // COMPUTE RESPONSE TIME
+             simtime_t timeslot = par("timeslot");
+             // SIGNAL
+            emit(responseTime_s, waitTime_s+timeslot);
+
         }
-        else break;
+
+
+        else
+        {
+            // COMPUTE RESPONSE TIME
+                Antenna::packet_info_t i;
+                simtime_t timeslot = par("timeslot");
+                simtime_t St = timeslot + (i.propagationTime - i.frameTime);
+                emit(responseTime_s, waitTime_s+St);
+                break;
+        }
     }
 }
 
@@ -200,10 +215,6 @@ void Antenna::createFrame()
 
     // simtime_t meanResponseTime = (this->frame->getSumServiceTimes()+this->frame->getSumWaitingTimes()+timeslot)/this->frame->getNumPackets();
 
-    // COMPUTE RESPONSE TIME
-     simtime_t timeslot = par("timeslot");
-     // SIGNAL
-    emit(responseTime_s, waitTime_s+timeslot);
 
     // Schedule next iteration
     simtime_t timeslot_dt = par("timeslot");
