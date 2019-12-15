@@ -157,26 +157,11 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
             queue->remove(p);
             delete p; // also delete the packet!
             //Signal
-
-            //SIGNAL
-            emit(waitTime_s,packetsInformation[p->getId()].frameTime - packetsInformation[p->getId()].arrivalTime);
-            // COMPUTE RESPONSE TIME
-             simtime_t timeslot = par("timeslot");
-             // SIGNAL
-            emit(responseTime_s, waitTime_s+timeslot);
-
         }
 
 
-        else
-        {
-            // COMPUTE RESPONSE TIME
+        else break;
 
-                simtime_t timeslot = par("timeslot");
-                simtime_t St = timeslot + (packetsInformation[p->getId()].propagationTime - packetsInformation[p->getId()].frameTime);
-                emit(responseTime_s, waitTime_s+St);
-                break;
-        }
     }
 }
 
@@ -252,6 +237,17 @@ void Antenna::downlinkPropagation()
 
         //    here is where GIADA or STEFANO should emit the signals! (using the info structure)
         // ->
+        //SIGNAL
+        //emit(waitTime_s,info.frameTime - info.arrivalTime);
+        // COMPUTE RESPONSE TIME
+         //simtime_t timeslot = par("timeslot");
+         // SIGNAL
+        //emit(responseTime_s,waitTime_s+timeslot);
+
+        emit(responseTime_s,info.propagationTime - info.arrivalTime);
+
+
+
         //    ^  THERE
         packetsInformation.erase(id); // remove the packet from the hash table
     }
