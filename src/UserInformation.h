@@ -11,6 +11,7 @@ private:
     // int id;
     omnetpp::cQueue FIFOQueue;
     int CQI;
+    int numPendingPackets;
 
 public: // too much stuff
     std::vector<ResourceBlock>::iterator lastRB;
@@ -24,6 +25,11 @@ public:
 
     virtual int              CQIToBytes();
     virtual omnetpp::cQueue* getQueue();
+
+    virtual void incrementNumPendingPackets();
+    virtual void setNumPendingPackets(int val);
+    virtual void initNumPendingPackets();
+    virtual int  getNumPendingPackets();
 };
 
 #endif /* USERINFORMATION_H_ */

@@ -15,11 +15,14 @@ class Antenna : public cSimpleModule
   public:
     struct packet_info_t
     {
+        long      sender;
+
         simtime_t arrivalTime;     // inserted into the queue
-        simtime_t servedTime;   // removed from the queue
+        simtime_t servedTime;      // removed from the queue
         simtime_t frameTime;       // inserted into the frame
         simtime_t propagationTime; // left the antenna
-        bool isServed; // false quando salvo arrivalTIme
+
+        bool      isServed;
         // maybe other stuff??
     };
 
@@ -35,10 +38,13 @@ class Antenna : public cSimpleModule
     // Information that are useful for performance evaluation
     std::vector<long> pendingPackets; // a list of the packet being in the current frame
     std::map<long, Antenna::packet_info_t> packetsInformation;
+    int  numServedUsers;
+    long numSentBytes;
 
     // Signal
-    simsignal_t waitTime_s;
+    //simsignal_t waitTime_s;
     simsignal_t responseTime_s;
+    simsignal_t throughput_s;
 
   protected:
     virtual void initialize();

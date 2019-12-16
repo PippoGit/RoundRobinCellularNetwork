@@ -22,7 +22,7 @@ void Antenna::initialize()
 
     //signals
     responseTime_s=registerSignal("responseTime");
-    waitTime_s= registerSignal("waitTime");
+    throughput_s= registerSignal("throughput");
 
 }
 
@@ -68,7 +68,7 @@ void Antenna::broadcastFrame(Frame *f)
 void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &from, std::vector<ResourceBlock>::iterator to)
 {
     cQueue *queue = currentUser->getQueue();
-
+    currentUser->initNumPendingPackets();
     while(!(queue->isEmpty() || from == to))
     {
         EV_DEBUG << "[CREATE_FRAME RR] Non empty queue" << endl;
@@ -95,6 +95,10 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
 
         if(packetSize <= totalRemainingBytes)
         {
+            numServedUsers++;
+            numSentBytes += packetSize;
+
+            currentUser->incrementNumPendingPackets();
             // If there is space, it means that i'm going to put the packet somewhere!
             // SO the packet will become "pending"
             pendingPackets.push_back(p->getId());
@@ -123,7 +127,7 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
             // 2) If there are still some bytes to write, put them at "from"
             if(residualPacketSize > 0)
             {
-                EV_DEBUG << "[CREATE_FRAME RR] Puting remaining bytes... " << endl;
+                EV_DEBUG << "[CREATE_FRAME RR] Putting remaining bytes... " << endl;
                 EV_DEBUG << "    RESIDUAL SIZE:  " << residualPacketSize << endl;
                 EV_DEBUG << "    REQUIRED RBs:   " << residualRequiredRBs << endl;
                 EV_DEBUG << "    REMAINING:      " << (to - from) << endl;
@@ -220,6 +224,7 @@ void Antenna::handlePacket(Packet *p)
     Antenna::packet_info_t i;
     i.arrivalTime = simTime();
     i.isServed=false;
+    i.sender = p->getSenderID();
     packetsInformation.insert(std::pair<long, Antenna::packet_info_t>(p->getId(), i));
     users[userId].getQueue()->insert(p);
 }
@@ -230,32 +235,36 @@ void Antenna::downlinkPropagation()
     if(frame == nullptr) return; // first iteration...
 
     // Update the info about the packet being in the frame
+    double tpt;
     for(long id : pendingPackets)
     {
         Antenna::packet_info_t info = packetsInformation.at(id);
         info.propagationTime = simTime();
 
-        //    here is where GIADA or STEFANO should emit the signals! (using the info structure)
         // ->
         //SIGNAL
-        //emit(waitTime_s,info.frameTime - info.arrivalTime);
-        // COMPUTE RESPONSE TIME
-         //simtime_t timeslot = par("timeslot");
-         // SIGNAL
-        //emit(responseTime_s,waitTime_s+timeslot);
+                    //emit(waitTime_s,info.frameTime - info.arrivalTime);
+                    // COMPUTE RESPONSE TIME
+                     //simtime_t timeslot = par("timeslot");
+                     // SIGNAL
+                    //emit(responseTime_s,waitTime_s+timeslot);
 
         emit(responseTime_s,info.propagationTime - info.arrivalTime);
 
 
-
         //    ^  THERE
+
         packetsInformation.erase(id); // remove the packet from the hash table
     }
+    double timeslot = par("timeslot");
+    emit(throughput_s, numServedUsers*(numSentBytes/timeslot));
 
     broadcastFrame(frame);
     EV_DEBUG << "[DOWNLINK] Broadcast propagation of the frame" << endl;
 
     pendingPackets.clear(); // clear the pending packets data structure...
+    numServedUsers = 0;
+    numSentBytes = 0;
 }
 
 

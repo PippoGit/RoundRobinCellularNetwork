@@ -34,7 +34,9 @@ void User::handleTimer()
 {
     createNewPacket();
     cRNG *seed = getRNG(SEED_INTERARRIVAL);
-    interArrivalTime = omnetpp::exponential(seed, SimTime(0.5));
+    simtime_t lambda = par("lambda");
+    interArrivalTime = omnetpp::exponential(seed, lambda);
+    EV << " GIADA NON SAI FARE UN CAZZO:    " << lambda;
     this->scheduleAt(simTime() + interArrivalTime, waitMessage);
 
 }

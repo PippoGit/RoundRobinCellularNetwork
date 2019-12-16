@@ -12,6 +12,7 @@ UserInformation::UserInformation()
 {
     // id = NEXT_USER_ID++; // this thing should work because stuff don't change over time... (iguess)
     CQI = 0; //before FIRST utilization the CQI should be generated
+    numPendingPackets = 0;
 }
 
 /*
@@ -21,6 +22,27 @@ int UserInformation::getUserId()
 }
 */
 
+
+int UserInformation::getNumPendingPackets()
+{
+    return numPendingPackets;
+}
+
+void UserInformation::incrementNumPendingPackets()
+{
+    numPendingPackets++;
+}
+
+
+void UserInformation::setNumPendingPackets(int val)
+{
+    numPendingPackets = val;
+}
+
+void UserInformation::initNumPendingPackets()
+{
+    setNumPendingPackets(0);
+}
 
 int UserInformation::CQIToBytes()
 {
