@@ -72,7 +72,7 @@ void Antenna::broadcastFrame(Frame *f)
 void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &from, std::vector<ResourceBlock>::iterator to)
 {
     cQueue *queue = currentUser->getQueue();
-    currentUser->initNumPendingPackets();
+    currentUser->shouldBeServed();
     while(!(queue->isEmpty() || from == to))
     {
         EV_DEBUG << "[CREATE_FRAME RR] Non empty queue" << endl;
