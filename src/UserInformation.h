@@ -33,6 +33,7 @@ public:
     virtual int  getNumPendingPackets();
     virtual void serveUser();
     virtual bool isServed();
+    virtual void shouldBeServed();
 };
 
 #endif /* USERINFORMATION_H_ */
