@@ -44,6 +44,12 @@ void UserInformation::initNumPendingPackets()
     setNumPendingPackets(0);
 }
 
+void UserInformation::shouldBeServed() 
+{
+    initNumPendingPackets();
+    served = false;
+}
+
 int UserInformation::CQIToBytes()
 {
     int bytes[] = {3, 3, 6, 11, 15, 20, 25, 36, 39, 50, 63, 72, 80, 93, 93};
