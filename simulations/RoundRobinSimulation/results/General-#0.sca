@@ -1,25 +1,27 @@
 version 2
-run General-0-20191216-16:11:08-15784
+run General-0-20191217-16:15:37-12944
 attr configname General
-attr datetime 20191216-16:11:08
+attr datetime 20191217-16:15:37
 attr experiment General
 attr inifile omnetpp.ini
 attr iterationvars ""
 attr iterationvarsf ""
 attr measurement ""
 attr network CellularNetwork
-attr processid 15784
+attr processid 12944
 attr repetition 0
 attr replication #0
 attr resultdir results
 attr runnumber 0
 attr seedset 0
-param **.nUsers 15
-param **.antenna.timeslot 1s
-param **.user[*].lambda 0.4s
+param **.nUsers 10
+param **.antenna.timeslot 0.01s
+param **.user[*].lambda 0.008s
 
-scalar CellularNetwork.antenna responseTime:mean nan
+scalar CellularNetwork.antenna NumServedUser:mean 0.0013493455673998
+attr source NumServedUser
+scalar CellularNetwork.antenna responseTime:mean 0.020701296332773
 attr source responseTime
-scalar CellularNetwork.antenna throughput:mean nan
+scalar CellularNetwork.antenna throughput:mean 84.765888544056
 attr source throughput
 

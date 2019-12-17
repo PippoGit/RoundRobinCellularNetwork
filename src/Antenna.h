@@ -13,6 +13,7 @@ using namespace omnetpp;
 class Antenna : public cSimpleModule
 {
   public:
+
     struct packet_info_t
     {
         long      sender;
@@ -45,6 +46,7 @@ class Antenna : public cSimpleModule
     //simsignal_t waitTime_s;
     simsignal_t responseTime_s;
     simsignal_t throughput_s;
+    simsignal_t NumServedUser_s;
 
   protected:
     virtual void initialize();

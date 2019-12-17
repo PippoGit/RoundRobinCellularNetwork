@@ -19,19 +19,23 @@ void Antenna::initialize()
     // schedule first iteration of RR algorithm
     frame = nullptr;
     scheduleAt(simTime(), timer);
+    numSentBytes=0;
+    numServedUsers = 0;
 
     //signals
     responseTime_s=registerSignal("responseTime");
     throughput_s= registerSignal("throughput");
-
+    NumServedUser_s=registerSignal("NumServedUser");
 }
 
 void Antenna::updateCQIs()
 {
+    bool isBinomial=par("isBinomial");
     for(std::vector<UserInformation>::iterator it = users.begin(); it != users.end(); ++it)
     {
+
         cRNG *seedUser = getRNG(SEED_CQI);
-        it->generateCQI(seedUser);
+        it->generateCQI(seedUser,isBinomial);
     }
 }
 
@@ -95,7 +99,12 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
 
         if(packetSize <= totalRemainingBytes)
         {
-            numServedUsers++;
+
+            if(!currentUser->isServed()) {
+                numServedUsers++;
+                currentUser->serveUser();
+            }
+
             numSentBytes += packetSize;
 
             currentUser->incrementNumPendingPackets();
@@ -249,7 +258,7 @@ void Antenna::downlinkPropagation()
                      // SIGNAL
                     //emit(responseTime_s,waitTime_s+timeslot);
 
-        emit(responseTime_s,info.propagationTime - info.arrivalTime);
+        emit(responseTime_s, info.propagationTime.dbl() - info.arrivalTime.dbl());
 
 
         //    ^  THERE
@@ -258,7 +267,7 @@ void Antenna::downlinkPropagation()
     }
     double timeslot = par("timeslot");
     emit(throughput_s, numServedUsers*(numSentBytes/timeslot));
-
+    emit(NumServedUser_s,numServedUsers);
     broadcastFrame(frame);
     EV_DEBUG << "[DOWNLINK] Broadcast propagation of the frame" << endl;
 
