@@ -21,7 +21,7 @@ public: // too much stuff
     std::vector<ResourceBlock>::iterator lastRB;
     double remainingBytes;
 
-    omnetpp::simsignal_t throughput;
+    omnetpp::simsignal_t throughput_s;
 
 
 public:

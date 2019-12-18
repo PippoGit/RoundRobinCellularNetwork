@@ -40,16 +40,16 @@ class Antenna : public cSimpleModule
     // Information that are useful for performance evaluation
     std::vector<long> pendingPackets; // a list of the packet being in the current frame
     std::map<long, Antenna::packet_info_t> packetsInformation;
-    int  numServedUsers;
-    long numSentBytes;
+
+    int  numServedUsersPerTimeslot;
+    long numSentBytesPerTimeslot;
 
     // Signal
     //simsignal_t waitTime_s;
     simsignal_t responseTime_s;
     simsignal_t throughput_s;
-    simsignal_t NumServedUser_s;
+    simsignal_t numServedUser_s;
 
-    // simsignal_t *tptUser_s;
 
   protected:
     virtual ~Antenna();

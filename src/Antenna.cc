@@ -19,13 +19,13 @@ void Antenna::initialize()
     // schedule first iteration of RR algorithm
     frame = nullptr;
     scheduleAt(simTime(), timer);
-    numSentBytes=0;
-    numServedUsers = 0;
+    numSentBytesPerTimeslot=0;
+    numServedUsersPerTimeslot = 0;
 
     //signals
     responseTime_s=registerSignal("responseTime");
     throughput_s= registerSignal("throughput");
-    NumServedUser_s=registerSignal("NumServedUser");
+    numServedUser_s=registerSignal("NumServedUser");
 
     // tptUsers_s = new simsignal_t[NUM_USERS];
 
@@ -36,7 +36,7 @@ void Antenna::initialize()
         simsignal_t signal = registerSignal(signalName);
         cProperty *statisticTemplate = getProperties()->get("statisticTemplate", "tptUserTemplate");
         getEnvir()->addResultRecorders(this, signal, signalName, statisticTemplate);
-        users[i].throughput = signal;
+        users[i].throughput_s = signal;
     }
 }
 
@@ -57,8 +57,8 @@ void Antenna::initUsersInformation()
         it->shouldBeServed();
 
     }
-    numServedUsers = 0;
-    numSentBytes   = 0;
+    numServedUsersPerTimeslot = 0;
+    numSentBytesPerTimeslot   = 0;
 }
 
 
@@ -123,11 +123,11 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
         {
 
             if(!currentUser->isServed()) {
-                numServedUsers++;
+                numServedUsersPerTimeslot++;
                 currentUser->serveUser();
             }
 
-            numSentBytes += packetSize;
+            numSentBytesPerTimeslot += packetSize;
 
             currentUser->incrementNumPendingPackets();
             // If there is space, it means that i'm going to put the packet somewhere!
@@ -270,14 +270,6 @@ void Antenna::downlinkPropagation()
         Antenna::packet_info_t info = packetsInformation.at(id);
         info.propagationTime = simTime();
 
-        // ->
-        //SIGNAL
-                    //emit(waitTime_s,info.frameTime - info.arrivalTime);
-                    // COMPUTE RESPONSE TIME
-                     //simtime_t timeslot = par("timeslot");
-                     // SIGNAL
-                    //emit(responseTime_s,waitTime_s+timeslot);
-
         emit(responseTime_s, info.propagationTime.dbl() - info.arrivalTime.dbl());
 
         // Increment bytes sent for this user...
@@ -290,13 +282,13 @@ void Antenna::downlinkPropagation()
     EV_DEBUG << "[DOWNLINK] Broadcast propagation of the frame" << endl;
 
     double timeslot = par("timeslot");
-    emit(throughput_s, numServedUsers*(numSentBytes/timeslot));
-    emit(NumServedUser_s,numServedUsers);
+    emit(throughput_s, numSentBytesPerTimeslot); //Tpt defined as bytes sent per timeslot
+    emit(numServedUser_s,numServedUsersPerTimeslot); // Tpt defined as num of served users per timeslot
 
-    // Emit throughput per user
+    // Emit statitics per user
     for(auto it=users.begin(); it!=users.end(); ++it)
     {
-        emit(it->throughput, it->getServedBytes());
+        emit(it->throughput_s, it->getServedBytes());
     }
 
 
