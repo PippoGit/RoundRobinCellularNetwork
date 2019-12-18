@@ -26,13 +26,39 @@ void Antenna::initialize()
     responseTime_s=registerSignal("responseTime");
     throughput_s= registerSignal("throughput");
     NumServedUser_s=registerSignal("NumServedUser");
+
+    // tptUsers_s = new simsignal_t[NUM_USERS];
+
+    for(int i=0; i < NUM_USERS; i++)
+    {
+        char signalName[30];
+        sprintf(signalName, "tptUser-%d", i);
+        simsignal_t signal = registerSignal(signalName);
+        cProperty *statisticTemplate = getProperties()->get("statisticTemplate", "tptUserTemplate");
+        getEnvir()->addResultRecorders(this, signal, signalName, statisticTemplate);
+        users[i].throughput = signal;
+    }
 }
 
-void Antenna::updateCQIs()
+
+void Antenna::initUsersInformation()
 {
+    //THIS METHOD SHOULD RESET ALL THE INFORMATION THAT ARE VALID FOR A TIMESLOT
+    // THROUGHPUT INFORMATION AND CQIs
+
     bool isBinomial=par("isBinomial");
     for(std::vector<UserInformation>::iterator it = users.begin(); it != users.end(); ++it)
-        it->generateCQI(getRNG(RNG_CQI), isBinomial);
+    {
+        // it->generateCQI(getRNG(RNG_CQI), isBinomial); OLD VERSION
+
+        // VIRDIS-LIKE VERSION:
+        int cqi = (isBinomial)?binomial(0, 0):intuniform(MIN_CQI, MAX_CQI);
+        it->setCQI(cqi);
+        it->shouldBeServed();
+
+    }
+    numServedUsers = 0;
+    numSentBytes   = 0;
 }
 
 
@@ -68,17 +94,17 @@ void Antenna::broadcastFrame(Frame *f)
 void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &from, std::vector<ResourceBlock>::iterator to)
 {
     cQueue *queue = currentUser->getQueue();
-    currentUser->shouldBeServed();
+
     while(!(queue->isEmpty() || from == to))
     {
         EV_DEBUG << "[CREATE_FRAME RR] Non empty queue" << endl;
         Packet *p = check_and_cast<Packet*>(queue->front());
 
         //IF IT'S THE FIRST TIME YOU CONSIDER THE PACKET, UPDATE ITS START-SERVICE-TIME VARIABLE
-        if(!packetsInformation[p->getId()].isServed)
+        if(!packetsInformation[p->getId()].served)
             {
             packetsInformation[p->getId()].servedTime = simTime();
-            packetsInformation[p->getId()].isServed=true;
+            packetsInformation[p->getId()].served=true;
             }
         std::vector<UserInformation>::iterator recipient = users.begin() + p->getReceiverID();
         // (I have checked: believe it or not, this is the right recipient)
@@ -110,6 +136,7 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
 
             //WHEN A PACKET INSERTED IN FRAME, START-FRAME-TIME
             packetsInformation[p->getId()].frameTime = simTime();
+            packetsInformation[p->getId()].size = packetSize;
 
             // 1) fill the lastRB
             if(recipient->remainingBytes > 0)
@@ -158,17 +185,14 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
                 }
 
                 // Update lastRB for recipient
-                recipient->lastRB = from-1; // i guess?
+                recipient->lastRB = from-1;
                 recipient->remainingBytes = rCQI - fragmentSize; // last fragment size
             }
 
             // 3) The packet was put somewhere...
             queue->remove(p);
             delete p; // also delete the packet!
-            //Signal
         }
-
-
         else break;
 
     }
@@ -194,7 +218,7 @@ void Antenna::createFrame()
     EV_DEBUG << "[CREATE_FRAME] Updating CQI..." <<endl;
 
     // 1) Get updated CQIs
-    updateCQIs();
+    initUsersInformation();
 
     // 2) Round-robin over  allthe users...
     do
@@ -228,7 +252,7 @@ void Antenna::handlePacket(Packet *p)
     // this is a new packet! so we are going to keep its info somewhere!
     Antenna::packet_info_t i;
     i.arrivalTime = simTime();
-    i.isServed=false;
+    i.served = false;
     i.sender = p->getSenderID();
     packetsInformation.insert(std::pair<long, Antenna::packet_info_t>(p->getId(), i));
     users[userId].getQueue()->insert(p);
@@ -256,20 +280,27 @@ void Antenna::downlinkPropagation()
 
         emit(responseTime_s, info.propagationTime.dbl() - info.arrivalTime.dbl());
 
-
-        //    ^  THERE
+        // Increment bytes sent for this user...
+        users[info.sender].incrementServedBytes(info.size);
 
         packetsInformation.erase(id); // remove the packet from the hash table
     }
-    double timeslot = par("timeslot");
-    emit(throughput_s, numServedUsers*(numSentBytes/timeslot));
-    emit(NumServedUser_s,numServedUsers);
+
     broadcastFrame(frame);
     EV_DEBUG << "[DOWNLINK] Broadcast propagation of the frame" << endl;
 
+    double timeslot = par("timeslot");
+    emit(throughput_s, numServedUsers*(numSentBytes/timeslot));
+    emit(NumServedUser_s,numServedUsers);
+
+    // Emit throughput per user
+    for(auto it=users.begin(); it!=users.end(); ++it)
+    {
+        emit(it->throughput, it->getServedBytes());
+    }
+
+
     pendingPackets.clear(); // clear the pending packets data structure...
-    numServedUsers = 0;
-    numSentBytes = 0;
 }
 
 
@@ -283,3 +314,10 @@ void Antenna::handleMessage(cMessage *msg)
     else
         handlePacket(check_and_cast<Packet*>(msg));
 }
+
+
+Antenna::~Antenna()
+{
+    // delete []tptUser_s;
+}
+

@@ -17,6 +17,9 @@ simple Antenna
         @signal[NumServedUser](type=double);
     	@statistic[NumServedUser](source="NumServedUser"; record=mean,vector);       
        
+       @signal[tptUser*](type=double);
+       @statisticTemplate[tptUserTemplate](record=vector);  
+       
        
     gates:
  		// output out;   

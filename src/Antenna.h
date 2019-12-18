@@ -16,14 +16,15 @@ class Antenna : public cSimpleModule
 
     struct packet_info_t
     {
-        long      sender;
+        int       sender;
 
         simtime_t arrivalTime;     // inserted into the queue
         simtime_t servedTime;      // removed from the queue
         simtime_t frameTime;       // inserted into the frame
         simtime_t propagationTime; // left the antenna
 
-        bool      isServed;
+        bool      served;
+        int       size;
         // maybe other stuff??
     };
 
@@ -48,14 +49,18 @@ class Antenna : public cSimpleModule
     simsignal_t throughput_s;
     simsignal_t NumServedUser_s;
 
+    // simsignal_t *tptUser_s;
+
   protected:
+    virtual ~Antenna();
+
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
     virtual void handlePacket(Packet *p);
     virtual void downlinkPropagation();
     virtual void createFrame();
 
-    virtual void   updateCQIs();
+    virtual void   initUsersInformation();
     virtual void   roundrobin();
     virtual void   broadcastFrame(Frame *f);
     virtual void   fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &from, std::vector<ResourceBlock>::iterator to);

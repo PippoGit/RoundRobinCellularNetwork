@@ -12,11 +12,16 @@ private:
     omnetpp::cQueue FIFOQueue;
     int CQI;
     int numPendingPackets;
+
+    int  servedBytes;
     bool served;
+
 
 public: // too much stuff
     std::vector<ResourceBlock>::iterator lastRB;
     double remainingBytes;
+
+    omnetpp::simsignal_t throughput;
 
 
 public:
@@ -31,9 +36,15 @@ public:
     virtual void setNumPendingPackets(int val);
     virtual void initNumPendingPackets();
     virtual int  getNumPendingPackets();
+
     virtual void serveUser();
     virtual bool isServed();
     virtual void shouldBeServed();
+
+    virtual void setCQI(int cqi);
+
+    virtual void incrementServedBytes(int bytes);
+    virtual int  getServedBytes();
 };
 
 #endif /* USERINFORMATION_H_ */

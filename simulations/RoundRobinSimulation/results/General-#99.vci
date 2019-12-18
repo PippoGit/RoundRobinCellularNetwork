@@ -1,15 +1,15 @@
-file 403878 1576681981                                          
+file 582461 1576685592                                          
 version 2
-run General-99-20191218-16:12:52-14076
+run General-99-20191218-17:12:46-6844
 attr configname General
-attr datetime 20191218-16:12:52
+attr datetime 20191218-17:12:46
 attr experiment General
 attr inifile omnetpp.ini
 attr iterationvars ""
 attr iterationvarsf ""
 attr measurement ""
 attr network CellularNetwork
-attr processid 14076
+attr processid 6844
 attr repetition 99
 attr replication #99
 attr resultdir results
@@ -23,9 +23,29 @@ vector 0 CellularNetwork.antenna throughput:vector ETV
 attr source throughput
 vector 1 CellularNetwork.antenna NumServedUser:vector ETV
 attr source NumServedUser
-vector 2 CellularNetwork.antenna responseTime:vector ETV
+vector 2 CellularNetwork.antenna tptUser-0:vector ETV
+vector 3 CellularNetwork.antenna tptUser-1:vector ETV
+vector 4 CellularNetwork.antenna tptUser-2:vector ETV
+vector 5 CellularNetwork.antenna tptUser-3:vector ETV
+vector 6 CellularNetwork.antenna tptUser-4:vector ETV
+vector 7 CellularNetwork.antenna tptUser-5:vector ETV
+vector 8 CellularNetwork.antenna tptUser-6:vector ETV
+vector 9 CellularNetwork.antenna tptUser-7:vector ETV
+vector 10 CellularNetwork.antenna tptUser-8:vector ETV
+vector 11 CellularNetwork.antenna tptUser-9:vector ETV
+vector 12 CellularNetwork.antenna responseTime:vector ETV
 attr source responseTime
-0	719 20461 48 36333 0.01 10 1000 0 1260000 311019000 1.3841423106e+014
-1	21180 15592 48 36333 0.01 10 1000 0 10 6058 40322
-2	36772 367104 69 36333 0.02 10 12659 0.010004416243 0.189083612082 291.50194681241 10.217937937137
+0	1270 20477 48 36333 0.01 10 1000 0 1255500 326377100 1.4321786205e+014
+1	21747 15589 48 36333 0.01 10 1000 0 10 6354 43556
+2	37336 16331 48 36333 0.01 10 1000 0 330 48372 5806546
+3	53667 16352 48 36333 0.01 10 1000 0 377 48924 5881432
+4	70019 16316 48 36333 0.01 10 1000 0 431 46569 5687221
+5	86335 16337 48 36333 0.01 10 1000 0 604 47709 5769469
+6	102672 16326 48 36333 0.01 10 1000 0 407 46215 5548865
+7	118998 16343 48 36333 0.01 10 1000 0 371 48492 5886016
+8	135341 16316 48 36333 0.01 10 1000 0 388 46816 5679134
+9	151657 16362 48 36333 0.01 10 1000 0 553 50021 6409539
+10	168019 17327 48 36333 0.01 10 1000 0 313 46702 5393664
+11	185346 17354 48 36333 0.01 10 1000 0 320 50154 6034320
+12	202700 379759 69 36333 0.02 10 12658 0.010000361608 0.104731468345 245.5456626068 5.8539503185809
 

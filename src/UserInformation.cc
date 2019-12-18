@@ -22,6 +22,10 @@ int UserInformation::getUserId()
 }
 */
 
+void UserInformation::setCQI(int cqi)
+{
+    CQI = cqi;
+}
 
 int UserInformation::getNumPendingPackets()
 {
@@ -48,12 +52,25 @@ void UserInformation::shouldBeServed()
 {
     initNumPendingPackets();
     served = false;
+    servedBytes = 0;
 }
 
 int UserInformation::CQIToBytes()
 {
     int bytes[] = {3, 3, 6, 11, 15, 20, 25, 36, 39, 50, 63, 72, 80, 93, 93};
     return bytes[CQI-1];
+}
+
+
+void UserInformation::incrementServedBytes(int bytes)
+{
+    servedBytes += bytes;
+}
+
+
+int UserInformation::getServedBytes()
+{
+    return servedBytes;
 }
 
 
