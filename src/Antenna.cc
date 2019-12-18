@@ -102,23 +102,25 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
 
         //IF IT'S THE FIRST TIME YOU CONSIDER THE PACKET, UPDATE ITS START-SERVICE-TIME VARIABLE
         if(!packetsInformation[p->getId()].served)
-            {
+        {
             packetsInformation[p->getId()].servedTime = simTime();
             packetsInformation[p->getId()].served=true;
-            }
+        }
+
         std::vector<UserInformation>::iterator recipient = users.begin() + p->getReceiverID();
         // (I have checked: believe it or not, this is the right recipient)
 
-        double packetSize           = p->getServiceDemand();
-        double residualPacketSize   = packetSize;
-        int    rCQI                 = recipient->CQIToBytes(); // Is this wrong??
-        double residualRequiredRBs  = packetSize/rCQI;
-        int    remainingRBs         = (to-from);
+        double packetSize           = p->getServiceDemand(),
+               residualPacketSize   = packetSize,
+               residualRequiredRBs  = packetSize/rCQI;
+
+        int    rCQI                 = recipient->CQIToBytes(),
+               remainingRBs         = (to-from);
 
         // IF THERE is ENOUGH SPACE FOR THE WHOLE PACKET!
         double totalRemainingBytes = (remainingRBs * rCQI) + (recipient->remainingBytes < rCQI)*recipient->remainingBytes;
-        // I have to put the remainingBytes ONLY if that slot is half-full
 
+        // I have to put the remainingBytes ONLY if that slot is half-full
         if(packetSize <= totalRemainingBytes)
         {
 
