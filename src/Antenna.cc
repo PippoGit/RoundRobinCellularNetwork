@@ -32,11 +32,7 @@ void Antenna::updateCQIs()
 {
     bool isBinomial=par("isBinomial");
     for(std::vector<UserInformation>::iterator it = users.begin(); it != users.end(); ++it)
-    {
-
-        cRNG *seedUser = getRNG(SEED_CQI);
-        it->generateCQI(seedUser,isBinomial);
-    }
+        it->generateCQI(getRNG(RNG_CQI), isBinomial);
 }
 
 

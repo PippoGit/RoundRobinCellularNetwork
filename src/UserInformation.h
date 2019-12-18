@@ -22,7 +22,7 @@ public: // too much stuff
 public:
     UserInformation();
     virtual ~UserInformation();
-    virtual void generateCQI(omnetpp::cRNG*seedCQI, bool isBinomial);
+    virtual void generateCQI(omnetpp::cRNG*RNG, bool isBinomial);
 
     virtual int              CQIToBytes();
     virtual omnetpp::cQueue* getQueue();

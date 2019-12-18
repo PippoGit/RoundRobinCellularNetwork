@@ -6,10 +6,10 @@
 
 #define FRAME_SIZE 25
 
-#define SEED_CQI 1
-#define SEED_SERVICE_DEMAND 2
-#define SEED_RECIPIENT 3
-#define SEED_INTERARRIVAL 4
+#define RNG_CQI 0
+#define RNG_SERVICE_DEMAND 1
+#define RNG_RECIPIENT 2
+#define RNG_INTERARRIVAL 3
 
 #define MIN_CQI 1
 #define MAX_CQI 15

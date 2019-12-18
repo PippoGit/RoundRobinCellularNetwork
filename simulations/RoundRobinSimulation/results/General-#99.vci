@@ -1,20 +1,20 @@
-file 399207 1576681946                                          
+file 403878 1576681981                                          
 version 2
-run General-0-20191218-16:12:18-18040
+run General-99-20191218-16:12:52-14076
 attr configname General
-attr datetime 20191218-16:12:18
+attr datetime 20191218-16:12:52
 attr experiment General
 attr inifile omnetpp.ini
 attr iterationvars ""
 attr iterationvarsf ""
 attr measurement ""
 attr network CellularNetwork
-attr processid 18040
-attr repetition 0
-attr replication #0
+attr processid 14076
+attr repetition 99
+attr replication #99
 attr resultdir results
-attr runnumber 0
-attr seedset 0
+attr runnumber 99
+attr seedset 99
 param **.nUsers 10
 param **.antenna.timeslot 0.01s
 param **.user[*].lambda 0.008s
@@ -25,7 +25,7 @@ vector 1 CellularNetwork.antenna NumServedUser:vector ETV
 attr source NumServedUser
 vector 2 CellularNetwork.antenna responseTime:vector ETV
 attr source responseTime
-0	714 20460 60 36003 0.01 10 1000 0 1322000 317922300 1.4446823943e+014
-1	21174 15604 60 36003 0.01 10 1000 0 10 6179 41799
-2	36778 362427 99 36003 0.02 10 12488 0.010002256875 0.112395920864 262.58870730763 7.1543665316287
+0	719 20461 48 36333 0.01 10 1000 0 1260000 311019000 1.3841423106e+014
+1	21180 15592 48 36333 0.01 10 1000 0 10 6058 40322
+2	36772 367104 69 36333 0.02 10 12659 0.010004416243 0.189083612082 291.50194681241 10.217937937137
 

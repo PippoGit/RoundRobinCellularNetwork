@@ -69,15 +69,15 @@ bool UserInformation::isServed()
 }
 
 
-void UserInformation::generateCQI(omnetpp::cRNG*seedCQI, bool isBinomial)
+void UserInformation::generateCQI(omnetpp::cRNG*RNG, bool isBinomial)
 {
     if(isBinomial)
     {
-        CQI = omnetpp::binomial(seedCQI, MIN_CQI, MAX_CQI);
+        CQI = omnetpp::binomial(RNG, MIN_CQI, MAX_CQI);
     }
     else
     {
-        CQI = omnetpp::intuniform(seedCQI, MIN_CQI, MAX_CQI);
+        CQI = omnetpp::intuniform(RNG, MIN_CQI, MAX_CQI);
     }
     remainingBytes = CQIToBytes();
 }

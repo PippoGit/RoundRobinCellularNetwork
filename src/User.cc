@@ -33,10 +33,8 @@ void User::handleMessage(cMessage *msg)
 void User::handleTimer()
 {
     createNewPacket();
-    cRNG *seed = getRNG(SEED_INTERARRIVAL);
     simtime_t lambda = par("lambda");
-    interArrivalTime = omnetpp::exponential(seed, lambda);
-    EV << " la lambda:    " << lambda;
+    interArrivalTime = omnetpp::exponential(getRNG(RNG_INTERARRIVAL), lambda);
     this->scheduleAt(simTime() + interArrivalTime, waitMessage);
 
 }
@@ -52,7 +50,7 @@ void User::handleFrame(Frame* f)
             EV << "[USER] There are " << numFragments << " fragments" << endl;
             for(int j = 0; j < numFragments; j++)
             {
-                EV << "   ID PKT: " << f->getRBFrame(i).getFragment(j).id << endl;
+                EV << "   ID PKT:   " << f->getRBFrame(i).getFragment(j).id << endl;
                 EV << "   PKT SIZE: " <<  f->getRBFrame(i).getFragment(j).packetSize << endl;
                 EV << "   FRG SIZE: " <<  f->getRBFrame(i).getFragment(j).fragmentSize << endl;
             }
@@ -67,10 +65,10 @@ void User::createNewPacket(){
     packet->setSenderID(this->userID);
 
     //for assumption: packet dimension between 1 and 75 bytes (La intuniform prende ENTRAMBI gli estremi)
-    packet->setServiceDemand(omnetpp::intuniform(getRNG(SEED_SERVICE_DEMAND), MIN_SERVICE_DEMAND, MAX_SERVICE_DEMAND)); //F: secondo me dovrebbe essere un double
+    packet->setServiceDemand(omnetpp::intuniform(getRNG(RNG_SERVICE_DEMAND), MIN_SERVICE_DEMAND, MAX_SERVICE_DEMAND)); //F: secondo me dovrebbe essere un double
 
     int numUsers = this->getParentModule()->par("nUsers");
-    packet->setReceiverID(omnetpp::intuniform(getRNG(SEED_RECIPIENT), MIN_USERS, numUsers - 1)); // la INT UNIFORM prende anche gli estremi!
+    packet->setReceiverID(omnetpp::intuniform(getRNG(RNG_RECIPIENT), MIN_USERS, numUsers - 1)); // la INT UNIFORM prende anche gli estremi!
 
     send(packet, "out");
 }
