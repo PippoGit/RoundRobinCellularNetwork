@@ -1,0 +1,51 @@
+file 578143 1576771318                                          
+version 2
+run General-1-20191219-17:01:51-7652
+attr configname General
+attr datetime 20191219-17:01:51
+attr experiment General
+attr inifile omnetpp.ini
+attr iterationvars ""
+attr iterationvarsf ""
+attr measurement ""
+attr network CellularNetwork
+attr processid 7652
+attr repetition 1
+attr replication #1
+attr resultdir results
+attr runnumber 1
+attr seedset 1
+param **.nUsers 10
+param **.antenna.timeslot 0.01s
+param **.user[*].lambda 0.008s
+
+vector 0 CellularNetwork.antenna throughput:vector ETV
+attr source throughput
+vector 1 CellularNetwork.antenna NumServedUser:vector ETV
+attr source NumServedUser
+vector 2 CellularNetwork.antenna tptUser-0:vector ETV
+vector 3 CellularNetwork.antenna tptUser-1:vector ETV
+vector 4 CellularNetwork.antenna tptUser-2:vector ETV
+vector 5 CellularNetwork.antenna tptUser-3:vector ETV
+vector 6 CellularNetwork.antenna tptUser-4:vector ETV
+vector 7 CellularNetwork.antenna tptUser-5:vector ETV
+vector 8 CellularNetwork.antenna tptUser-6:vector ETV
+vector 9 CellularNetwork.antenna tptUser-7:vector ETV
+vector 10 CellularNetwork.antenna tptUser-8:vector ETV
+vector 11 CellularNetwork.antenna tptUser-9:vector ETV
+vector 12 CellularNetwork.antenna responseTime:vector ETV
+attr source responseTime
+0	1265 17589 40 36295 0.01 10 1000 0 1870 480143 276688565
+1	18854 15601 40 36295 0.01 10 1000 0 10 6100 41036
+2	34455 16289 40 36295 0.01 10 1000 0 396 44903 5477553
+3	50744 16362 40 36295 0.01 10 1000 0 562 53427 7436889
+4	67106 16297 40 36295 0.01 10 1000 0 408 44994 5425514
+5	83403 16309 40 36295 0.01 10 1000 0 384 47074 5957672
+6	99712 16336 40 36295 0.01 10 1000 0 472 49295 6649661
+7	116048 16347 40 36295 0.01 10 1000 0 432 49804 6740380
+8	132395 16273 40 36295 0.01 10 1000 0 455 45466 6106682
+9	148668 16327 40 36295 0.01 10 1000 0 391 47485 6044213
+10	164995 17343 40 36295 0.01 10 1000 0 383 49186 6255068
+11	182338 17316 40 36295 0.01 10 1000 0 497 48509 6414129
+12	199654 378487 65 36295 0.02 10 12615 0.010000407988001 0.110287927833 269.41172571593 7.5952355459038
+

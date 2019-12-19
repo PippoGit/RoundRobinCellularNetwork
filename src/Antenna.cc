@@ -53,6 +53,7 @@ void Antenna::initUsersInformation()
 
         // VIRDIS-LIKE VERSION:
         int cqi = (isBinomial)?binomial(0, 0):intuniform(MIN_CQI, MAX_CQI);
+        EV<<"CQI per : "<<cqi<<endl;
         it->setCQI(cqi);
         it->shouldBeServed();
 
