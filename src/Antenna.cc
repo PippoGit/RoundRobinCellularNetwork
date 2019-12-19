@@ -110,12 +110,16 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
         std::vector<UserInformation>::iterator recipient = users.begin() + p->getReceiverID();
         // (I have checked: believe it or not, this is the right recipient)
 
+
+
+        int    rCQI                 = recipient->CQIToBytes(),
+               remainingRBs         = (to-from);
+
         double packetSize           = p->getServiceDemand(),
                residualPacketSize   = packetSize,
                residualRequiredRBs  = packetSize/rCQI;
 
-        int    rCQI                 = recipient->CQIToBytes(),
-               remainingRBs         = (to-from);
+
 
         // IF THERE is ENOUGH SPACE FOR THE WHOLE PACKET!
         double totalRemainingBytes = (remainingRBs * rCQI) + (recipient->remainingBytes < rCQI)*recipient->remainingBytes;
