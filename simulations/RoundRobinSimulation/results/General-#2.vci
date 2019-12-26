@@ -1,50 +1,51 @@
-file 581351 1576860218                                          
+file 55712 1577359255                                           
 version 2
-run General-99-20191219-16:45:52-17308
+run General-2-20191226-12:07:28-23080
 attr configname General
-attr datetime 20191219-16:45:52
+attr datetime 20191226-12:07:28
 attr experiment General
 attr inifile omnetpp.ini
 attr iterationvars ""
 attr iterationvarsf ""
 attr measurement ""
 attr network CellularNetwork
-attr processid 17308
-attr repetition 99
-attr replication #99
+attr processid 23080
+attr repetition 2
+attr replication #2
 attr resultdir results
-attr runnumber 99
-attr seedset 99
+attr runnumber 2
+attr seedset 2
 param **.nUsers 10
 param **.antenna.timeslot 0.01s
 param **.user[*].lambda 0.008s
 
 vector 0 CellularNetwork.antenna throughput:vector ETV
 attr source throughput
-0	1272 17589 42 36439 0.01 10 1000 0 1265 483496 272950132
 vector 1 CellularNetwork.antenna NumServedUser:vector ETV
 attr source NumServedUser
-1	18861 15598 42 36439 0.01 10 1000 0 10 6222 42184
 vector 2 CellularNetwork.antenna tptUser-0:vector ETV
-2	34459 16362 42 36439 0.01 10 1000 0 676 50013 6677019
 vector 3 CellularNetwork.antenna tptUser-1:vector ETV
-3	50821 16322 42 36439 0.01 10 1000 0 487 48426 6641102
 vector 4 CellularNetwork.antenna tptUser-2:vector ETV
-4	67143 16352 42 36439 0.01 10 1000 0 592 50147 6747047
 vector 5 CellularNetwork.antenna tptUser-3:vector ETV
-5	83495 16324 42 36439 0.01 10 1000 0 483 46854 5651282
 vector 6 CellularNetwork.antenna tptUser-4:vector ETV
-6	99819 16296 42 36439 0.01 10 1000 0 387 45147 5365435
 vector 7 CellularNetwork.antenna tptUser-5:vector ETV
-7	116115 16361 42 36439 0.01 10 1000 0 377 48749 5851165
 vector 8 CellularNetwork.antenna tptUser-6:vector ETV
-8	132476 16280 42 36439 0.01 10 1000 0 504 43486 5517704
 vector 9 CellularNetwork.antenna tptUser-7:vector ETV
-9	148756 16333 42 36439 0.01 10 1000 0 506 49311 6500303
 vector 10 CellularNetwork.antenna tptUser-8:vector ETV
-10	165089 17358 42 36439 0.01 10 1000 0 417 51814 6834416
 vector 11 CellularNetwork.antenna tptUser-9:vector ETV
-11	182447 17342 42 36439 0.01 10 1000 0 588 49549 6694537
 vector 12 CellularNetwork.antenna responseTime:vector ETV
 attr source responseTime
-12	199789 381562 83 36439 0.02 10 12715 0.010003011075 0.145002188028 263.94711079301 7.3946363769609
+0	1267 1692 48 3643 0.01 1.02 102 0 1177 46422 25022108
+1	2959 1490 48 3643 0.01 1.02 102 0 10 620 4128
+2	4449 1563 48 3643 0.01 1.02 102 0 336 4713 568125
+3	6012 1567 48 3643 0.01 1.02 102 0 287 4783 568181
+4	7579 1565 48 3643 0.01 1.02 102 0 239 5012 579478
+5	9144 1558 48 3643 0.01 1.02 102 0 361 4173 511997
+6	10702 1574 48 3643 0.01 1.02 102 0 291 5527 655605
+7	12276 1552 48 3643 0.01 1.02 102 0 227 3796 395576
+8	13828 1555 48 3643 0.01 1.02 102 0 251 4025 482083
+9	15383 1571 48 3643 0.01 1.02 102 0 327 5004 606682
+10	16954 1655 48 3643 0.01 1.02 102 0 333 4464 628472
+11	18609 1673 48 3643 0.01 1.02 102 0 249 4925 580015
+12	20282 35428 93 3643 0.02 1.02 1247 0.010004262884 0.067959846684 24.155796167035 0.57057922665567
+

@@ -1,14 +1,14 @@
 version 2
-run General-1-20191219-17:01:51-7652
+run General-1-20191226-12:07:13-24192
 attr configname General
-attr datetime 20191219-17:01:51
+attr datetime 20191226-12:07:13
 attr experiment General
 attr inifile omnetpp.ini
 attr iterationvars ""
 attr iterationvarsf ""
 attr measurement ""
 attr network CellularNetwork
-attr processid 7652
+attr processid 24192
 attr repetition 1
 attr replication #1
 attr resultdir results
