@@ -55,8 +55,6 @@ void Antenna::initUsersInformation()
     bool isBinomial=par("isBinomial");
     for(std::vector<UserInformation>::iterator it = users.begin(); it != users.end(); ++it)
     {
-        // it->generateCQI(getRNG(RNG_CQI), isBinomial); OLD VERSION
-
         // VIRDIS-LIKE VERSION:
         int cqi = (isBinomial)?binomial(0, 0):intuniform(MIN_CQI, MAX_CQI);
         it->setCQI(cqi);
@@ -203,22 +201,12 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
 }
 
 
-// THIS IS USELESS NOW!
-void Antenna::initUsersLastRBs(std::vector<ResourceBlock>::iterator end)
-{
-    for(auto it = users.begin(); it != users.end(); ++it)
-        it->lastRB = end;
-}
-
-
 void Antenna::createFrame()
 {
     int numIterations = 0;
     std::vector<UserInformation>::iterator firstUser = currentUser;
     std::vector<ResourceBlock> vframe(FRAME_SIZE);
     std::vector<ResourceBlock>::iterator currentRB = vframe.begin();
-
-    initUsersLastRBs(vframe.end());
 
     EV_DEBUG << "[CREATE_FRAME] Updating CQI..." <<endl;
 
@@ -235,7 +223,7 @@ void Antenna::createFrame()
         fillFrameWithCurrentUser(currentRB, vframe.end());
 
         numIterations += (currentUser == firstUser);
-    } while(currentRB != vframe.end() /* && numIterations < 2*/ ); // we don't care anymore about num iterations!
+    } while(currentRB != vframe.end() && numIterations < 2); // we don't care anymore about num iterations!
 
     // 3) send the frame to all the users DURING NEXT TIMESLOT!
     this->frame = vectorToFrame(vframe);
@@ -277,13 +265,12 @@ void Antenna::downlinkPropagation()
     if(frame == nullptr) return; // first iteration...
 
     // Update the info about the packet being in the frame
-    double tpt;
     for(long id : pendingPackets)
     {
         Antenna::packet_info_t info = packetsInformation.at(id);
         info.propagationTime = simTime();
 
-        // emit(responseTime_s, info.propagationTime.dbl() - info.arrivalTime.dbl());
+        emit(responseTime_s, info.propagationTime.dbl() - info.arrivalTime.dbl());
 
         // Increment bytes sent for this user...
         users[info.sender].incrementServedBytes(info.size);
@@ -294,14 +281,13 @@ void Antenna::downlinkPropagation()
     broadcastFrame(frame);
     EV_DEBUG << "[DOWNLINK] Broadcast propagation of the frame" << endl;
 
-    double timeslot = par("timeslot");
-    // emit(throughput_s, numSentBytesPerTimeslot); //Tpt defined as bytes sent per timeslot
-    // emit(numServedUser_s,numServedUsersPerTimeslot); // Tpt defined as num of served users per timeslot
+    emit(throughput_s, numSentBytesPerTimeslot);     //Tpt defined as bytes sent per timeslot
+    emit(numServedUser_s, numServedUsersPerTimeslot); // Tpt defined as num of served users per timeslot
 
     // Emit statitics per user
     for(auto it=users.begin(); it!=users.end(); ++it)
     {
-       // emit(it->throughput_s, it->getServedBytes());
+       emit(it->throughput_s, it->getServedBytes());
     }
 
 

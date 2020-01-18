@@ -10,16 +10,16 @@ simple Antenna
 	   	
     	//signals
 
-        @signal[throughput](type=double);
+        @signal[throughput](type=long);
     	@statistic[throughput](source="throughput"; record=mean,vector);  
     	  
         @signal[responseTime](type=double);
     	@statistic[responseTime](source="responseTime"; record=mean,vector);    
        
-        @signal[NumServedUser](type=double);
+        @signal[NumServedUser](type=long);
     	@statistic[NumServedUser](source="NumServedUser"; record=mean,vector);       
        
-       @signal[tptUser*](type=double);
+       @signal[tptUser*](type=long);
        @statisticTemplate[tptUserTemplate](record=vector);  
        
        

@@ -65,7 +65,6 @@ class Antenna : public cSimpleModule
     virtual void   broadcastFrame(Frame *f);
     virtual void   fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &from, std::vector<ResourceBlock>::iterator to);
     virtual Frame* vectorToFrame(std::vector<ResourceBlock> &v);
-    virtual void   initUsersLastRBs(std::vector<ResourceBlock>::iterator end);
 };
 
 #endif

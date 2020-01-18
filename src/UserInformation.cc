@@ -30,7 +30,7 @@ int UserInformation::getUserId()
 void UserInformation::setCQI(int cqi)
 {
     CQI = cqi;
-    remainingBytes = CQIToBytes();
+    // remainingBytes = CQIToBytes();
 }
 
 int UserInformation::getNumPendingPackets()
@@ -102,7 +102,7 @@ void UserInformation::generateCQI(omnetpp::cRNG*RNG, bool isBinomial)
     {
         CQI = omnetpp::intuniform(RNG, MIN_CQI, MAX_CQI);
     }
-    remainingBytes = CQIToBytes();
+    // remainingBytes = CQIToBytes();
 }
 
 

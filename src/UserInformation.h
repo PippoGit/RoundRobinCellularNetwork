@@ -19,9 +19,10 @@ private:
     omnetpp::cMessage *timer;
 
 
-public: // too much stuff
-    std::vector<ResourceBlock>::iterator lastRB;
-    double remainingBytes;
+public:
+    // too much stuff
+    // std::vector<ResourceBlock>::iterator lastRB;
+    // double remainingBytes;
 
     omnetpp::simsignal_t throughput_s;
 
