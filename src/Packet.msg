@@ -1,5 +1,5 @@
 message Packet {
-    int senderID;
+   //  int senderID;
     int receiverID;
     int serviceDemand;
     simtime_t arrivalTime;

@@ -56,7 +56,7 @@ class Antenna : public cSimpleModule
 
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
-    virtual void handlePacket(Packet *p);
+    virtual void handlePacket(int userId);
     virtual void downlinkPropagation();
     virtual void createFrame();
 

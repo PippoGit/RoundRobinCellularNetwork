@@ -6,7 +6,8 @@ void Antenna::initialize()
 {
     EV_DEBUG << "[ANTENNA-INITIALIZE] Initializing antenna..." << endl;
     NUM_USERS = this->getParentModule()->par("nUsers");
-    timer = new cMessage("timer");
+    timer = new cMessage("roundrobin");
+    timer->setKind(MSG_RR_TIMER);
 
     EV_DEBUG << "[ANTENNA-INITIALIZE] Building UserInformation data structure" << endl;
     users.reserve(NUM_USERS);
@@ -16,18 +17,10 @@ void Antenna::initialize()
     EV_DEBUG << "[ANTENNA-INITIALIZE] Initializing first iterator" << endl;
     currentUser = users.end()-1; // this will make the first call to roundrobin() to set currentUser to begin()
 
-    // schedule first iteration of RR algorithm
-    frame = nullptr;
-    scheduleAt(simTime(), timer);
-    numSentBytesPerTimeslot=0;
-    numServedUsersPerTimeslot = 0;
-
     //signals
-    responseTime_s=registerSignal("responseTime");
-    throughput_s= registerSignal("throughput");
-    numServedUser_s=registerSignal("NumServedUser");
-
-    // tptUsers_s = new simsignal_t[NUM_USERS];
+    responseTime_s  = registerSignal("responseTime");
+    throughput_s    = registerSignal("throughput");
+    numServedUser_s = registerSignal("NumServedUser");
 
     for(int i=0; i < NUM_USERS; i++)
     {
@@ -37,7 +30,20 @@ void Antenna::initialize()
         cProperty *statisticTemplate = getProperties()->get("statisticTemplate", "tptUserTemplate");
         getEnvir()->addResultRecorders(this, signal, signalName, statisticTemplate);
         users[i].throughput_s = signal;
+
+        char tmrName[30];
+        sprintf(tmrName, "pkt-%d", i);
+        cMessage *tmr = new cMessage(tmrName);
+        tmr->setKind(MSG_PKT_TIMER);
+        users[i].setTimer(tmr);
+        scheduleAt(simTime(), tmr);
     }
+
+    // schedule first iteration of RR algorithm
+    frame = nullptr;
+    scheduleAt(simTime(), timer);
+    numSentBytesPerTimeslot=0;
+    numServedUsersPerTimeslot = 0;
 }
 
 
@@ -53,7 +59,6 @@ void Antenna::initUsersInformation()
 
         // VIRDIS-LIKE VERSION:
         int cqi = (isBinomial)?binomial(0, 0):intuniform(MIN_CQI, MAX_CQI);
-        EV<<"CQI per : "<<cqi<<endl;
         it->setCQI(cqi);
         it->shouldBeServed();
 
@@ -94,11 +99,24 @@ void Antenna::broadcastFrame(Frame *f)
 
 void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &from, std::vector<ResourceBlock>::iterator to)
 {
-    cQueue *queue = currentUser->getQueue();
+    // It's the turn of CurrentUser, let's take its queue and info...
+    cQueue *queue     = currentUser->getQueue();
+    int uCQI          = currentUser->CQIToBytes();
+    int currentUserId = (currentUser - users.begin());
+
+    int    remainingRBs        = (to-from);
+    double totalRemainingBytes = (remainingRBs * uCQI);
+
+    EV_DEBUG << "[CREATE_FRAME RR] SET UP " << endl;
+    EV_DEBUG << "    USER CQI        : " << uCQI << endl;
+    EV_DEBUG << "    REMAINING RBs   : " << remainingRBs << endl;
+    EV_DEBUG << "    REMAINING BYTES : " << totalRemainingBytes << endl;
+
 
     while(!(queue->isEmpty() || from == to))
     {
         EV_DEBUG << "[CREATE_FRAME RR] Non empty queue" << endl;
+
         Packet *p = check_and_cast<Packet*>(queue->front());
 
         //IF IT'S THE FIRST TIME YOU CONSIDER THE PACKET, UPDATE ITS START-SERVICE-TIME VARIABLE
@@ -108,22 +126,14 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
             packetsInformation[p->getId()].served=true;
         }
 
-        std::vector<UserInformation>::iterator recipient = users.begin() + p->getReceiverID();
-        // (I have checked: believe it or not, this is the right recipient)
+        double packetSize          = p->getServiceDemand(),
+               residualPacketSize  = packetSize,
+               residualRequiredRBs = packetSize/uCQI;
 
 
+        EV_DEBUG << "[CREATE_FRAME RR] PACKET TO INSERT" << endl;
+        EV_DEBUG << "   PACKET SIZE  : " << packetSize << endl;
 
-        int    rCQI                 = recipient->CQIToBytes(),
-               remainingRBs         = (to-from);
-
-        double packetSize           = p->getServiceDemand(),
-               residualPacketSize   = packetSize,
-               residualRequiredRBs  = packetSize/rCQI;
-
-
-
-        // IF THERE is ENOUGH SPACE FOR THE WHOLE PACKET!
-        double totalRemainingBytes = (remainingRBs * rCQI) + (recipient->remainingBytes < rCQI)*recipient->remainingBytes;
 
         // I have to put the remainingBytes ONLY if that slot is half-full
         if(packetSize <= totalRemainingBytes)
@@ -134,9 +144,9 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
                 currentUser->serveUser();
             }
 
-            numSentBytesPerTimeslot += packetSize;
-
+            numSentBytesPerTimeslot += packetSize; // ???
             currentUser->incrementNumPendingPackets();
+
             // If there is space, it means that i'm going to put the packet somewhere!
             // SO the packet will become "pending"
             pendingPackets.push_back(p->getId());
@@ -145,67 +155,55 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
             packetsInformation[p->getId()].frameTime = simTime();
             packetsInformation[p->getId()].size = packetSize;
 
-            // 1) fill the lastRB
-            if(recipient->remainingBytes > 0)
+
+            /////////////////////////////////////////////////////
+
+            EV_DEBUG << "[CREATE_FRAME RR] Inserting " << packetSize << "Bytes at " << (FRAME_SIZE) - (to - from) << endl;
+            EV_DEBUG << "    REQUIRED RBs:   " << residualRequiredRBs << endl;
+            EV_DEBUG << "    REMAINING RBs:  " << (to - from) << endl;
+
+
+            double fragmentSize;
+            while(residualPacketSize > 0)
             {
-                EV_DEBUG << "[CREATE_FRAME RR] Putting " << recipient->remainingBytes << " in last RB" << endl;
-                EV_DEBUG << "     Inserting at index: " << (FRAME_SIZE) - (to - recipient->lastRB) << endl;
+                // if nobody wrote on this RB, i'll take it!
+                if(from->getRecipient() == -1) from->remainingBytes = uCQI;
 
-                if(recipient->lastRB == to) recipient->lastRB = from; // to is just another name for .end()
+                fragmentSize = std::min(residualPacketSize, static_cast<double>(uCQI));
 
-                double fragmentSize = std::min(packetSize, recipient->remainingBytes);
-
-                residualPacketSize  -= fragmentSize;
-                residualRequiredRBs  = residualPacketSize/rCQI;
-
-                recipient->lastRB->setRecipient(p->getReceiverID());
-                recipient->lastRB->appendFragment(p, fragmentSize);
-                recipient->remainingBytes -= fragmentSize;
-            }
-
-            // 2) If there are still some bytes to write, put them at "from"
-            if(residualPacketSize > 0)
-            {
-                EV_DEBUG << "[CREATE_FRAME RR] Putting remaining bytes... " << endl;
+                EV_DEBUG << "Adding fragment:    " << endl;
+                EV_DEBUG << "    FRAGMENT SIZE:  " << fragmentSize << endl;
                 EV_DEBUG << "    RESIDUAL SIZE:  " << residualPacketSize << endl;
-                EV_DEBUG << "    REQUIRED RBs:   " << residualRequiredRBs << endl;
-                EV_DEBUG << "    REMAINING:      " << (to - from) << endl;
+                EV_DEBUG << "    REMAINING RBs:  " << (to - from) << endl;
                 EV_DEBUG << "    INDEX:          " << (FRAME_SIZE) - (to - from) << endl;
 
-                // if (recipient->lastRB == from) from++; // if lastRB was equal to from i have to move to the following RB
+                from->setRecipient(currentUserId);
+                from->appendFragment(p, fragmentSize);
 
-                double fragmentSize;
-                while(residualPacketSize > 0)
-                {
-                    int currentIndex = FRAME_SIZE - (to - from);
+                residualPacketSize -= fragmentSize;
+                from->remainingBytes -= fragmentSize;
 
-                    EV_DEBUG << "    Inserting fragment at RB: " << currentIndex << endl;
-                    fragmentSize = std::min(residualPacketSize, static_cast<double>(rCQI));
-                    EV_DEBUG << "    The size for the fragment is: " << fragmentSize << endl;
-
-                    from->setRecipient(p->getReceiverID());
-                    from->setSender(p->getSenderID());
-                    from->appendFragment(p, fragmentSize);
-
-                    residualPacketSize -= fragmentSize;
+                // if current RB is full, consider the next one
+                if(from->remainingBytes == 0)
                     ++from;
-                }
-
-                // Update lastRB for recipient
-                recipient->lastRB = from-1;
-                recipient->remainingBytes = rCQI - fragmentSize; // last fragment size
             }
+            /////////////////////////////////////////////////////
 
             // 3) The packet was put somewhere...
+            totalRemainingBytes -= packetSize;
             queue->remove(p);
             delete p; // also delete the packet!
         }
         else break;
 
     }
+
+    // If the last RB was not filled i have to skip it....
+    if(from->getRecipient() == currentUserId) ++from;
 }
 
 
+// THIS IS USELESS NOW!
 void Antenna::initUsersLastRBs(std::vector<ResourceBlock>::iterator end)
 {
     for(auto it = users.begin(); it != users.end(); ++it)
@@ -237,7 +235,7 @@ void Antenna::createFrame()
         fillFrameWithCurrentUser(currentRB, vframe.end());
 
         numIterations += (currentUser == firstUser);
-    } while(currentRB != vframe.end() && numIterations < 2);
+    } while(currentRB != vframe.end() /* && numIterations < 2*/ ); // we don't care anymore about num iterations!
 
     // 3) send the frame to all the users DURING NEXT TIMESLOT!
     this->frame = vectorToFrame(vframe);
@@ -251,18 +249,26 @@ void Antenna::createFrame()
 }
 
 
-void Antenna::handlePacket(Packet *p)
+void Antenna::handlePacket(int userId)
 {
-    int userId = p->getSenderID();
-    EV_DEBUG << "[UPLINK] Received a new packet to be put into the queue of " << userId << endl;
+    EV_DEBUG << "[UPLINK] Create a new packet to be put into the queue of " << userId << endl;
+
+
+    Packet *packet = new Packet();
+    packet->setServiceDemand(intuniform(MIN_SERVICE_DEMAND, MAX_SERVICE_DEMAND, RNG_SERVICE_DEMAND));
+    packet->setReceiverID(userId);
 
     // this is a new packet! so we are going to keep its info somewhere!
     Antenna::packet_info_t i;
     i.arrivalTime = simTime();
     i.served = false;
-    i.sender = p->getSenderID();
-    packetsInformation.insert(std::pair<long, Antenna::packet_info_t>(p->getId(), i));
-    users[userId].getQueue()->insert(p);
+    packetsInformation.insert(std::pair<long, Antenna::packet_info_t>(packet->getId(), i));
+    users[userId].getQueue()->insert(packet);
+
+    // SCHEDULE NEXT PACKET
+
+    simtime_t lambda = par("lambda");
+    scheduleAt(simTime() + exponential(lambda, RNG_INTERARRIVAL), users[userId].getTimer());
 }
 
 
@@ -277,7 +283,7 @@ void Antenna::downlinkPropagation()
         Antenna::packet_info_t info = packetsInformation.at(id);
         info.propagationTime = simTime();
 
-        emit(responseTime_s, info.propagationTime.dbl() - info.arrivalTime.dbl());
+        // emit(responseTime_s, info.propagationTime.dbl() - info.arrivalTime.dbl());
 
         // Increment bytes sent for this user...
         users[info.sender].incrementServedBytes(info.size);
@@ -289,13 +295,13 @@ void Antenna::downlinkPropagation()
     EV_DEBUG << "[DOWNLINK] Broadcast propagation of the frame" << endl;
 
     double timeslot = par("timeslot");
-    emit(throughput_s, numSentBytesPerTimeslot); //Tpt defined as bytes sent per timeslot
-    emit(numServedUser_s,numServedUsersPerTimeslot); // Tpt defined as num of served users per timeslot
+    // emit(throughput_s, numSentBytesPerTimeslot); //Tpt defined as bytes sent per timeslot
+    // emit(numServedUser_s,numServedUsersPerTimeslot); // Tpt defined as num of served users per timeslot
 
     // Emit statitics per user
     for(auto it=users.begin(); it!=users.end(); ++it)
     {
-        emit(it->throughput_s, it->getServedBytes());
+       // emit(it->throughput_s, it->getServedBytes());
     }
 
 
@@ -305,13 +311,18 @@ void Antenna::downlinkPropagation()
 
 void Antenna::handleMessage(cMessage *msg)
 {
-    if(msg->isSelfMessage())
+    if(msg->getKind() == MSG_RR_TIMER)
     {
         downlinkPropagation();
         createFrame();
     }
-    else
-        handlePacket(check_and_cast<Packet*>(msg));
+    else if(msg->getKind() == MSG_PKT_TIMER)
+    {
+        int userId;
+        EV_DEBUG << "[ANTENNA PKT-TMR] A new packet should be generate: " << msg->getName() << endl;
+        sscanf(msg->getName(), "pkt-%d", &userId);
+        handlePacket(userId);
+    }
 }
 
 

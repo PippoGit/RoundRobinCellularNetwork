@@ -10,13 +10,11 @@
 
 ResourceBlock::ResourceBlock()
 {
-    this->sender    = -1;
     this->recipient = -1;
 }
 
-ResourceBlock::ResourceBlock(int sender, int recipient)
+ResourceBlock::ResourceBlock(int recipient)
 {
-    this->sender = sender;
     this->recipient = recipient;
 }
 
@@ -39,7 +37,6 @@ ResourceBlock::fragment_t ResourceBlock::getFragment(int i)
 
 ResourceBlock::ResourceBlock(const ResourceBlock &b)
 {
-    this->sender    = b.getSender();
     this->recipient = b.getRecipient();
     this->fragments = b.getFragments();
 }
@@ -48,18 +45,6 @@ ResourceBlock::ResourceBlock(const ResourceBlock &b)
 void ResourceBlock::setRecipient(int id)
 {
     recipient = id;
-}
-
-
-void ResourceBlock::setSender(int id)
-{
-    sender = id;
-}
-
-
-int ResourceBlock::getSender() const
-{
-    return sender;
 }
 
 

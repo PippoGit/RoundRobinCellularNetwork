@@ -13,6 +13,7 @@
 
 class ResourceBlock {
     public:
+        double remainingBytes;
         struct fragment_t {
             long   id;
             int    packetSize;
@@ -20,18 +21,15 @@ class ResourceBlock {
         };
 
     private:
-        int sender;
         int recipient;
         std::vector<fragment_t> fragments;
 
     public:
         ResourceBlock();
-        ResourceBlock(int sender, int recipient);
+        ResourceBlock(int recipient);
         ResourceBlock(const ResourceBlock &b);
 
-        virtual void    setSender(int id);
         virtual void    setRecipient(int id);
-        virtual int     getSender() const;
         virtual int     getRecipient() const;
 
         virtual void                      appendFragment(Packet* pkt, double fragmentSize);

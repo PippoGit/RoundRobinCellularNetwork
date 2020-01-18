@@ -16,6 +16,8 @@ private:
     int  servedBytes;
     bool served;
 
+    omnetpp::cMessage *timer;
+
 
 public: // too much stuff
     std::vector<ResourceBlock>::iterator lastRB;
@@ -45,6 +47,9 @@ public:
 
     virtual void incrementServedBytes(int bytes);
     virtual int  getServedBytes();
+
+    virtual void setTimer(omnetpp::cMessage *t);
+    omnetpp::cMessage* getTimer() { return timer; };
 };
 
 #endif /* USERINFORMATION_H_ */

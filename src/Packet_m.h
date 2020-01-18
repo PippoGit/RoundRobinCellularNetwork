@@ -23,7 +23,7 @@
  * <pre>
  * message Packet
  * {
- *     int senderID;
+ *     //  int senderID;
  *     int receiverID;
  *     int serviceDemand;
  *     simtime_t arrivalTime;
@@ -35,7 +35,6 @@
 class Packet : public ::omnetpp::cMessage
 {
   protected:
-    int senderID;
     int receiverID;
     int serviceDemand;
     ::omnetpp::simtime_t arrivalTime;
@@ -59,8 +58,6 @@ class Packet : public ::omnetpp::cMessage
     virtual void parsimUnpack(omnetpp::cCommBuffer *b) override;
 
     // field getter/setter methods
-    virtual int getSenderID() const;
-    virtual void setSenderID(int senderID);
     virtual int getReceiverID() const;
     virtual void setReceiverID(int receiverID);
     virtual int getServiceDemand() const;

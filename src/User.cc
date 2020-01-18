@@ -7,7 +7,7 @@ int User::NEXT_USER_ID;
 void User::initialize()
 {
     waitMessage=new cMessage("waitMessage");
-    scheduleAt(simTime(), waitMessage);
+    //scheduleAt(simTime(), waitMessage);
     userID = NEXT_USER_ID++;
 
     //Statistics
@@ -17,17 +17,14 @@ void User::initialize()
 void User::handleMessage(cMessage *msg)
 {
     if(msg->isSelfMessage()){
-        handleTimer();
+        // handleTimer();
     }
     else
     {
         Frame *f = check_and_cast<Frame*>(msg);
         handleFrame(f);
         //emit Signal
-
     }
-
-
 }
 
 void User::handleTimer()
@@ -61,8 +58,6 @@ void User::handleFrame(Frame* f)
 
 void User::createNewPacket(){
     Packet *packet = new Packet();
-
-    packet->setSenderID(this->userID);
 
     //for assumption: packet dimension between 1 and 75 bytes (La intuniform prende ENTRAMBI gli estremi)
     packet->setServiceDemand(intuniform(MIN_SERVICE_DEMAND, MAX_SERVICE_DEMAND, RNG_SERVICE_DEMAND)); //F: secondo me dovrebbe essere un double

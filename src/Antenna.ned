@@ -5,6 +5,7 @@ simple Antenna
     parameters:
         double timeslot @unit(s) = default(0.5s);
     	bool isBinomial=default(false); // binomial or uniform.
+	    double lambda @unit(s)=default(0.25s);
 
 	   	
     	//signals
