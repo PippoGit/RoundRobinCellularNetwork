@@ -198,8 +198,8 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
 
     }
 
-    // If the last RB was not filled i have to skip it....
-    if(from->getRecipient() == currentUserId) ++from;
+    // If the last RB was not filled (AND the frame is not full)
+    if(from != to && from->getRecipient() == currentUserId) ++from; // the next user should start at from+1
 }
 
 
