@@ -201,8 +201,7 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
 
 void Antenna::createFrame()
 {
-    int numIterations = 0;
-    std::vector<UserInformation>::iterator firstUser = currentUser;
+    std::vector<UserInformation>::iterator lastUser = currentUser;
     std::vector<ResourceBlock> vframe(FRAME_SIZE);
     std::vector<ResourceBlock>::iterator currentRB = vframe.begin();
 
@@ -220,8 +219,7 @@ void Antenna::createFrame()
 
         // Fill the frame with current user's queue and update currentRB index
         fillFrameWithCurrentUser(currentRB, vframe.end());
-        numIterations += (currentUser == firstUser);
-    } while(currentRB != vframe.end() && numIterations < 2);
+    } while(!(currentRB == vframe.end() || lastUser == firstUser));
 
     // 3) send the frame to all the users DURING NEXT TIMESLOT!
     this->frame = vectorToFrame(vframe);
