@@ -219,7 +219,7 @@ void Antenna::createFrame()
 
         // Fill the frame with current user's queue and update currentRB index
         fillFrameWithCurrentUser(currentRB, vframe.end());
-    } while(!(currentRB == vframe.end() || lastUser == firstUser));
+    } while(!(currentRB == vframe.end() || currentUser == lastUser ));
 
     // 3) send the frame to all the users DURING NEXT TIMESLOT!
     this->frame = vectorToFrame(vframe);
