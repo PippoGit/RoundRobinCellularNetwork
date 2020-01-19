@@ -13,7 +13,6 @@
 
 class ResourceBlock {
     public:
-        double remainingBytes;
         struct fragment_t {
             long   id;
             int    packetSize;
@@ -23,6 +22,7 @@ class ResourceBlock {
     private:
         int recipient;
         std::vector<fragment_t> fragments;
+        double remainingBytes;
 
     public:
         ResourceBlock();
@@ -36,6 +36,12 @@ class ResourceBlock {
         virtual int                       getNumFragments();
         virtual std::vector<fragment_t>   getFragments() const;
         virtual ResourceBlock::fragment_t getFragment(int i);
+
+        virtual void                      allocResourceBlock(int user, int cqiBytes);
+
+        bool  isAvailable()        { return (recipient == -1);   };
+        bool  isFull()             { return (remainingBytes==0); };
+        double getRemainingBytes() { return remainingBytes;      };
 };
 
 

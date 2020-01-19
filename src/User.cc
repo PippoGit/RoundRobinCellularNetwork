@@ -21,8 +21,8 @@ void User::handleMessage(cMessage *msg)
     }
     else
     {
-        Frame *f = check_and_cast<Frame*>(msg);
-        handleFrame(f);
+        //Frame *f = check_and_cast<Frame*>(msg);
+        // handleFrame(f);
         //emit Signal
     }
 }

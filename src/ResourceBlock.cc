@@ -26,6 +26,7 @@ void ResourceBlock::appendFragment(Packet *p, double fragmentSize)
         .fragmentSize = fragmentSize
     };
     fragments.push_back(fragment);
+    this->remainingBytes -= fragmentSize;
 }
 
 
@@ -45,6 +46,13 @@ ResourceBlock::ResourceBlock(const ResourceBlock &b)
 void ResourceBlock::setRecipient(int id)
 {
     recipient = id;
+}
+
+
+void ResourceBlock::allocResourceBlock(int user, int cqiBytes)
+{
+    recipient = user;
+    remainingBytes = cqiBytes;
 }
 
 

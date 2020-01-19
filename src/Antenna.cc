@@ -49,17 +49,15 @@ void Antenna::initialize()
 
 void Antenna::initUsersInformation()
 {
-    //THIS METHOD SHOULD RESET ALL THE INFORMATION THAT ARE VALID FOR A TIMESLOT
+    // THIS METHOD SHOULD RESET ALL THE INFORMATION THAT ARE VALID FOR A TIMESLOT
     // THROUGHPUT INFORMATION AND CQIs
+    bool isBinomial = par("isBinomial");
 
-    bool isBinomial=par("isBinomial");
     for(std::vector<UserInformation>::iterator it = users.begin(); it != users.end(); ++it)
     {
-        // VIRDIS-LIKE VERSION:
         int cqi = (isBinomial)?binomial(0, 0):intuniform(MIN_CQI, MAX_CQI);
         it->setCQI(cqi);
         it->shouldBeServed();
-
     }
     numServedUsersPerTimeslot = 0;
     numSentBytesPerTimeslot   = 0;
@@ -121,7 +119,7 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
         if(!packetsInformation[p->getId()].served)
         {
             packetsInformation[p->getId()].servedTime = simTime();
-            packetsInformation[p->getId()].served=true;
+            packetsInformation[p->getId()].served     = true;
         }
 
         double packetSize          = p->getServiceDemand(),
@@ -132,42 +130,47 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
         EV_DEBUG << "[CREATE_FRAME RR] PACKET TO INSERT" << endl;
         EV_DEBUG << "   PACKET SIZE  : " << packetSize << endl;
 
-
-        // I have to put the remainingBytes ONLY if that slot is half-full
         if(packetSize <= totalRemainingBytes)
         {
-
-            if(!currentUser->isServed()) {
+            // CurrentUser will now be "served"
+            // The user is consider for service only if there is enough space for the
+            // first packet in its queue
+            if(!currentUser->isServed())
+            {
                 numServedUsersPerTimeslot++;
                 currentUser->serveUser();
+
             }
 
-            numSentBytesPerTimeslot += packetSize; // ???
-            currentUser->incrementNumPendingPackets();
-
-            // If there is space, it means that i'm going to put the packet somewhere!
+            // If there is space, it means that i'm going to send that packet
             // SO the packet will become "pending"
             pendingPackets.push_back(p->getId());
+            numSentBytesPerTimeslot += packetSize;
+            currentUser->incrementNumPendingPackets();
 
-            //WHEN A PACKET INSERTED IN FRAME, START-FRAME-TIME
+            // WHEN A PACKET INSERTED IN FRAME, START-FRAME-TIME
             packetsInformation[p->getId()].frameTime = simTime();
-            packetsInformation[p->getId()].size = packetSize;
+            packetsInformation[p->getId()].size      = packetSize;
+
+            // The packet will be put somewhere in the frame, so decrease the number
+            // of bytes available in the frame (for this user)
+            totalRemainingBytes -= packetSize;
 
 
             /////////////////////////////////////////////////////
-
             EV_DEBUG << "[CREATE_FRAME RR] Inserting " << packetSize << "Bytes at " << (FRAME_SIZE) - (to - from) << endl;
             EV_DEBUG << "    REQUIRED RBs:   " << residualRequiredRBs << endl;
             EV_DEBUG << "    REMAINING RBs:  " << (to - from) << endl;
 
-
-            double fragmentSize;
             while(residualPacketSize > 0)
             {
                 // if nobody wrote on this RB, i'll take it!
-                if(from->getRecipient() == -1) from->remainingBytes = uCQI;
+                // if it is NOT available, it is because it was already allocated
+                // to currentUser in the previous iteration!
+                if(from->isAvailable())
+                    from->allocResourceBlock(currentUserId, uCQI);
 
-                fragmentSize = std::min(residualPacketSize, static_cast<double>(uCQI));
+                double fragmentSize = std::min(residualPacketSize, static_cast<double>(uCQI));
 
                 EV_DEBUG << "Adding fragment:    " << endl;
                 EV_DEBUG << "    FRAGMENT SIZE:  " << fragmentSize << endl;
@@ -175,29 +178,24 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
                 EV_DEBUG << "    REMAINING RBs:  " << (to - from) << endl;
                 EV_DEBUG << "    INDEX:          " << (FRAME_SIZE) - (to - from) << endl;
 
-                from->setRecipient(currentUserId);
                 from->appendFragment(p, fragmentSize);
 
                 residualPacketSize -= fragmentSize;
-                from->remainingBytes -= fragmentSize;
 
                 // if current RB is full, consider the next one
-                if(from->remainingBytes == 0)
+                if(from->isFull())
                     ++from;
             }
             /////////////////////////////////////////////////////
-
-            // 3) The packet was put somewhere...
-            totalRemainingBytes -= packetSize;
             queue->remove(p);
             delete p; // also delete the packet!
         }
         else break;
-
     }
 
     // If the last RB was not filled (AND the frame is not full)
-    if(from != to && from->getRecipient() == currentUserId) ++from; // the next user should start at from+1
+    if(from != to && from->getRecipient() == currentUserId)
+        ++from; // the next user should start at from+1
 }
 
 
@@ -221,15 +219,13 @@ void Antenna::createFrame()
 
         // Fill the frame with current user's queue and update currentRB index
         fillFrameWithCurrentUser(currentRB, vframe.end());
-
         numIterations += (currentUser == firstUser);
-    } while(currentRB != vframe.end() && numIterations < 2); // we don't care anymore about num iterations!
+    } while(currentRB != vframe.end() && numIterations < 2);
 
     // 3) send the frame to all the users DURING NEXT TIMESLOT!
     this->frame = vectorToFrame(vframe);
 
     // simtime_t meanResponseTime = (this->frame->getSumServiceTimes()+this->frame->getSumWaitingTimes()+timeslot)/this->frame->getNumPackets();
-
 
     // Schedule next iteration
     simtime_t timeslot_dt = par("timeslot");
@@ -240,7 +236,6 @@ void Antenna::createFrame()
 void Antenna::handlePacket(int userId)
 {
     EV_DEBUG << "[UPLINK] Create a new packet to be put into the queue of " << userId << endl;
-
 
     Packet *packet = new Packet();
     packet->setServiceDemand(intuniform(MIN_SERVICE_DEMAND, MAX_SERVICE_DEMAND, RNG_SERVICE_DEMAND));
@@ -281,7 +276,7 @@ void Antenna::downlinkPropagation()
     broadcastFrame(frame);
     EV_DEBUG << "[DOWNLINK] Broadcast propagation of the frame" << endl;
 
-    emit(throughput_s, numSentBytesPerTimeslot);     //Tpt defined as bytes sent per timeslot
+    emit(throughput_s,    numSentBytesPerTimeslot);   //Tpt defined as bytes sent per timeslot
     emit(numServedUser_s, numServedUsersPerTimeslot); // Tpt defined as num of served users per timeslot
 
     // Emit statitics per user
@@ -289,7 +284,6 @@ void Antenna::downlinkPropagation()
     {
        emit(it->throughput_s, it->getServedBytes());
     }
-
 
     pendingPackets.clear(); // clear the pending packets data structure...
 }
@@ -315,5 +309,8 @@ void Antenna::handleMessage(cMessage *msg)
 Antenna::~Antenna()
 {
     // delete []tptUser_s;
+    delete timer;
+    for(auto it=users.begin(); it!=users.end(); ++it)
+        delete it->getTimer();
 }
 
