@@ -210,16 +210,14 @@ void Antenna::createFrame()
     // 1) Get updated CQIs
     initUsersInformation();
 
-    // 2) Round-robin over  allthe users...
-    do
-    {
-        EV_DEBUG << "[CREATE_FRAME] Round Robin Starting Up..." <<endl;
-        // Select next queue
-        roundrobin();
-
-        // Fill the frame with current user's queue and update currentRB index
-        fillFrameWithCurrentUser(currentRB, vframe.end());
-    } while(!(currentRB == vframe.end() || currentUser == lastUser ));
+    roundrobin();
+        do
+        {
+            EV_DEBUG << "[CREATE_FRAME] Round Robin Starting Up..." <<endl;
+            // Fill the frame with current user's queue and update currentRB index
+            fillFrameWithCurrentUser(currentRB, vframe.end());
+            roundrobin();
+        } while(!(currentRB == vframe.end() || currentUser == lastUser));
 
     // 3) send the frame to all the users DURING NEXT TIMESLOT!
     this->frame = vectorToFrame(vframe);
