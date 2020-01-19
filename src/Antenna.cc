@@ -42,7 +42,7 @@ void Antenna::initialize()
     // schedule first iteration of RR algorithm
     frame = nullptr;
     scheduleAt(simTime(), timer);
-    numSentBytesPerTimeslot=0;
+    numSentBytesPerTimeslot   = 0;
     numServedUsersPerTimeslot = 0;
 }
 
@@ -194,7 +194,7 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
     }
 
     // If the last RB was not filled (AND the frame is not full)
-    if(from != to && from->getRecipient() == currentUserId)
+    if(!(from == to || from->isAvailable()))
         ++from; // the next user should start at from+1
 }
 
@@ -214,6 +214,7 @@ void Antenna::createFrame()
     // 2) Round-robin over  allthe users...
     do
     {
+        EV_DEBUG << "[CREATE_FRAME] Round Robin Starting Up..." <<endl;
         // Select next queue
         roundrobin();
 
@@ -249,7 +250,6 @@ void Antenna::handlePacket(int userId)
     users[userId].getQueue()->insert(packet);
 
     // SCHEDULE NEXT PACKET
-
     simtime_t lambda = par("lambda");
     scheduleAt(simTime() + exponential(lambda, RNG_INTERARRIVAL), users[userId].getTimer());
 }
@@ -274,12 +274,14 @@ void Antenna::downlinkPropagation()
     }
 
     broadcastFrame(frame);
-    EV_DEBUG << "[DOWNLINK] Broadcast propagation of the frame" << endl;
+    EV << "[DOWNLINK] Broadcast propagation of the frame" << endl;
 
+    EV << "[ANTENNA] Emitting signals for global statistics " << endl;
     emit(throughput_s,    numSentBytesPerTimeslot);   //Tpt defined as bytes sent per timeslot
     emit(numServedUser_s, numServedUsersPerTimeslot); // Tpt defined as num of served users per timeslot
 
     // Emit statitics per user
+    EV << "[ANTENNA] Emitting signals for user's statistics " << endl;
     for(auto it=users.begin(); it!=users.end(); ++it)
     {
        emit(it->throughput_s, it->getServedBytes());
