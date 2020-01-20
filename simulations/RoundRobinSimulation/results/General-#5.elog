@@ -1,0 +1,572 @@
+E # 0 t 0 m 1 ce -1 msg -1
+SB v 1285 rid General-5-20200120-09:57:21-2244 b 1000
+KF p -1 c "" s ""
+MC id 1 c omnetpp::cModule t roundrobincellularnetwork.simulations.RoundRobinSimulation.CellularNetwork n CellularNetwork cm 1
+MS id 1 d ""
+MC id 2 c Antenna t roundrobincellularnetwork.Antenna pid 1 n antenna
+MS id 2 d p=113,223
+MC id 3 c User t roundrobincellularnetwork.User pid 1 n user[0]
+GC m 3 g 0 n in o 0
+GC m 3 g 3 n out o 1
+MS id 3 d p=279,145
+MC id 4 c User t roundrobincellularnetwork.User pid 1 n user[1]
+GC m 4 g 0 n in o 0
+GC m 4 g 3 n out o 1
+MS id 4 d p=279,145
+MC id 5 c User t roundrobincellularnetwork.User pid 1 n user[2]
+GC m 5 g 0 n in o 0
+GC m 5 g 3 n out o 1
+MS id 5 d p=279,145
+MC id 6 c User t roundrobincellularnetwork.User pid 1 n user[3]
+GC m 6 g 0 n in o 0
+GC m 6 g 3 n out o 1
+MS id 6 d p=279,145
+MC id 7 c User t roundrobincellularnetwork.User pid 1 n user[4]
+GC m 7 g 0 n in o 0
+GC m 7 g 3 n out o 1
+MS id 7 d p=279,145
+MC id 8 c User t roundrobincellularnetwork.User pid 1 n user[5]
+GC m 8 g 0 n in o 0
+GC m 8 g 3 n out o 1
+MS id 8 d p=279,145
+MC id 9 c User t roundrobincellularnetwork.User pid 1 n user[6]
+GC m 9 g 0 n in o 0
+GC m 9 g 3 n out o 1
+MS id 9 d p=279,145
+MC id 10 c User t roundrobincellularnetwork.User pid 1 n user[7]
+GC m 10 g 0 n in o 0
+GC m 10 g 3 n out o 1
+MS id 10 d p=279,145
+MC id 11 c User t roundrobincellularnetwork.User pid 1 n user[8]
+GC m 11 g 0 n in o 0
+GC m 11 g 3 n out o 1
+MS id 11 d p=279,145
+MC id 12 c User t roundrobincellularnetwork.User pid 1 n user[9]
+GC m 12 g 0 n in o 0
+GC m 12 g 3 n out o 1
+MS id 12 d p=279,145
+GC m 2 g 2621440 n out i 0 o 1
+CC sm 2 sg 2621440 dm 3 dg 0
+GC m 2 g 1048576 n in i 0 o 0
+CC sm 3 sg 3 dm 2 dg 1048576
+GC m 2 g 2621441 n out i 1 o 1
+CC sm 2 sg 2621441 dm 4 dg 0
+GC m 2 g 1048577 n in i 1 o 0
+CC sm 4 sg 3 dm 2 dg 1048577
+GC m 2 g 2621442 n out i 2 o 1
+CC sm 2 sg 2621442 dm 5 dg 0
+GC m 2 g 1048578 n in i 2 o 0
+CC sm 5 sg 3 dm 2 dg 1048578
+GC m 2 g 2621443 n out i 3 o 1
+CC sm 2 sg 2621443 dm 6 dg 0
+GC m 2 g 1048579 n in i 3 o 0
+CC sm 6 sg 3 dm 2 dg 1048579
+GC m 2 g 2621444 n out i 4 o 1
+CC sm 2 sg 2621444 dm 7 dg 0
+GC m 2 g 1048580 n in i 4 o 0
+CC sm 7 sg 3 dm 2 dg 1048580
+GC m 2 g 2621445 n out i 5 o 1
+CC sm 2 sg 2621445 dm 8 dg 0
+GC m 2 g 1048581 n in i 5 o 0
+CC sm 8 sg 3 dm 2 dg 1048581
+GC m 2 g 2621446 n out i 6 o 1
+CC sm 2 sg 2621446 dm 9 dg 0
+GC m 2 g 1048582 n in i 6 o 0
+CC sm 9 sg 3 dm 2 dg 1048582
+GC m 2 g 2621447 n out i 7 o 1
+CC sm 2 sg 2621447 dm 10 dg 0
+GC m 2 g 1048583 n in i 7 o 0
+CC sm 10 sg 3 dm 2 dg 1048583
+GC m 2 g 2621448 n out i 8 o 1
+CC sm 2 sg 2621448 dm 11 dg 0
+GC m 2 g 1048584 n in i 8 o 0
+CC sm 11 sg 3 dm 2 dg 1048584
+GC m 2 g 2621449 n out i 9 o 1
+CC sm 2 sg 2621449 dm 12 dg 0
+GC m 2 g 1048585 n in i 9 o 0
+CC sm 12 sg 3 dm 2 dg 1048585
+MB sm 1 tm 2 m initialize(0)
+CM id 0 tid 0 eid 0 etid 0 c omnetpp::cMessage n roundrobin pe -1
+CM id 1 tid 1 eid 1 etid 1 c omnetpp::cMessage n pkt-0 pe -1
+BS id 1 tid 1 eid 1 etid 1 c omnetpp::cMessage n pkt-0 pe 0
+ES t 0
+CM id 2 tid 2 eid 2 etid 2 c omnetpp::cMessage n pkt-1 pe -1
+BS id 2 tid 2 eid 2 etid 2 c omnetpp::cMessage n pkt-1 pe 0
+ES t 0
+CM id 3 tid 3 eid 3 etid 3 c omnetpp::cMessage n pkt-2 pe -1
+BS id 3 tid 3 eid 3 etid 3 c omnetpp::cMessage n pkt-2 pe 0
+ES t 0
+CM id 4 tid 4 eid 4 etid 4 c omnetpp::cMessage n pkt-3 pe -1
+BS id 4 tid 4 eid 4 etid 4 c omnetpp::cMessage n pkt-3 pe 0
+ES t 0
+CM id 5 tid 5 eid 5 etid 5 c omnetpp::cMessage n pkt-4 pe -1
+BS id 5 tid 5 eid 5 etid 5 c omnetpp::cMessage n pkt-4 pe 0
+ES t 0
+CM id 6 tid 6 eid 6 etid 6 c omnetpp::cMessage n pkt-5 pe -1
+BS id 6 tid 6 eid 6 etid 6 c omnetpp::cMessage n pkt-5 pe 0
+ES t 0
+CM id 7 tid 7 eid 7 etid 7 c omnetpp::cMessage n pkt-6 pe -1
+BS id 7 tid 7 eid 7 etid 7 c omnetpp::cMessage n pkt-6 pe 0
+ES t 0
+CM id 8 tid 8 eid 8 etid 8 c omnetpp::cMessage n pkt-7 pe -1
+BS id 8 tid 8 eid 8 etid 8 c omnetpp::cMessage n pkt-7 pe 0
+ES t 0
+CM id 9 tid 9 eid 9 etid 9 c omnetpp::cMessage n pkt-8 pe -1
+BS id 9 tid 9 eid 9 etid 9 c omnetpp::cMessage n pkt-8 pe 0
+ES t 0
+CM id 10 tid 10 eid 10 etid 10 c omnetpp::cMessage n pkt-9 pe -1
+BS id 10 tid 10 eid 10 etid 10 c omnetpp::cMessage n pkt-9 pe 0
+ES t 0
+BS id 0 tid 0 eid 0 etid 0 c omnetpp::cMessage n roundrobin k 1 pe 0
+ES t 0
+ME
+MB sm 1 tm 3 m initialize(0)
+CM id 11 tid 11 eid 11 etid 11 c omnetpp::cMessage n waitMessage pe -1
+ME
+MB sm 1 tm 4 m initialize(0)
+CM id 12 tid 12 eid 12 etid 12 c omnetpp::cMessage n waitMessage pe -1
+ME
+MB sm 1 tm 5 m initialize(0)
+CM id 13 tid 13 eid 13 etid 13 c omnetpp::cMessage n waitMessage pe -1
+ME
+MB sm 1 tm 6 m initialize(0)
+CM id 14 tid 14 eid 14 etid 14 c omnetpp::cMessage n waitMessage pe -1
+ME
+MB sm 1 tm 7 m initialize(0)
+CM id 15 tid 15 eid 15 etid 15 c omnetpp::cMessage n waitMessage pe -1
+ME
+MB sm 1 tm 8 m initialize(0)
+CM id 16 tid 16 eid 16 etid 16 c omnetpp::cMessage n waitMessage pe -1
+ME
+MB sm 1 tm 9 m initialize(0)
+CM id 17 tid 17 eid 17 etid 17 c omnetpp::cMessage n waitMessage pe -1
+ME
+MB sm 1 tm 10 m initialize(0)
+CM id 18 tid 18 eid 18 etid 18 c omnetpp::cMessage n waitMessage pe -1
+ME
+MB sm 1 tm 11 m initialize(0)
+CM id 19 tid 19 eid 19 etid 19 c omnetpp::cMessage n waitMessage pe -1
+ME
+MB sm 1 tm 12 m initialize(0)
+CM id 20 tid 20 eid 20 etid 20 c omnetpp::cMessage n waitMessage pe -1
+ME
+
+E # 1 t 0 m 2 ce 0 msg 1
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a new packet to be put into the queue of 0
+CM id 21 tid 21 eid 21 etid 21 c omnetpp::cMessage n "" pe -1
+- INFO (Antenna)CellularNetwork.antenna: [DEBUG_ISH?] the packet is generated at (Packet)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Adding some random service demand for the packet
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Setting the recipient for the packet (0)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a data structure for the new packet with ID 21
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 21 in the packetsInformation hashmap
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 21 in the Queue for the user 0
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Scheduling next packet for User-0
+BS id 1 tid 1 eid 1 etid 1 c omnetpp::cMessage n pkt-0 pe 1
+ES t 0.036417777558
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Done!
+
+E # 2 t 0 m 2 ce 0 msg 2
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a new packet to be put into the queue of 1
+CM id 22 tid 22 eid 22 etid 22 c omnetpp::cMessage n "" pe -1
+- INFO (Antenna)CellularNetwork.antenna: [DEBUG_ISH?] the packet is generated at (Packet)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Adding some random service demand for the packet
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Setting the recipient for the packet (1)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a data structure for the new packet with ID 22
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 22 in the packetsInformation hashmap
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 22 in the Queue for the user 1
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Scheduling next packet for User-1
+BS id 2 tid 2 eid 2 etid 2 c omnetpp::cMessage n pkt-1 pe 2
+ES t 0.055296517949
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Done!
+
+E # 3 t 0 m 2 ce 0 msg 3
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a new packet to be put into the queue of 2
+CM id 23 tid 23 eid 23 etid 23 c omnetpp::cMessage n "" pe -1
+- INFO (Antenna)CellularNetwork.antenna: [DEBUG_ISH?] the packet is generated at (Packet)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Adding some random service demand for the packet
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Setting the recipient for the packet (2)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a data structure for the new packet with ID 23
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 23 in the packetsInformation hashmap
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 23 in the Queue for the user 2
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Scheduling next packet for User-2
+BS id 3 tid 3 eid 3 etid 3 c omnetpp::cMessage n pkt-2 pe 3
+ES t 0.146837901749
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Done!
+
+E # 4 t 0 m 2 ce 0 msg 4
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a new packet to be put into the queue of 3
+CM id 24 tid 24 eid 24 etid 24 c omnetpp::cMessage n "" pe -1
+- INFO (Antenna)CellularNetwork.antenna: [DEBUG_ISH?] the packet is generated at (Packet)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Adding some random service demand for the packet
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Setting the recipient for the packet (3)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a data structure for the new packet with ID 24
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 24 in the packetsInformation hashmap
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 24 in the Queue for the user 3
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Scheduling next packet for User-3
+BS id 4 tid 4 eid 4 etid 4 c omnetpp::cMessage n pkt-3 pe 4
+ES t 0.010227651904
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Done!
+
+E # 5 t 0 m 2 ce 0 msg 5
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a new packet to be put into the queue of 4
+CM id 25 tid 25 eid 25 etid 25 c omnetpp::cMessage n "" pe -1
+- INFO (Antenna)CellularNetwork.antenna: [DEBUG_ISH?] the packet is generated at (Packet)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Adding some random service demand for the packet
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Setting the recipient for the packet (4)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a data structure for the new packet with ID 25
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 25 in the packetsInformation hashmap
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 25 in the Queue for the user 4
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Scheduling next packet for User-4
+BS id 5 tid 5 eid 5 etid 5 c omnetpp::cMessage n pkt-4 pe 5
+ES t 0.072506405055
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Done!
+
+E # 6 t 0 m 2 ce 0 msg 6
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a new packet to be put into the queue of 5
+CM id 26 tid 26 eid 26 etid 26 c omnetpp::cMessage n "" pe -1
+- INFO (Antenna)CellularNetwork.antenna: [DEBUG_ISH?] the packet is generated at (Packet)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Adding some random service demand for the packet
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Setting the recipient for the packet (5)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a data structure for the new packet with ID 26
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 26 in the packetsInformation hashmap
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 26 in the Queue for the user 5
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Scheduling next packet for User-5
+BS id 6 tid 6 eid 6 etid 6 c omnetpp::cMessage n pkt-5 pe 6
+ES t 0.076089556874
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Done!
+
+E # 7 t 0 m 2 ce 0 msg 7
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a new packet to be put into the queue of 6
+CM id 27 tid 27 eid 27 etid 27 c omnetpp::cMessage n "" pe -1
+- INFO (Antenna)CellularNetwork.antenna: [DEBUG_ISH?] the packet is generated at (Packet)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Adding some random service demand for the packet
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Setting the recipient for the packet (6)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a data structure for the new packet with ID 27
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 27 in the packetsInformation hashmap
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 27 in the Queue for the user 6
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Scheduling next packet for User-6
+BS id 7 tid 7 eid 7 etid 7 c omnetpp::cMessage n pkt-6 pe 7
+ES t 0.016591859039
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Done!
+
+E # 8 t 0 m 2 ce 0 msg 8
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a new packet to be put into the queue of 7
+CM id 28 tid 28 eid 28 etid 28 c omnetpp::cMessage n "" pe -1
+- INFO (Antenna)CellularNetwork.antenna: [DEBUG_ISH?] the packet is generated at (Packet)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Adding some random service demand for the packet
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Setting the recipient for the packet (7)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a data structure for the new packet with ID 28
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 28 in the packetsInformation hashmap
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 28 in the Queue for the user 7
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Scheduling next packet for User-7
+BS id 8 tid 8 eid 8 etid 8 c omnetpp::cMessage n pkt-7 pe 8
+ES t 0.042655044763
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Done!
+
+E # 9 t 0 m 2 ce 0 msg 9
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a new packet to be put into the queue of 8
+CM id 29 tid 29 eid 29 etid 29 c omnetpp::cMessage n "" pe -1
+- INFO (Antenna)CellularNetwork.antenna: [DEBUG_ISH?] the packet is generated at (Packet)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Adding some random service demand for the packet
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Setting the recipient for the packet (8)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a data structure for the new packet with ID 29
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 29 in the packetsInformation hashmap
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 29 in the Queue for the user 8
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Scheduling next packet for User-8
+BS id 9 tid 9 eid 9 etid 9 c omnetpp::cMessage n pkt-8 pe 9
+ES t 0.012490123343
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Done!
+
+E # 10 t 0 m 2 ce 0 msg 10
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a new packet to be put into the queue of 9
+CM id 30 tid 30 eid 30 etid 30 c omnetpp::cMessage n "" pe -1
+- INFO (Antenna)CellularNetwork.antenna: [DEBUG_ISH?] the packet is generated at (Packet)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Adding some random service demand for the packet
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Setting the recipient for the packet (9)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a data structure for the new packet with ID 30
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 30 in the packetsInformation hashmap
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 30 in the Queue for the user 9
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Scheduling next packet for User-9
+BS id 10 tid 10 eid 10 etid 10 c omnetpp::cMessage n pkt-9 pe 10
+ES t 0.029162082157
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Done!
+
+E # 11 t 0 m 2 ce 0 msg 0
+DM id 21 tid 21 eid 21 etid 21 c omnetpp::cMessage n "" pe 1
+DM id 22 tid 22 eid 22 etid 22 c omnetpp::cMessage n "" pe 2
+DM id 23 tid 23 eid 23 etid 23 c omnetpp::cMessage n "" pe 3
+DM id 24 tid 24 eid 24 etid 24 c omnetpp::cMessage n "" pe 4
+DM id 25 tid 25 eid 25 etid 25 c omnetpp::cMessage n "" pe 5
+DM id 26 tid 26 eid 26 etid 26 c omnetpp::cMessage n "" pe 6
+DM id 27 tid 27 eid 27 etid 27 c omnetpp::cMessage n "" pe 7
+DM id 28 tid 28 eid 28 etid 28 c omnetpp::cMessage n "" pe 8
+DM id 29 tid 29 eid 29 etid 29 c omnetpp::cMessage n "" pe 9
+CM id 31 tid 31 eid 31 etid 31 c omnetpp::cMessage n "" pe -1
+BS id 0 tid 0 eid 0 etid 0 c omnetpp::cMessage n roundrobin k 1 pe 11
+ES t 0.1
+
+E # 12 t 0.010227651904 m 2 ce 4 msg 4
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a new packet to be put into the queue of 3
+CM id 32 tid 32 eid 32 etid 32 c omnetpp::cMessage n "" pe -1
+- INFO (Antenna)CellularNetwork.antenna: [DEBUG_ISH?] the packet is generated at (Packet)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Adding some random service demand for the packet
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Setting the recipient for the packet (3)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a data structure for the new packet with ID 32
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 32 in the packetsInformation hashmap
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 32 in the Queue for the user 3
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Scheduling next packet for User-3
+BS id 4 tid 4 eid 4 etid 4 c omnetpp::cMessage n pkt-3 pe 12
+ES t 0.068181143002
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Done!
+
+E # 13 t 0.012490123343 m 2 ce 9 msg 9
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a new packet to be put into the queue of 8
+CM id 33 tid 33 eid 33 etid 33 c omnetpp::cMessage n "" pe -1
+- INFO (Antenna)CellularNetwork.antenna: [DEBUG_ISH?] the packet is generated at (Packet)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Adding some random service demand for the packet
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Setting the recipient for the packet (8)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a data structure for the new packet with ID 33
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 33 in the packetsInformation hashmap
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 33 in the Queue for the user 8
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Scheduling next packet for User-8
+BS id 9 tid 9 eid 9 etid 9 c omnetpp::cMessage n pkt-8 pe 13
+ES t 0.02265687228
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Done!
+
+E # 14 t 0.016591859039 m 2 ce 7 msg 7
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a new packet to be put into the queue of 6
+CM id 34 tid 34 eid 34 etid 34 c omnetpp::cMessage n "" pe -1
+- INFO (Antenna)CellularNetwork.antenna: [DEBUG_ISH?] the packet is generated at (Packet)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Adding some random service demand for the packet
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Setting the recipient for the packet (6)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a data structure for the new packet with ID 34
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 34 in the packetsInformation hashmap
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 34 in the Queue for the user 6
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Scheduling next packet for User-6
+BS id 7 tid 7 eid 7 etid 7 c omnetpp::cMessage n pkt-6 pe 14
+ES t 0.025736297411
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Done!
+
+E # 15 t 0.02265687228 m 2 ce 13 msg 9
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a new packet to be put into the queue of 8
+CM id 35 tid 35 eid 35 etid 35 c omnetpp::cMessage n "" pe -1
+- INFO (Antenna)CellularNetwork.antenna: [DEBUG_ISH?] the packet is generated at (Packet)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Adding some random service demand for the packet
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Setting the recipient for the packet (8)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a data structure for the new packet with ID 35
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 35 in the packetsInformation hashmap
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 35 in the Queue for the user 8
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Scheduling next packet for User-8
+BS id 9 tid 9 eid 9 etid 9 c omnetpp::cMessage n pkt-8 pe 15
+ES t 0.027914905678
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Done!
+
+E # 16 t 0.025736297411 m 2 ce 14 msg 7
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a new packet to be put into the queue of 6
+CM id 36 tid 36 eid 36 etid 36 c omnetpp::cMessage n "" pe -1
+- INFO (Antenna)CellularNetwork.antenna: [DEBUG_ISH?] the packet is generated at (Packet)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Adding some random service demand for the packet
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Setting the recipient for the packet (6)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a data structure for the new packet with ID 36
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 36 in the packetsInformation hashmap
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 36 in the Queue for the user 6
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Scheduling next packet for User-6
+BS id 7 tid 7 eid 7 etid 7 c omnetpp::cMessage n pkt-6 pe 16
+ES t 0.050651717534
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Done!
+
+E # 17 t 0.027914905678 m 2 ce 15 msg 9
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a new packet to be put into the queue of 8
+CM id 37 tid 37 eid 37 etid 37 c omnetpp::cMessage n "" pe -1
+- INFO (Antenna)CellularNetwork.antenna: [DEBUG_ISH?] the packet is generated at (Packet)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Adding some random service demand for the packet
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Setting the recipient for the packet (8)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a data structure for the new packet with ID 37
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 37 in the packetsInformation hashmap
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 37 in the Queue for the user 8
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Scheduling next packet for User-8
+BS id 9 tid 9 eid 9 etid 9 c omnetpp::cMessage n pkt-8 pe 17
+ES t 0.040315710765
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Done!
+
+E # 18 t 0.029162082157 m 2 ce 10 msg 10
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a new packet to be put into the queue of 9
+CM id 38 tid 38 eid 38 etid 38 c omnetpp::cMessage n "" pe -1
+- INFO (Antenna)CellularNetwork.antenna: [DEBUG_ISH?] the packet is generated at (Packet)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Adding some random service demand for the packet
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Setting the recipient for the packet (9)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a data structure for the new packet with ID 38
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 38 in the packetsInformation hashmap
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 38 in the Queue for the user 9
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Scheduling next packet for User-9
+BS id 10 tid 10 eid 10 etid 10 c omnetpp::cMessage n pkt-9 pe 18
+ES t 0.077285667463
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Done!
+
+E # 19 t 0.036417777558 m 2 ce 1 msg 1
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a new packet to be put into the queue of 0
+CM id 39 tid 39 eid 39 etid 39 c omnetpp::cMessage n "" pe -1
+- INFO (Antenna)CellularNetwork.antenna: [DEBUG_ISH?] the packet is generated at (Packet)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Adding some random service demand for the packet
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Setting the recipient for the packet (0)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a data structure for the new packet with ID 39
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 39 in the packetsInformation hashmap
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 39 in the Queue for the user 0
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Scheduling next packet for User-0
+BS id 1 tid 1 eid 1 etid 1 c omnetpp::cMessage n pkt-0 pe 19
+ES t 0.126007480422
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Done!
+
+E # 20 t 0.040315710765 m 2 ce 17 msg 9
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a new packet to be put into the queue of 8
+CM id 40 tid 40 eid 40 etid 40 c omnetpp::cMessage n "" pe -1
+- INFO (Antenna)CellularNetwork.antenna: [DEBUG_ISH?] the packet is generated at (Packet)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Adding some random service demand for the packet
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Setting the recipient for the packet (8)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a data structure for the new packet with ID 40
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 40 in the packetsInformation hashmap
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 40 in the Queue for the user 8
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Scheduling next packet for User-8
+BS id 9 tid 9 eid 9 etid 9 c omnetpp::cMessage n pkt-8 pe 20
+ES t 0.066861183424
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Done!
+
+E # 21 t 0.042655044763 m 2 ce 8 msg 8
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a new packet to be put into the queue of 7
+CM id 41 tid 41 eid 41 etid 41 c omnetpp::cMessage n "" pe -1
+- INFO (Antenna)CellularNetwork.antenna: [DEBUG_ISH?] the packet is generated at (Packet)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Adding some random service demand for the packet
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Setting the recipient for the packet (7)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a data structure for the new packet with ID 41
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 41 in the packetsInformation hashmap
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 41 in the Queue for the user 7
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Scheduling next packet for User-7
+BS id 8 tid 8 eid 8 etid 8 c omnetpp::cMessage n pkt-7 pe 21
+ES t 0.070478053058
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Done!
+
+E # 22 t 0.050651717534 m 2 ce 16 msg 7
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a new packet to be put into the queue of 6
+CM id 42 tid 42 eid 42 etid 42 c omnetpp::cMessage n "" pe -1
+- INFO (Antenna)CellularNetwork.antenna: [DEBUG_ISH?] the packet is generated at (Packet)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Adding some random service demand for the packet
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Setting the recipient for the packet (6)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a data structure for the new packet with ID 42
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 42 in the packetsInformation hashmap
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 42 in the Queue for the user 6
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Scheduling next packet for User-6
+BS id 7 tid 7 eid 7 etid 7 c omnetpp::cMessage n pkt-6 pe 22
+ES t 0.050775113582
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Done!
+
+E # 23 t 0.050775113582 m 2 ce 22 msg 7
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a new packet to be put into the queue of 6
+CM id 43 tid 43 eid 43 etid 43 c omnetpp::cMessage n "" pe -1
+- INFO (Antenna)CellularNetwork.antenna: [DEBUG_ISH?] the packet is generated at (Packet)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Adding some random service demand for the packet
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Setting the recipient for the packet (6)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a data structure for the new packet with ID 43
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 43 in the packetsInformation hashmap
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 43 in the Queue for the user 6
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Scheduling next packet for User-6
+BS id 7 tid 7 eid 7 etid 7 c omnetpp::cMessage n pkt-6 pe 23
+ES t 0.121012871137
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Done!
+
+E # 24 t 0.055296517949 m 2 ce 2 msg 2
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a new packet to be put into the queue of 1
+CM id 44 tid 44 eid 44 etid 44 c omnetpp::cMessage n "" pe -1
+- INFO (Antenna)CellularNetwork.antenna: [DEBUG_ISH?] the packet is generated at (Packet)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Adding some random service demand for the packet
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Setting the recipient for the packet (1)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a data structure for the new packet with ID 44
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 44 in the packetsInformation hashmap
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 44 in the Queue for the user 1
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Scheduling next packet for User-1
+BS id 2 tid 2 eid 2 etid 2 c omnetpp::cMessage n pkt-1 pe 24
+ES t 0.163018643279
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Done!
+
+E # 25 t 0.066861183424 m 2 ce 20 msg 9
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a new packet to be put into the queue of 8
+CM id 45 tid 45 eid 45 etid 45 c omnetpp::cMessage n "" pe -1
+- INFO (Antenna)CellularNetwork.antenna: [DEBUG_ISH?] the packet is generated at (Packet)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Adding some random service demand for the packet
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Setting the recipient for the packet (8)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a data structure for the new packet with ID 45
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 45 in the packetsInformation hashmap
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 45 in the Queue for the user 8
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Scheduling next packet for User-8
+BS id 9 tid 9 eid 9 etid 9 c omnetpp::cMessage n pkt-8 pe 25
+ES t 0.355126351401
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Done!
+
+E # 26 t 0.068181143002 m 2 ce 12 msg 4
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a new packet to be put into the queue of 3
+CM id 46 tid 46 eid 46 etid 46 c omnetpp::cMessage n "" pe -1
+- INFO (Antenna)CellularNetwork.antenna: [DEBUG_ISH?] the packet is generated at (Packet)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Adding some random service demand for the packet
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Setting the recipient for the packet (3)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a data structure for the new packet with ID 46
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 46 in the packetsInformation hashmap
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 46 in the Queue for the user 3
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Scheduling next packet for User-3
+BS id 4 tid 4 eid 4 etid 4 c omnetpp::cMessage n pkt-3 pe 26
+ES t 0.176299497546
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Done!
+
+E # 27 t 0.070478053058 m 2 ce 21 msg 8
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a new packet to be put into the queue of 7
+CM id 47 tid 47 eid 47 etid 47 c omnetpp::cMessage n "" pe -1
+- INFO (Antenna)CellularNetwork.antenna: [DEBUG_ISH?] the packet is generated at (Packet)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Adding some random service demand for the packet
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Setting the recipient for the packet (7)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a data structure for the new packet with ID 47
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 47 in the packetsInformation hashmap
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 47 in the Queue for the user 7
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Scheduling next packet for User-7
+BS id 8 tid 8 eid 8 etid 8 c omnetpp::cMessage n pkt-7 pe 27
+ES t 0.070482207919
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Done!
+
+E # 28 t 0.070482207919 m 2 ce 27 msg 8
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a new packet to be put into the queue of 7
+CM id 48 tid 48 eid 48 etid 48 c omnetpp::cMessage n "" pe -1
+- INFO (Antenna)CellularNetwork.antenna: [DEBUG_ISH?] the packet is generated at (Packet)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Adding some random service demand for the packet
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Setting the recipient for the packet (7)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a data structure for the new packet with ID 48
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 48 in the packetsInformation hashmap
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 48 in the Queue for the user 7
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Scheduling next packet for User-7
+BS id 8 tid 8 eid 8 etid 8 c omnetpp::cMessage n pkt-7 pe 28
+ES t 0.088345226956
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Done!
+
+E # 29 t 0.072506405055 m 2 ce 5 msg 5
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a new packet to be put into the queue of 4
+CM id 49 tid 49 eid 49 etid 49 c omnetpp::cMessage n "" pe -1
+- INFO (Antenna)CellularNetwork.antenna: [DEBUG_ISH?] the packet is generated at (Packet)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Adding some random service demand for the packet
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Setting the recipient for the packet (4)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a data structure for the new packet with ID 49
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 49 in the packetsInformation hashmap
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 49 in the Queue for the user 4
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Scheduling next packet for User-4
+BS id 5 tid 5 eid 5 etid 5 c omnetpp::cMessage n pkt-4 pe 29
+ES t 0.25889748296
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Done!
+
+E # 30 t 0.076089556874 m 2 ce 6 msg 6
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a new packet to be put into the queue of 5
+CM id 50 tid 50 eid 50 etid 50 c omnetpp::cMessage n "" pe -1
+- INFO (Antenna)CellularNetwork.antenna: [DEBUG_ISH?] the packet is generated at (Packet)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Adding some random service demand for the packet
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Setting the recipient for the packet (5)
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Create a data structure for the new packet with ID 50
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 50 in the packetsInformation hashmap
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Inserting packet with ID 50 in the Queue for the user 5
+- INFO (Antenna)CellularNetwork.antenna: [UPLINK] Scheduling next packet for User-5
+BS id 6 tid 6 eid 6 etid 6 c omnetpp::cMessage n pkt-5 pe 30
+ES t 0.12061849682
+- INFO (Antenna)Ce

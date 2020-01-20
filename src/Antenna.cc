@@ -211,21 +211,19 @@ void Antenna::createFrame()
     initUsersInformation();
 
     do
-            {
-                EV_DEBUG << "[CREATE_FRAME] Round Robin Starting Up..." <<endl;
-                roundrobin();
+    {
+        EV_DEBUG << "[CREATE_FRAME] Round Robin Starting Up..." <<endl;
+        roundrobin();
 
-                if(currentUser == lastUser)
-                   break;
+        if(currentUser == lastUser)
+           break;
 
-                // Fill the frame with current user's queue and update currentRB index
-                fillFrameWithCurrentUser(currentRB, vframe.end());
-            } while(currentRB != vframe.end());
+        // Fill the frame with current user's queue and update currentRB index
+        fillFrameWithCurrentUser(currentRB, vframe.end());
+    } while(currentRB != vframe.end());
 
     // 3) send the frame to all the users DURING NEXT TIMESLOT!
     this->frame = vectorToFrame(vframe);
-
-    // simtime_t meanResponseTime = (this->frame->getSumServiceTimes()+this->frame->getSumWaitingTimes()+timeslot)/this->frame->getNumPackets();
 
     // Schedule next iteration
     simtime_t timeslot_dt = par("timeslot");
@@ -235,22 +233,39 @@ void Antenna::createFrame()
 
 void Antenna::handlePacket(int userId)
 {
-    EV_DEBUG << "[UPLINK] Create a new packet to be put into the queue of " << userId << endl;
-
+    EV << "[UPLINK] Create a new packet to be put into the queue of " << userId << endl;
     Packet *packet = new Packet();
+
+    if (packet != nullptr)
+        EV << "[DEBUG_ISH?] the packet is generated at " << packet << endl;
+
+    EV << "[UPLINK] Adding some random service demand for the packet" << endl;
     packet->setServiceDemand(intuniform(MIN_SERVICE_DEMAND, MAX_SERVICE_DEMAND, RNG_SERVICE_DEMAND));
+    EV << "[UPLINK] Setting the recipient for the packet (" << userId <<")" << endl;
     packet->setReceiverID(userId);
 
+    EV << "[UPLINK] Create a data structure for the new packet with ID " << packet->getId() << endl;
     // this is a new packet! so we are going to keep its info somewhere!
     Antenna::packet_info_t i;
     i.arrivalTime = simTime();
     i.served = false;
+
+    EV << "[UPLINK] Inserting packet with ID " << packet->getId() << " in the packetsInformation hashmap" << endl;
     packetsInformation.insert(std::pair<long, Antenna::packet_info_t>(packet->getId(), i));
+
+    EV << "[UPLINK] Inserting packet with ID " << packet->getId() << " in the Queue for the user " << userId << endl;
+
+    if(users[userId].getQueue() == nullptr) {
+        EV << " I don't know why, but the queue is a nullpotr??" << endl;
+    }
+
     users[userId].getQueue()->insert(packet);
 
     // SCHEDULE NEXT PACKET
+    EV << "[UPLINK] Scheduling next packet for User-" << userId << endl;
     simtime_t lambda = par("lambda");
     scheduleAt(simTime() + exponential(lambda, RNG_INTERARRIVAL), users[userId].getTimer());
+    EV << "[UPLINK] Done!" << endl;
 }
 
 
@@ -292,6 +307,8 @@ void Antenna::downlinkPropagation()
 
 void Antenna::handleMessage(cMessage *msg)
 {
+    EV << "[ANTENNA] New message to be handled! \n" << msg->detailedInfo() << endl;
+
     if(msg->getKind() == MSG_RR_TIMER)
     {
         downlinkPropagation();
