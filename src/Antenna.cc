@@ -254,16 +254,19 @@ void Antenna::handlePacket(int userId)
     packetsInformation.insert(std::pair<long, Antenna::packet_info_t>(packet->getId(), i));
 
     EV << "[UPLINK] Inserting packet with ID " << packet->getId() << " in the Queue for the user " << userId << endl;
+    EV << "[UPLINK] Getting the queue... " << endl;
+    cQueue *q = users[userId].getQueue();
+    EV << "[UPLINK] Queue: " << q << endl;
 
-    if(users[userId].getQueue() == nullptr) {
-        EV << " I don't know why, but the queue is a nullpotr??" << endl;
-    }
+    EV << "[UPLINK] Inserting packet " << packet << endl;
+    q->insert(packet);
+    EV << "[UPLINK] INSERTED! "<< endl;
 
-    users[userId].getQueue()->insert(packet);
 
     // SCHEDULE NEXT PACKET
     EV << "[UPLINK] Scheduling next packet for User-" << userId << endl;
     simtime_t lambda = par("lambda");
+    EV << " LAMBDA: " << lambda << " DOUBLE: " << lambda.dbl() << endl;
     scheduleAt(simTime() + exponential(lambda, RNG_INTERARRIVAL), users[userId].getTimer());
     EV << "[UPLINK] Done!" << endl;
 }
@@ -307,17 +310,20 @@ void Antenna::downlinkPropagation()
 
 void Antenna::handleMessage(cMessage *msg)
 {
-    EV << "[ANTENNA] New message to be handled! \n" << msg->detailedInfo() << endl;
+    EV << "[ANTENNA] New message to be handled!" << endl;
 
     if(msg->getKind() == MSG_RR_TIMER)
     {
+        EV << " [ANTENA RR] Start propagation of the previous frame..." << endl;
         downlinkPropagation();
+        EV << " [*** ANTENA RR ***] Create new frame..." << endl;
         createFrame();
+        EV << " [*** ANTENA RR ***] DONE!" << endl;
     }
     else if(msg->getKind() == MSG_PKT_TIMER)
     {
         int userId;
-        EV_DEBUG << "[ANTENNA PKT-TMR] A new packet should be generate: " << msg->getName() << endl;
+        EV << "[ANTENNA PKT-TMR] A new packet should be generate: " << msg->getName() << endl;
         sscanf(msg->getName(), "pkt-%d", &userId);
         handlePacket(userId);
     }
@@ -327,8 +333,9 @@ void Antenna::handleMessage(cMessage *msg)
 Antenna::~Antenna()
 {
     // delete []tptUser_s;
-    delete timer;
-    for(auto it=users.begin(); it!=users.end(); ++it)
-        delete it->getTimer();
+
+    // delete timer;
+    // for(auto it=users.begin(); it!=users.end(); ++it)
+        // delete it->getTimer();
 }
 
