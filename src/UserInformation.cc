@@ -15,7 +15,7 @@ UserInformation::UserInformation()
     numPendingPackets = 0;
 }
 
-void UserInformation::setTimer(omnetpp::cMessage* t)
+void UserInformation::setTimer(PacketTimer* t)
 {
     timer = t;
 }
@@ -30,7 +30,6 @@ int UserInformation::getUserId()
 void UserInformation::setCQI(int cqi)
 {
     CQI = cqi;
-    // remainingBytes = CQIToBytes();
 }
 
 int UserInformation::getNumPendingPackets()

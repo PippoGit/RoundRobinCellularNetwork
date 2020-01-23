@@ -25,7 +25,6 @@ void Antenna::initialize()
     for(int i=0; i < NUM_USERS; i++)
     {
         std::string signal_name;
-        std::string timer_name;
         std::stringstream sstream;
 
         sstream << "tptUser-" << i;
@@ -37,9 +36,8 @@ void Antenna::initialize()
         getEnvir()->addResultRecorders(this, signal, signal_name.c_str(), statisticTemplate);
         users[i].throughput_s = signal;
 
-        sstream << "pkt-" << i;
-        timer_name = sstream.str();
-        cMessage *tmr = new cMessage(timer_name.c_str());
+        PacketTimer *tmr = new PacketTimer();
+        tmr->setUserId(i);
         tmr->setKind(MSG_PKT_TIMER);
         users[i].setTimer(tmr);
         scheduleAt(simTime(), tmr);
@@ -255,6 +253,7 @@ void Antenna::handlePacket(int userId)
     Antenna::packet_info_t i;
     i.arrivalTime = simTime();
     i.served = false;
+    i.recipient = userId;
 
     EV << "[UPLINK] Inserting packet with ID " << packet->getId() << " in the packetsInformation hashmap" << endl;
     packetsInformation.insert(std::pair<long, Antenna::packet_info_t>(packet->getId(), i));
@@ -291,7 +290,7 @@ void Antenna::downlinkPropagation()
         emit(responseTime_s, info.propagationTime.dbl() - info.arrivalTime.dbl());
 
         // Increment bytes sent for this user...
-        users[info.sender].incrementServedBytes(info.size);
+        users[info.recipient].incrementServedBytes(info.size);
 
         packetsInformation.erase(id); // remove the packet from the hash table
     }
@@ -328,11 +327,9 @@ void Antenna::handleMessage(cMessage *msg)
     }
     else if(msg->getKind() == MSG_PKT_TIMER)
     {
-        int userId;
-        EV << "[ANTENNA PKT-TMR] A new packet should be generate: " << msg->getName() << endl;
-        EV << msg->getName() << endl;
-        sscanf(msg->getName(), "pkt-%d", &userId);
-        handlePacket(userId);
+        PacketTimer *t = check_and_cast<PacketTimer*>(msg);
+        EV << "[ANTENNA PKT-TMR] A new packet should be generate: " << t->getUserId() << endl;
+        handlePacket(t->getUserId());
     }
 }
 

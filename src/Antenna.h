@@ -6,6 +6,7 @@
 #include "ResourceBlock.h"
 #include "Packet_m.h"
 #include "Frame_m.h"
+#include "PacketTimer_m.h"
 #include "constants.h"
 
 using namespace omnetpp;
@@ -16,7 +17,7 @@ class Antenna : public cSimpleModule
 
     struct packet_info_t
     {
-        int       sender;
+        int       recipient;
 
         simtime_t arrivalTime;     // inserted into the queue
         simtime_t servedTime;      // removed from the queue

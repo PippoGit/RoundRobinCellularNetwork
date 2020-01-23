@@ -5,6 +5,7 @@
 #include <vector>
 #include "ResourceBlock.h"
 #include "constants.h"
+#include "PacketTimer_m.h"
 
 class UserInformation {
 private:
@@ -16,7 +17,7 @@ private:
     int  servedBytes;
     bool served;
 
-    omnetpp::cMessage *timer;
+    PacketTimer *timer;
 
 
 public:
@@ -49,8 +50,8 @@ public:
     virtual void incrementServedBytes(int bytes);
     virtual int  getServedBytes();
 
-    virtual void setTimer(omnetpp::cMessage *t);
-    omnetpp::cMessage* getTimer() { return timer; };
+    virtual void setTimer(PacketTimer *t);
+    PacketTimer* getTimer() { return timer; };
 };
 
 #endif /* USERINFORMATION_H_ */
