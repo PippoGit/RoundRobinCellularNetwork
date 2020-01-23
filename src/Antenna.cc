@@ -24,16 +24,22 @@ void Antenna::initialize()
 
     for(int i=0; i < NUM_USERS; i++)
     {
-        char signalName[30];
-        sprintf(signalName, "tptUser-%d", i);
-        simsignal_t signal = registerSignal(signalName);
+        std::string signal_name;
+        std::string timer_name;
+        std::stringstream sstream;
+
+        sstream << "tptUser-" << i;
+        signal_name = sstream.str();
+        sstream.str(std::string()); // clear the stream
+
+        simsignal_t signal = registerSignal(signal_name.c_str());
         cProperty *statisticTemplate = getProperties()->get("statisticTemplate", "tptUserTemplate");
-        getEnvir()->addResultRecorders(this, signal, signalName, statisticTemplate);
+        getEnvir()->addResultRecorders(this, signal, signal_name.c_str(), statisticTemplate);
         users[i].throughput_s = signal;
 
-        char tmrName[30];
-        sprintf(tmrName, "pkt-%d", i);
-        cMessage *tmr = new cMessage(tmrName);
+        sstream << "pkt-" << i;
+        timer_name = sstream.str();
+        cMessage *tmr = new cMessage(timer_name.c_str());
         tmr->setKind(MSG_PKT_TIMER);
         users[i].setTimer(tmr);
         scheduleAt(simTime(), tmr);
@@ -324,11 +330,20 @@ void Antenna::handleMessage(cMessage *msg)
     {
         int userId;
         EV << "[ANTENNA PKT-TMR] A new packet should be generate: " << msg->getName() << endl;
+        EV << msg->getName() << endl;
         sscanf(msg->getName(), "pkt-%d", &userId);
         handlePacket(userId);
     }
 }
 
+
+void Antenna::finish() {
+    // drop(timer);
+
+    delete timer;
+    for(auto it=users.begin(); it!=users.end(); ++it)
+        delete it->getTimer();
+}
 
 Antenna::~Antenna()
 {

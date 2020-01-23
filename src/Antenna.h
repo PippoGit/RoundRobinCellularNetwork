@@ -53,6 +53,7 @@ class Antenna : public cSimpleModule
 
   protected:
     virtual ~Antenna();
+    virtual void finish();
 
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
