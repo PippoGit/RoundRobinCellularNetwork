@@ -16,25 +16,11 @@ void User::initialize()
 
 void User::handleMessage(cMessage *msg)
 {
-    if(msg->isSelfMessage()){
-        // handleTimer();
-    }
-    else
-    {
         Frame *f = check_and_cast<Frame*>(msg);
         handleFrame(f);
-        //emit Signal
-    }
 }
 
-void User::handleTimer()
-{
-    createNewPacket();
-    simtime_t lambda = par("lambda");
-    interArrivalTime = exponential(lambda, RNG_INTERARRIVAL);
-    this->scheduleAt(simTime() + interArrivalTime, waitMessage);
 
-}
 
 void User::handleFrame(Frame* f)
 {
@@ -56,14 +42,4 @@ void User::handleFrame(Frame* f)
     delete(f);
 }
 
-void User::createNewPacket(){
-    Packet *packet = new Packet();
 
-    //for assumption: packet dimension between 1 and 75 bytes (La intuniform prende ENTRAMBI gli estremi)
-    packet->setServiceDemand(intuniform(MIN_SERVICE_DEMAND, MAX_SERVICE_DEMAND, RNG_SERVICE_DEMAND)); //F: secondo me dovrebbe essere un double
-
-    int numUsers = this->getParentModule()->par("nUsers");
-    packet->setReceiverID(intuniform(MIN_USERS, numUsers - 1, RNG_RECIPIENT)); // la INT UNIFORM prende anche gli estremi!
-
-    send(packet, "out");
-}
