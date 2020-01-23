@@ -27,14 +27,7 @@ void User::handleMessage(cMessage *msg)
     }
 }
 
-void User::handleTimer()
-{
-    createNewPacket();
-    simtime_t lambda = par("lambda");
-    interArrivalTime = exponential(lambda, RNG_INTERARRIVAL);
-    this->scheduleAt(simTime() + interArrivalTime, waitMessage);
 
-}
 
 void User::handleFrame(Frame* f)
 {
