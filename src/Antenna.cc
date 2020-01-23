@@ -337,9 +337,11 @@ void Antenna::handleMessage(cMessage *msg)
 void Antenna::finish() {
     // drop(timer);
 
-    delete timer;
+    cancelAndDelete(timer);
     for(auto it=users.begin(); it!=users.end(); ++it)
-        delete it->getTimer();
+        cancelAndDelete(it->getTimer());
+
+    cancelAndDelete(frame);
 }
 
 Antenna::~Antenna()

@@ -1,0 +1,51 @@
+file 2100167 1579789111                                         
+version 2
+run General-0-20200123-15:18:26-57028
+attr configname General
+attr datetime 20200123-15:18:26
+attr experiment General
+attr inifile omnetpp.ini
+attr iterationvars ""
+attr iterationvarsf ""
+attr measurement ""
+attr network CellularNetwork
+attr processid 57028
+attr repetition 0
+attr replication #0
+attr resultdir results
+attr runnumber 0
+attr seedset 0
+param **.nUsers 10
+param **.antenna.timeslot 1ms
+param **.antenna.lambda 0.08s
+
+vector 0 CellularNetwork.antenna responseTime:vector ETV
+attr source responseTime
+vector 1 CellularNetwork.antenna throughput:vector ETV
+attr source throughput
+vector 2 CellularNetwork.antenna NumServedUser:vector ETV
+attr source NumServedUser
+vector 3 CellularNetwork.antenna tptUser-0:vector ETV
+vector 4 CellularNetwork.antenna tptUser-1:vector ETV
+vector 5 CellularNetwork.antenna tptUser-2:vector ETV
+vector 6 CellularNetwork.antenna tptUser-3:vector ETV
+vector 7 CellularNetwork.antenna tptUser-4:vector ETV
+vector 8 CellularNetwork.antenna tptUser-5:vector ETV
+vector 9 CellularNetwork.antenna tptUser-6:vector ETV
+vector 10 CellularNetwork.antenna tptUser-7:vector ETV
+vector 11 CellularNetwork.antenna tptUser-8:vector ETV
+vector 12 CellularNetwork.antenna tptUser-9:vector ETV
+0	1264 40095 12 111141 0.001 9.99 1229 0.001 4.881 206.35441490791 686.76418156691
+1	41359 169890 12 111251 0.001 10 10000 0 1955 46760 6785218
+2	211249 168900 12 111251 0.001 10 10000 0 8 1131 1285
+3	380149 169014 12 111251 0.001 10 10000 0 470 5322 462492
+4	549163 169006 12 111251 0.001 10 10000 0 110 4682 236572
+5	718169 169012 12 111251 0.001 10 10000 0 75 4524 221916
+6	887181 168971 12 111251 0.001 10 10000 0 240 3250 209826
+7	1056152 169010 12 111251 0.001 10 10000 0 75 4828 244852
+8	1225162 169008 12 111251 0.001 10 10000 0 75 4336 213220
+9	1394170 169015 12 111251 0.001 10 10000 0 75 4715 229065
+10	1563185 179006 12 111251 0.001 10 10000 0 413 5013 407069
+11	1742191 179000 12 111251 0.001 10 10000 0 75 4490 225072
+12	1921191 178974 12 111251 0.001 10 10000 0 1955 5600 4136252
+

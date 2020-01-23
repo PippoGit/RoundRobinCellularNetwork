@@ -6,11 +6,7 @@ int User::NEXT_USER_ID;
 
 void User::initialize()
 {
-    waitMessage=new cMessage("waitMessage");
-    //scheduleAt(simTime(), waitMessage);
     userID = NEXT_USER_ID++;
-
-    //Statistics
 
 }
 
