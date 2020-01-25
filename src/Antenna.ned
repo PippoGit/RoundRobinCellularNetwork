@@ -6,7 +6,7 @@ simple Antenna
         double timeslot @unit(s) = default(0.5s);
     	bool isBinomial=default(false); // binomial or uniform.
 	    double lambda @unit(s)=default(0.5s);
-
+		double successProb;
 	   	
     	//signals
 

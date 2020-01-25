@@ -6,11 +6,11 @@
  */
 
 #include "UserInformation.h"
-// int UserInformation::NEXT_USER_ID;
+int NEXT_USER_ID;
 
 UserInformation::UserInformation()
 {
-    // id = NEXT_USER_ID++; // this thing should work because stuff don't change over time... (iguess)
+    id = NEXT_USER_ID++; // this thing should work because stuff don't change over time... (iguess)
     CQI = 0; //before FIRST utilization the CQI should be generated
     numPendingPackets = 0;
 }
@@ -20,12 +20,11 @@ void UserInformation::setTimer(PacketTimer* t)
     timer = t;
 }
 
-/*
-int UserInformation::getUserId()
+
+int UserInformation::getId()
 {
     return id;
 }
-*/
 
 void UserInformation::setCQI(int cqi)
 {

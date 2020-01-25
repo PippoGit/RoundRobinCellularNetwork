@@ -7,9 +7,11 @@
 #include "constants.h"
 #include "PacketTimer_m.h"
 
+
+
 class UserInformation {
 private:
-    // int id;
+    int id;
     omnetpp::cQueue FIFOQueue;
     int CQI;
     int numPendingPackets;
@@ -32,6 +34,7 @@ public:
     UserInformation();
     virtual ~UserInformation();
     virtual void generateCQI(omnetpp::cRNG*RNG, bool isBinomial);
+    virtual int getId();
 
     virtual int              CQIToBytes();
     virtual omnetpp::cQueue* getQueue();

@@ -56,10 +56,12 @@ void Antenna::initUsersInformation()
     // THIS METHOD SHOULD RESET ALL THE INFORMATION THAT ARE VALID FOR A TIMESLOT
     // THROUGHPUT INFORMATION AND CQIs
     bool isBinomial = par("isBinomial");
-
+    double successProb = par("successProb");
     for(std::vector<UserInformation>::iterator it = users.begin(); it != users.end(); ++it)
     {
-        int cqi = (isBinomial)?binomial(0, 0):intuniform(MIN_CQI, MAX_CQI);
+        double p = (it->getId()%2)? successProb: 1-successProb;
+        int cqi = (isBinomial)?binomial(BINOMIAL_N, p):intuniform(MIN_CQI, MAX_CQI);
+        EV <<"User: "<<it->getId()<< " - p: "<<p<<" - cqi: "<<cqi<<endl;
         it->setCQI(cqi);
         it->shouldBeServed();
     }
