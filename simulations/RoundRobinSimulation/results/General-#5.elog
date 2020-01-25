@@ -1,5 +1,5 @@
 E # 0 t 0 m 1 ce -1 msg -1
-SB v 1285 rid General-5-20200125-13:22:13-72632 b 1000
+SB v 1285 rid General-5-20200125-16:27:42-38372 b 1000
 KF p -1 c "" s ""
 MC id 1 c omnetpp::cModule t roundrobincellularnetwork.simulations.RoundRobinSimulation.CellularNetwork n CellularNetwork cm 1
 MS id 1 d ""

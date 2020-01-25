@@ -1,5 +1,5 @@
 E # 0 t 0 m 1 ce -1 msg -1
-SB v 1285 rid General-0-20200125-13:22:47-72364 b 1000
+SB v 1285 rid General-0-20200125-16:28:11-37928 b 1000
 KF p -1 c "" s ""
 MC id 1 c omnetpp::cModule t roundrobincellularnetwork.simulations.RoundRobinSimulation.CellularNetwork n CellularNetwork cm 1
 MS id 1 d ""
@@ -355,21 +355,21 @@ E # 11 t 0 m 2 ce 0 msg 0
 - INFO (Antenna)CellularNetwork.antenna: [ANTENNA] New message to be handled!
 - INFO (Antenna)CellularNetwork.antenna:  [ANTENA RR] Start propagation of the previous frame...
 - INFO (Antenna)CellularNetwork.antenna:  [*** ANTENA RR ***] Create new frame...
-- INFO (Antenna)CellularNetwork.antenna: User: 0 - p: 0.8 - cqi: 11
-- INFO (Antenna)CellularNetwork.antenna: User: 1 - p: 0.2 - cqi: 2
-- INFO (Antenna)CellularNetwork.antenna: User: 2 - p: 0.8 - cqi: 9
-- INFO (Antenna)CellularNetwork.antenna: User: 3 - p: 0.2 - cqi: 3
-- INFO (Antenna)CellularNetwork.antenna: User: 4 - p: 0.8 - cqi: 15
-- INFO (Antenna)CellularNetwork.antenna: User: 5 - p: 0.2 - cqi: 2
-- INFO (Antenna)CellularNetwork.antenna: User: 6 - p: 0.8 - cqi: 14
-- INFO (Antenna)CellularNetwork.antenna: User: 7 - p: 0.2 - cqi: 2
-- INFO (Antenna)CellularNetwork.antenna: User: 8 - p: 0.8 - cqi: 13
-- INFO (Antenna)CellularNetwork.antenna: User: 9 - p: 0.2 - cqi: 3
-DM id 11 tid 11 eid 11 etid 11 c omnetpp::cMessage n "" pe 1
+- INFO (Antenna)CellularNetwork.antenna: User: 0 - p: 0.2 - cqi: 0
+- INFO (Antenna)CellularNetwork.antenna: User: 1 - p: 0.2 - cqi: 1
+- INFO (Antenna)CellularNetwork.antenna: User: 2 - p: 0.2 - cqi: 4
+- INFO (Antenna)CellularNetwork.antenna: User: 3 - p: 0.5 - cqi: 3
+- INFO (Antenna)CellularNetwork.antenna: User: 4 - p: 0.5 - cqi: 10
+- INFO (Antenna)CellularNetwork.antenna: User: 5 - p: 0.5 - cqi: 6
+- INFO (Antenna)CellularNetwork.antenna: User: 6 - p: 0.5 - cqi: 7
+- INFO (Antenna)CellularNetwork.antenna: User: 7 - p: 0.9 - cqi: 11
+- INFO (Antenna)CellularNetwork.antenna: User: 8 - p: 0.9 - cqi: 14
+- INFO (Antenna)CellularNetwork.antenna: User: 9 - p: 0.9 - cqi: 12
 DM id 12 tid 12 eid 12 etid 12 c omnetpp::cMessage n "" pe 2
 DM id 13 tid 13 eid 13 etid 13 c omnetpp::cMessage n "" pe 3
 DM id 14 tid 14 eid 14 etid 14 c omnetpp::cMessage n "" pe 4
 DM id 15 tid 15 eid 15 etid 15 c omnetpp::cMessage n "" pe 5
+DM id 16 tid 16 eid 16 etid 16 c omnetpp::cMessage n "" pe 6
 DM id 17 tid 17 eid 17 etid 17 c omnetpp::cMessage n "" pe 7
 DM id 18 tid 18 eid 18 etid 18 c omnetpp::cMessage n "" pe 8
 DM id 19 tid 19 eid 19 etid 19 c omnetpp::cMessage n "" pe 9
@@ -2872,46 +2872,25 @@ DM id 21 tid 21 eid 21 etid 21 c omnetpp::cMessage n "" pe 128
 - INFO (Antenna)CellularNetwork.antenna: [ANTENNA] Emitting signals for global statistics 
 - INFO (Antenna)CellularNetwork.antenna: [ANTENNA] Emitting signals for user's statistics 
 - INFO (Antenna)CellularNetwork.antenna:  [*** ANTENA RR ***] Create new frame...
-- INFO (Antenna)CellularNetwork.antenna: User: 0 - p: 0.8 - cqi: 12
-- INFO (Antenna)CellularNetwork.antenna: User: 1 - p: 0.2 - cqi: 2
-- INFO (Antenna)CellularNetwork.antenna: User: 2 - p: 0.8 - cqi: 13
-- INFO (Antenna)CellularNetwork.antenna: User: 3 - p: 0.2 - cqi: 3
-- INFO (Antenna)CellularNetwork.antenna: User: 4 - p: 0.8 - cqi: 10
-- INFO (Antenna)CellularNetwork.antenna: User: 5 - p: 0.2 - cqi: 1
-- INFO (Antenna)CellularNetwork.antenna: User: 6 - p: 0.8 - cqi: 14
-- INFO (Antenna)CellularNetwork.antenna: User: 7 - p: 0.2 - cqi: 3
-- INFO (Antenna)CellularNetwork.antenna: User: 8 - p: 0.8 - cqi: 13
-- INFO (Antenna)CellularNetwork.antenna: User: 9 - p: 0.2 - cqi: 2
+- INFO (Antenna)CellularNetwork.antenna: User: 0 - p: 0.2 - cqi: 3
+- INFO (Antenna)CellularNetwork.antenna: User: 1 - p: 0.2 - cqi: 3
+- INFO (Antenna)CellularNetwork.antenna: User: 2 - p: 0.2 - cqi: 3
+- INFO (Antenna)CellularNetwork.antenna: User: 3 - p: 0.5 - cqi: 7
+- INFO (Antenna)CellularNetwork.antenna: User: 4 - p: 0.5 - cqi: 7
+- INFO (Antenna)CellularNetwork.antenna: User: 5 - p: 0.5 - cqi: 4
+- INFO (Antenna)CellularNetwork.antenna: User: 6 - p: 0.5 - cqi: 6
+- INFO (Antenna)CellularNetwork.antenna: User: 7 - p: 0.9 - cqi: 13
+- INFO (Antenna)CellularNetwork.antenna: User: 8 - p: 0.9 - cqi: 14
+- INFO (Antenna)CellularNetwork.antenna: User: 9 - p: 0.9 - cqi: 13
+DM id 11 tid 11 eid 11 etid 11 c omnetpp::cMessage n "" pe 1
 DM id 35 tid 35 eid 35 etid 35 c omnetpp::cMessage n "" pe 25
 DM id 42 tid 42 eid 42 etid 42 c omnetpp::cMessage n "" pe 32
-DM id 52 tid 52 eid 52 etid 52 c omnetpp::cMessage n "" pe 42
-DM id 56 tid 56 eid 56 etid 56 c omnetpp::cMessage n "" pe 46
-DM id 64 tid 64 eid 64 etid 64 c omnetpp::cMessage n "" pe 54
-DM id 68 tid 68 eid 68 etid 68 c omnetpp::cMessage n "" pe 58
-DM id 75 tid 75 eid 75 etid 75 c omnetpp::cMessage n "" pe 65
-DM id 77 tid 77 eid 77 etid 77 c omnetpp::cMessage n "" pe 67
-DM id 89 tid 89 eid 89 etid 89 c omnetpp::cMessage n "" pe 79
-DM id 90 tid 90 eid 90 etid 90 c omnetpp::cMessage n "" pe 80
-DM id 92 tid 92 eid 92 etid 92 c omnetpp::cMessage n "" pe 82
-DM id 100 tid 100 eid 100 etid 100 c omnetpp::cMessage n "" pe 90
-DM id 108 tid 108 eid 108 etid 108 c omnetpp::cMessage n "" pe 98
-DM id 112 tid 112 eid 112 etid 112 c omnetpp::cMessage n "" pe 102
-DM id 117 tid 117 eid 117 etid 117 c omnetpp::cMessage n "" pe 107
-DM id 137 tid 137 eid 137 etid 137 c omnetpp::cMessage n "" pe 127
 DM id 22 tid 22 eid 22 etid 22 c omnetpp::cMessage n "" pe 12
 DM id 53 tid 53 eid 53 etid 53 c omnetpp::cMessage n "" pe 43
+DM id 58 tid 58 eid 58 etid 58 c omnetpp::cMessage n "" pe 48
+DM id 60 tid 60 eid 60 etid 60 c omnetpp::cMessage n "" pe 50
 DM id 40 tid 40 eid 40 etid 40 c omnetpp::cMessage n "" pe 30
-DM id 54 tid 54 eid 54 etid 54 c omnetpp::cMessage n "" pe 44
-DM id 67 tid 67 eid 67 etid 67 c omnetpp::cMessage n "" pe 57
-DM id 87 tid 87 eid 87 etid 87 c omnetpp::cMessage n "" pe 77
-DM id 102 tid 102 eid 102 etid 102 c omnetpp::cMessage n "" pe 92
-DM id 127 tid 127 eid 127 etid 127 c omnetpp::cMessage n "" pe 117
-DM id 134 tid 134 eid 134 etid 134 c omnetpp::cMessage n "" pe 124
 DM id 47 tid 47 eid 47 etid 47 c omnetpp::cMessage n "" pe 37
-DM id 27 tid 27 eid 27 etid 27 c omnetpp::cMessage n "" pe 17
-DM id 31 tid 31 eid 31 etid 31 c omnetpp::cMessage n "" pe 21
-DM id 34 tid 34 eid 34 etid 34 c omnetpp::cMessage n "" pe 24
-DM id 41 tid 41 eid 41 etid 41 c omnetpp::cMessage n "" pe 31
 CM id 158 tid 158 eid 158 etid 158 c omnetpp::cMessage n "" pe -1
 BS id 0 tid 0 eid 0 etid 0 c omnetpp::cMessage n roundrobin k 1 pe 128
 ES t 0.002
@@ -2919,10 +2898,6 @@ ES t 0.002
 
 E # 129 t 0.001 m 3 ce 128 msg 138
 - INFO (User)CellularNetwork.user[0]: [USER] I have received a frame... Here is the content:
-- INFO (User)CellularNetwork.user[0]: [USER] There are 1 fragments
-- INFO (User)CellularNetwork.user[0]:    ID PKT:   11
-- INFO (User)CellularNetwork.user[0]:    PKT SIZE: 38
-- INFO (User)CellularNetwork.user[0]:    FRG SIZE: 38
 DM id 138 tid 21 eid 138 etid 21 c omnetpp::cMessage n "" pe 129
 
 E # 130 t 0.001 m 4 ce 128 msg 140
@@ -2954,9 +2929,41 @@ E # 131 t 0.001 m 5 ce 128 msg 142
 - INFO (User)CellularNetwork.user[2]: [USER] There are 1 fragments
 - INFO (User)CellularNetwork.user[2]:    ID PKT:   13
 - INFO (User)CellularNetwork.user[2]:    PKT SIZE: 73
-- INFO (User)CellularNetwork.user[2]:    FRG SIZE: 39
+- INFO (User)CellularNetwork.user[2]:    FRG SIZE: 11
 - INFO (User)CellularNetwork.user[2]: [USER] There are 1 fragments
 - INFO (User)CellularNetwork.user[2]:    ID PKT:   13
 - INFO (User)CellularNetwork.user[2]:    PKT SIZE: 73
-- INFO (User)CellularNetwork.user[2]:    FRG SIZE: 34
+- INFO (User)CellularNetwork.user[2]:    FRG SIZE: 11
+- INFO (User)CellularNetwork.user[2]: [USER] There are 1 fragments
+- INFO (User)CellularNetwork.user[2]:    ID PKT:   13
+- INFO (User)CellularNetwork.user[2]:    PKT SIZE: 73
+- INFO (User)CellularNetwork.user[2]:    FRG SIZE: 11
+- INFO (User)CellularNetwork.user[2]: [USER] There are 1 fragments
+- INFO (User)CellularNetwork.user[2]:    ID PKT:   13
+- INFO (User)CellularNetwork.user[2]:    PKT SIZE: 73
+- INFO (User)CellularNetwork.user[2]:    FRG SIZE: 11
+- INFO (User)CellularNetwork.user[2]: [USER] There are 1 fragments
+- INFO (User)CellularNetwork.user[2]:    ID PKT:   13
+- INFO (User)CellularNetwork.user[2]:    PKT SIZE: 73
+- INFO (User)CellularNetwork.user[2]:    FRG SIZE: 11
+- INFO (User)CellularNetwork.user[2]: [USER] There are 1 fragments
+- INFO (User)CellularNetwork.user[2]:    ID PKT:   13
+- INFO (User)CellularNetwork.user[2]:    PKT SIZE: 73
+- INFO (User)CellularNetwork.user[2]:    FRG SIZE: 11
+- INFO (User)CellularNetwork.user[2]: [USER] There are 1 fragments
+- INFO (User)CellularNetwork.user[2]:    ID PKT:   13
+- INFO (User)CellularNetwork.user[2]:    PKT SIZE: 73
+- INFO (User)CellularNetwork.user[2]:    FRG SIZE: 7
 DM id 142 tid 21 eid 142 etid 21 c omnetpp::cMessage n "" pe 131
+
+E # 132 t 0.001 m 6 ce 128 msg 144
+- INFO (User)CellularNetwork.user[3]: [USER] I have received a frame... Here is the content:
+- INFO (User)CellularNetwork.user[3]: [USER] There are 1 fragments
+- INFO (User)CellularNetwork.user[3]:    ID PKT:   14
+- INFO (User)CellularNetwork.user[3]:    PKT SIZE: 10
+- INFO (User)CellularNetwork.user[3]:    FRG SIZE: 6
+- INFO (User)CellularNetwork.user[3]: [USER] There are 1 fragments
+- INFO (User)CellularNetwork.user[3]:    ID PKT:   14
+- INFO (User)CellularNetwork.user[3]:    PKT SIZE: 10
+- INFO (User)CellularNetwork.user[3]:    FRG SIZE: 4
+DM id 144 tid 21 eid 144 etid 21 c omnetpp::cMessage n "" pe 132
