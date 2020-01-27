@@ -241,43 +241,43 @@ void Antenna::createFrame()
 
 void Antenna::handlePacket(int userId)
 {
-    EV << "[UPLINK] Create a new packet to be put into the queue of " << userId << endl;
+    EV_DEBUG << "[UPLINK] Create a new packet to be put into the queue of " << userId << endl;
     Packet *packet = new Packet();
 
     if (packet != nullptr)
-        EV << "[DEBUG_ISH?] the packet is generated at " << packet << endl;
+        EV_DEBUG << "[DEBUG_ISH?] the packet is generated at " << packet << endl;
 
-    EV << "[UPLINK] Adding some random service demand for the packet" << endl;
+    EV_DEBUG << "[UPLINK] Adding some random service demand for the packet" << endl;
     packet->setServiceDemand(intuniform(MIN_SERVICE_DEMAND, MAX_SERVICE_DEMAND, RNG_SERVICE_DEMAND));
-    EV << "[UPLINK] Setting the recipient for the packet (" << userId <<")" << endl;
+    EV_DEBUG << "[UPLINK] Setting the recipient for the packet (" << userId <<")" << endl;
     packet->setReceiverID(userId);
 
-    EV << "[UPLINK] Create a data structure for the new packet with ID " << packet->getId() << endl;
+    EV_DEBUG << "[UPLINK] Create a data structure for the new packet with ID " << packet->getId() << endl;
     // this is a new packet! so we are going to keep its info somewhere!
     Antenna::packet_info_t i;
     i.arrivalTime = simTime();
     i.served = false;
     i.recipient = userId;
 
-    EV << "[UPLINK] Inserting packet with ID " << packet->getId() << " in the packetsInformation hashmap" << endl;
+    EV_DEBUG << "[UPLINK] Inserting packet with ID " << packet->getId() << " in the packetsInformation hashmap" << endl;
     packetsInformation.insert(std::pair<long, Antenna::packet_info_t>(packet->getId(), i));
 
-    EV << "[UPLINK] Inserting packet with ID " << packet->getId() << " in the Queue for the user " << userId << endl;
-    EV << "[UPLINK] Getting the queue... " << endl;
+    EV_DEBUG << "[UPLINK] Inserting packet with ID " << packet->getId() << " in the Queue for the user " << userId << endl;
+    EV_DEBUG << "[UPLINK] Getting the queue... " << endl;
     cQueue *q = users[userId].getQueue();
-    EV << "[UPLINK] Queue: " << q << endl;
+    EV_DEBUG << "[UPLINK] Queue: " << q << endl;
 
-    EV << "[UPLINK] Inserting packet " << packet << endl;
+    EV_DEBUG << "[UPLINK] Inserting packet " << packet << endl;
     q->insert(packet);
-    EV << "[UPLINK] INSERTED! "<< endl;
+    EV_DEBUG << "[UPLINK] INSERTED! "<< endl;
 
 
     // SCHEDULE NEXT PACKET
-    EV << "[UPLINK] Scheduling next packet for User-" << userId << endl;
+    EV_DEBUG << "[UPLINK] Scheduling next packet for User-" << userId << endl;
     simtime_t lambda = par("lambda");
-    EV << " LAMBDA: " << lambda << " DOUBLE: " << lambda.dbl() << endl;
+    EV_DEBUG << " LAMBDA: " << lambda << " DOUBLE: " << lambda.dbl() << endl;
     scheduleAt(simTime() + exponential(lambda, RNG_INTERARRIVAL), users[userId].getTimer());
-    EV << "[UPLINK] Done!" << endl;
+    EV_DEBUG << "[UPLINK] Done!" << endl;
 }
 
 
@@ -300,14 +300,14 @@ void Antenna::downlinkPropagation()
     }
 
     broadcastFrame(frame);
-    EV << "[DOWNLINK] Broadcast propagation of the frame" << endl;
+    EV_DEBUG << "[DOWNLINK] Broadcast propagation of the frame" << endl;
 
-    EV << "[ANTENNA] Emitting signals for global statistics " << endl;
+    EV_DEBUG << "[ANTENNA] Emitting signals for global statistics " << endl;
     emit(throughput_s,    numSentBytesPerTimeslot);   //Tpt defined as bytes sent per timeslot
     emit(numServedUser_s, numServedUsersPerTimeslot); // Tpt defined as num of served users per timeslot
 
     // Emit statitics per user
-    EV << "[ANTENNA] Emitting signals for user's statistics " << endl;
+    EV_DEBUG << "[ANTENNA] Emitting signals for user's statistics " << endl;
     for(auto it=users.begin(); it!=users.end(); ++it)
     {
        emit(it->throughput_s, it->getServedBytes());
@@ -319,20 +319,20 @@ void Antenna::downlinkPropagation()
 
 void Antenna::handleMessage(cMessage *msg)
 {
-    EV << "[ANTENNA] New message to be handled!" << endl;
+    EV_DEBUG << "[ANTENNA] New message to be handled!" << endl;
 
     if(msg->getKind() == MSG_RR_TIMER)
     {
-        EV << " [ANTENA RR] Start propagation of the previous frame..." << endl;
+        EV_DEBUG << " [ANTENA RR] Start propagation of the previous frame..." << endl;
         downlinkPropagation();
-        EV << " [*** ANTENA RR ***] Create new frame..." << endl;
+        EV_DEBUG << " [*** ANTENA RR ***] Create new frame..." << endl;
         createFrame();
-        EV << " [*** ANTENA RR ***] DONE!" << endl;
+        EV_DEBUG << " [*** ANTENA RR ***] DONE!" << endl;
     }
     else if(msg->getKind() == MSG_PKT_TIMER)
     {
         PacketTimer *t = check_and_cast<PacketTimer*>(msg);
-        EV << "[ANTENNA PKT-TMR] A new packet should be generate: " << t->getUserId() << endl;
+        EV_DEBUG << "[ANTENNA PKT-TMR] A new packet should be generate: " << t->getUserId() << endl;
         handlePacket(t->getUserId());
     }
 }
