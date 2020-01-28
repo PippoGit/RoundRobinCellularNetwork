@@ -16,6 +16,7 @@ MODE_DESCRIPTION = {
 }
 
 LAMBDA_DESCRIPTION = {
+    'l01' : "Lambda = 0.1",
     'l09' : "Lambda = 0.9",
     'l13' : "Lambda = 1.3",
     'l2'  : "Lambda = 2.0",
@@ -28,6 +29,7 @@ MODE_PATH = {
 }
 
 LAMBDA_PATH = {
+    'l01' : "lambda01/",
     'l09' : "lambda09/",
     'l13' : "lambda13/",
     'l2'  : "lambda2/",
@@ -59,19 +61,22 @@ def describe_attribute(data, name):
     return
 
 
-def lorenz(arr):
-    # this divides the prefix sum by the total sum
-    # this ensures all the values are between 0 and 1.0
-    scaled_prefix_sum = arr.cumsum() / arr.sum()
-    # this prepends the 0 value (because 0% of all people have 0% of all wealth)
-    return np.insert(scaled_prefix_sum, 0, 0)
-
+def gini(data):
+    sorted_list = sorted(data)
+    height, area = 0, 0
+    for value in sorted_list:
+        height += value
+        area += height - value / 2.
+    fair_area = height * len(data) / 2.
+    return (fair_area - area) / fair_area
 
 
 
 def lorenz_curve(data, attribute):
     # sort the data
     sorted_samples = data[data.name == attribute].sort_values(['value']).value
+
+    print("Gini: ", gini(sorted_samples.to_list()))
 
     # compute required stuff
     n = len(sorted_samples)
@@ -188,15 +193,37 @@ def load_all_uni():
 def main():
     print("\n\nPerformance Evaluation - Python Data Analysis\n")
     
-    scalar_analysis('bin', 'l5', verbose=1)
+    scalar_analysis('uni', 'l01', verbose=0)
 
     # load all datasets of type UNIFORM
-    datasets = load_all_uni()
+    ds_uni = load_all_uni()
+    ds_bin = load_all_bin()
+
+    # attr = ['throughput', 'responseTime', 'NumServedUser']
+
+
+    # for ds in ds_uni:
+    #     print("\nUNIFORM (l13, l2, l5)")
+    #     for a in attr:
+    #         print("INFO ABOUT " + a )
+    #         describe_attribute(ds, a)
+    #         print("****")
+    #     print("\n\n")
+    
+    # for ds in ds_uni:
+    #     print("\n\n\nBINOMIAL (l09, l2, l5)")
+    #     for a in attr:
+    #         print("INFO ABOUT " + a )
+    #         describe_attribute(ds, a)
+    #         print("****")
+    #     print("\n\n")
+    
+    
 
     # print all ecdf all together  
-    all_ecdf(datasets, 
-             attribute='responseTime',
-             labels=['L = 0.9', 'L = 2.0', 'L = 5.0'])
+    # all_ecdf(ds_bin, 
+    #         attribute='responseTime',
+    #         labels=['L = 0.9', 'L = 2.0', 'L = 5.0'])
 
     # end
     return
