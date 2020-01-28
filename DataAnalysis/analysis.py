@@ -148,7 +148,7 @@ def scalar_analysis(cqi_mode, pkt_lambda, verbose=0):
         describe_attribute(clean_data, 'responseTime')
         
         print("** Info about mean num served user (throughput 2): ")
-        describe_attribute(clean_data, 'NumaServedUser')
+        describe_attribute(clean_data, 'NumServedUser')
 
     # check iid
     check_iid(clean_data, 'responseTime')
@@ -188,7 +188,7 @@ def load_all_uni():
 def main():
     print("\n\nPerformance Evaluation - Python Data Analysis\n")
     
-    scalar_analysis('bin', 'l5')
+    scalar_analysis('bin', 'l5', verbose=1)
 
     # load all datasets of type UNIFORM
     datasets = load_all_uni()
