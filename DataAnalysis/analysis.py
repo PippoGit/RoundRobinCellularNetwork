@@ -150,6 +150,27 @@ def plot_ecdf(data, attribute):
     return
 
 
+def plot_ecdf_vec(data, attribute, iteration=0):
+    # consider only what i need
+    sorted_samples = data[data.name == attribute]
+    print(sorted_samples)
+    sorted_samples = sorted_samples.value.iloc[iteration].sort()
+    print(sorted_samples)
+
+    F_x = []
+    n = len(sorted_samples)
+
+    for x in sorted_samples:
+        s = 0
+        for i in range(0, n):
+            s = s + 1 if sorted_samples[i] < x else s
+        F_x.append(s/n)
+    
+    plt.plot(sorted_samples, F_x)
+    return
+
+
+
 def check_iid(data, attribute):
     samples = data[data.name == attribute].value
     pd.plotting.lag_plot(samples)
@@ -228,21 +249,18 @@ def main():
     
     # VECTOR ANALYSIS
     clean_data = vector_parse('bin', 'l5')
-    
-    # Some output...
-    print("Head:")
-    print(clean_data.head())
-    print("Tail:")
-    print(clean_data.tail())
 
     # Lorenz curve...
-    lorenz_curve_vec(clean_data, 'responseTime')
+    # lorenz_curve_vec(clean_data, 'responseTime')
 
-    #########
+    plot_ecdf_vec(clean_data.head(), 'responseTime')
+    plt.show()
+
+    ###############################################
+
+    # SCALAR ANALYSIS (USELESS????)
 
     # scalar_analysis('bin', 'l13', verbose=0)
-
-
 
     # load all datasets of type UNIFORM
     # ds_uni = load_all_uni()
@@ -276,6 +294,7 @@ def main():
 
     # end
     return
+
 
 if __name__ == '__main__':
     main()
