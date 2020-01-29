@@ -2,5 +2,7 @@ simulations/RoundRobinSimulation/results/*
 .settings/language.settings.xml
 /.computed/
 
+.DS_Store
 **/.DS_Store
 **/vec_res.csv
+
