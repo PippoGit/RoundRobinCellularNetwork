@@ -6,3 +6,9 @@ simulations/RoundRobinSimulation/results/*
 **/.DS_Store
 **/vec_res.csv
 
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
