@@ -43,6 +43,9 @@ CSV_PATH = {
     'vec' : "vec_res.csv"
 }
 
+####################################################
+#                      PARSER                      #
+####################################################
 
 def vector_parse(cqi, pkt_lambda):
     path_csv = DATA_PATH + MODE_PATH[cqi] + LAMBDA_PATH[pkt_lambda] + CSV_PATH['vec']
@@ -87,6 +90,14 @@ def describe_attribute(data, name):
     print(data[data.name == name].describe(percentiles=[.25, .50, .75, .95]))
     return
 
+####################################################
+#                      PARSER                      #
+####################################################
+
+
+####################################################
+#                      LORENZ                      #
+####################################################
 
 def gini(data):
     sorted_list = sorted(data)
@@ -98,7 +109,7 @@ def gini(data):
     return (fair_area - area) / fair_area
 
 
-def lorenz_curve(data, attribute, value='value'):
+def lorenz_curve_sca(data, attribute, value='value'):
     # prepare the plot
     selected_ds = data[data.name == attribute]
     plot_lorenz_curve(selected_ds[value].to_numpy())
@@ -129,22 +140,39 @@ def lorenz_curve_vec(data, attribute):
 def plot_lorenz_curve(data):
     # sort the data
     sorted_data = np.sort(data)
-    print(sorted_data)
 
     # compute required stuff
     n = sorted_data.size
     T = sorted_data.sum()
     x = [i/n for i in range(0, n+1)]
     y = sorted_data.cumsum()/T 
-    print(y)
-    y = np.hstack((0, y)) # add y=0
+    y = np.hstack((0, y))
 
     # plot
     plt.plot(x, y)
     return
 
+####################################################
+#                      LORENZ                      #
+####################################################
 
-def ecdf(data, attribute, value='value', show=True):
+
+####################################################
+#                      ECDF                        #
+####################################################
+
+def all_ecdf(ds_list, attribute, labels=None):
+    for ds in ds_list:
+        ecdf_sca(ds, attribute, show=False)
+
+    plt.title("ECDF for " + attribute)    
+    if labels:
+        plt.legend(labels)
+    plt.show()
+    return
+
+
+def ecdf_sca(data, attribute, value='value', show=True):
     selected_ds = data[data.name == attribute]
 
     plot_ecdf(selected_ds[value].to_numpy())
@@ -184,10 +212,33 @@ def plot_ecdf_vec(data, attribute, iteration=0, sample_size=1000, replace=False)
     plt.show()
     return
 
+####################################################
+#                      ECDF                        #
+####################################################
 
 
-def check_iid(data, attribute):
-    samples = data[data.name == attribute].value
+####################################################
+#                      IID                         #
+####################################################
+
+def check_iid_sca(data, attribute, value='value'):
+    samples = data[data.name == attribute][value]
+    check_iid(samples, attribute)
+    return
+
+
+def check_iid_vec(data, attribute, iteration=0, sample_size=1000, seed=42):
+    samples = pd.Series(data[data.name == attribute].value.iloc[iteration])
+
+    # consider a sample
+    if sample_size != None:
+        samples = samples.sample(n=sample_size, random_state=seed)
+
+    check_iid(samples, attribute)
+    return
+
+
+def check_iid(samples, attribute):
     pd.plotting.lag_plot(samples)
     plt.title("Lag-Plot for " + attribute)
     plt.show()
@@ -196,7 +247,14 @@ def check_iid(data, attribute):
     plt.title("Autocorrelation plot for " + attribute)
     plt.show()
     return
-    
+
+####################################################
+#                      IID                         #
+####################################################
+
+####################################################
+####################################################
+####################################################
 
 
 def scalar_analysis(cqi_mode, pkt_lambda, verbose=0):
@@ -225,25 +283,14 @@ def scalar_analysis(cqi_mode, pkt_lambda, verbose=0):
 
     # check iid
     if(verbose > 0):
-        check_iid(clean_data, 'responseTime')
-        check_iid(clean_data, 'throughput')
-        check_iid(clean_data, 'NumServedUser')
+        check_iid_sca(clean_data, 'responseTime')
+        check_iid_sca(clean_data, 'throughput')
+        check_iid_sca(clean_data, 'NumServedUser')
 
     # plot lorenz curve for response time
-    lorenz_curve(clean_data, 'responseTime')
+    lorenz_curve_sca(clean_data, 'responseTime')
 
     # end of analysis
-    return
-
-
-def all_ecdf(ds_list, attribute, labels=None):
-    for ds in ds_list:
-        ecdf(ds, attribute, show=False)
-
-    plt.title("ECDF for " + attribute)    
-    if labels:
-        plt.legend(labels)
-    plt.show()
     return
 
 
@@ -259,12 +306,21 @@ def load_all_uni():
             scalar_parse('uni', 'l5')]
 
 
+####################################################
+####################################################
+####################################################
+
+
 def main():
     print("\n\nPerformance Evaluation - Python Data Analysis\n")
     
     # VECTOR ANALYSIS
     clean_data = vector_parse('bin', 'l13')
+    
+    # preamble
     print(clean_data.head(100))
+    # check_iid_vec(clean_data, 'responseTime')
+    describe_attribute(clean_data, 'throughput')
 
     # Lorenz curve...
     lorenz_curve_vec(clean_data, 'responseTime')
