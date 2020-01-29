@@ -6,6 +6,9 @@ import csv
 # plotty stuff
 import matplotlib.pyplot     as plt
 
+# Just to not fuck things up
+np.random.seed(42)
+
 # CONSTANTS
 DATA_PATH = "./data/"
 
@@ -74,12 +77,18 @@ def vector_parse(cqi, pkt_lambda):
     clean_data.reset_index(inplace=True, drop=True)
 
     # fix values...
-    clean_data.name = clean_data.name.apply(lambda x: x.split(':')[0])
+    clean_data.name     = clean_data.name.apply(lambda x: x.split(':')[0])
     clean_data.vecvalue = clean_data.vecvalue.apply(lambda x: np.array([float(i) for i in x.replace('"', '').split(' ')]))
     
+    clean_data['mean'] = clean_data.vecvalue.apply(lambda x: x.mean())
+    clean_data['max'] = clean_data.vecvalue.apply(lambda x: x.max())
+    clean_data['min'] = clean_data.vecvalue.apply(lambda x: x.min())
+    clean_data['std'] = clean_data.vecvalue.apply(lambda x: x.std())
+
+
     # rename vecvalue for simplicity...
     clean_data = clean_data.rename({'vecvalue':'value'}, axis=1)
-    return clean_data[['run', 'name', 'value']]
+    return clean_data[['run', 'name', 'value', 'mean', 'max', 'min', 'std']]
 
 
 # Parse CSV file
@@ -112,9 +121,9 @@ def gini(data):
     return (fair_area - area) / fair_area
 
 
-def lorenz_curve(data, attribute):
+def lorenz_curve(data, attribute, value='value'):
     # sort the data
-    sorted_samples = data[data.name == attribute].sort_values(['value']).value
+    sorted_samples = data[data.name == attribute].sort_values([value])[value]
 
     # Gini index
     print("Gini: ", gini(sorted_samples.to_list()))
@@ -150,23 +159,24 @@ def plot_ecdf(data, attribute):
     return
 
 
-def plot_ecdf_vec(data, attribute, iteration=0):
+def plot_ecdf_vec(data, attribute, iteration=0, sample_size=1000, replace=False):
     # consider only what i need
-    sorted_samples = data[data.name == attribute]
-    print(sorted_samples)
-    sorted_samples = sorted_samples.value.iloc[iteration].sort()
-    print(sorted_samples)
+    all_samples = data[data.name == attribute]
+    all_samples = all_samples.value.iloc[iteration]
+
+    sample = all_samples[np.random.choice(all_samples.shape[0], sample_size, replace=replace)]
+    sample.sort()
 
     F_x = []
-    n = len(sorted_samples)
+    n = len(sample)
 
-    for x in sorted_samples:
+    for x in sample:
         s = 0
         for i in range(0, n):
-            s = s + 1 if sorted_samples[i] < x else s
+            s = s + 1 if sample[i] < x else s
         F_x.append(s/n)
     
-    plt.plot(sorted_samples, F_x)
+    plt.plot(sample, F_x)
     return
 
 
@@ -198,7 +208,7 @@ def scalar_analysis(cqi_mode, pkt_lambda, verbose=0):
         print("Clean dataset for lambda2-scalar")
         print(clean_data.head())
 
-    # if(verbose > 0):
+    if(verbose > 0):
         print("** Info about mean throughput: ")
         describe_attribute(clean_data, 'throughput')
 
@@ -248,19 +258,22 @@ def main():
     print("\n\nPerformance Evaluation - Python Data Analysis\n")
     
     # VECTOR ANALYSIS
-    clean_data = vector_parse('bin', 'l5')
+    clean_data = vector_parse('bin', 'l13')
+    # print(clean_data.head(100))
 
     # Lorenz curve...
-    # lorenz_curve_vec(clean_data, 'responseTime')
+    lorenz_curve(clean_data, 'responseTime', value='mean')
+    # lorenz_curve_vec(clean_data, 'responseTime')
 
-    plot_ecdf_vec(clean_data.head(), 'responseTime')
+    # plot_ecdf_vec(clean_data, 'responseTime')
     plt.show()
 
     ###############################################
 
     # SCALAR ANALYSIS (USELESS????)
 
-    # scalar_analysis('bin', 'l13', verbose=0)
+    # clean_data = scalar_parse('bin', 'l13')
+    # lorenz_curve(clean_data, 'responseTime')
 
     # load all datasets of type UNIFORM
     # ds_uni = load_all_uni()
