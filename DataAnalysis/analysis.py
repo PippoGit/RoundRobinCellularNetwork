@@ -44,22 +44,6 @@ CSV_PATH = {
 }
 
 
-def lorenz_curve_vec(data, attribute):
-    # consider only the values for attribute
-    clean_data = data[data.name == attribute]
-
-    # for each iteration
-    for i in range(0, len(clean_data)):
-        # sort the data
-        vec = clean_data.value.iloc[i]
-        plot_lorenz_curve(vec)
-    
-    plt.plot([0, 1], [0, 1], 'k')
-    plt.title("Lorenz Curve for " + attribute)
-    plt.show()
-    return
-
-
 def vector_parse(cqi, pkt_lambda):
     path_csv = DATA_PATH + MODE_PATH[cqi] + LAMBDA_PATH[pkt_lambda] + CSV_PATH['vec']
     data = pd.read_csv(path_csv, delimiter=",", quoting=csv.QUOTE_NONE, encoding='utf-8')
@@ -126,6 +110,22 @@ def lorenz_curve(data, attribute, value='value'):
     return
 
 
+def lorenz_curve_vec(data, attribute):
+    # consider only the values for attribute
+    clean_data = data[data.name == attribute]
+
+    # for each iteration
+    for i in range(0, len(clean_data)):
+        # sort the data
+        vec = clean_data.value.iloc[i]
+        plot_lorenz_curve(vec)
+    
+    plt.plot([0, 1], [0, 1], 'k')
+    plt.title("Lorenz Curve for " + attribute)
+    plt.show()
+    return
+
+
 def plot_lorenz_curve(data):
     # sort the data
     sorted_data = np.sort(data)
@@ -144,40 +144,44 @@ def plot_lorenz_curve(data):
     return
 
 
+def ecdf(data, attribute, value='value', show=True):
+    selected_ds = data[data.name == attribute]
 
-def plot_ecdf(data, attribute):
-    sorted_samples = list(data[data.name == attribute].sort_values(['value']).value)
+    plot_ecdf(selected_ds[value].to_numpy())
+    plt.title("ECDF for " + attribute)
+    
+    if show:
+        plt.show()
+    return
+
+
+def plot_ecdf(data):
+    sorted_data = np.sort(data)
     F_x = []
-    n = len(sorted_samples)
+    n = sorted_data.size
 
-    for x in sorted_samples:
+    for x in sorted_data:
         s = 0
         for i in range(0, n):
-            s = s + 1 if sorted_samples[i] < x else s
+            s = s + 1 if sorted_data[i] < x else s
         F_x.append(s/n)
     
-    plt.plot(sorted_samples, F_x)
+    plt.plot(sorted_data, F_x)
     return
 
 
 def plot_ecdf_vec(data, attribute, iteration=0, sample_size=1000, replace=False):
     # consider only what i need
-    all_samples = data[data.name == attribute]
-    all_samples = all_samples.value.iloc[iteration]
+    sample = data[data.name == attribute]
+    sample = sample.value.iloc[iteration]
 
-    sample = all_samples[np.random.choice(all_samples.shape[0], sample_size, replace=replace)]
-    sample.sort()
-
-    F_x = []
-    n = len(sample)
-
-    for x in sample:
-        s = 0
-        for i in range(0, n):
-            s = s + 1 if sample[i] < x else s
-        F_x.append(s/n)
+    # consider a sample
+    if sample_size != None:
+        sample = sample[np.random.choice(sample.shape[0], sample_size, replace=replace)]
     
-    plt.plot(sample, F_x)
+    plot_ecdf(sample)
+    plt.title("ECDF for " + attribute)
+    plt.show()
     return
 
 
@@ -234,7 +238,7 @@ def scalar_analysis(cqi_mode, pkt_lambda, verbose=0):
 
 def all_ecdf(ds_list, attribute, labels=None):
     for ds in ds_list:
-        plot_ecdf(ds, attribute)
+        ecdf(ds, attribute, show=False)
 
     plt.title("ECDF for " + attribute)    
     if labels:
@@ -259,22 +263,20 @@ def main():
     print("\n\nPerformance Evaluation - Python Data Analysis\n")
     
     # VECTOR ANALYSIS
-    # clean_data = vector_parse('bin', 'l5')
-    # print(clean_data.head(100))
+    clean_data = vector_parse('bin', 'l13')
+    print(clean_data.head(100))
 
     # Lorenz curve...
-    # lorenz_curve(clean_data, 'responseTime', value='mean')
-    # lorenz_curve_vec(clean_data, 'responseTime')
+    lorenz_curve_vec(clean_data, 'responseTime')
 
-    # plot_ecdf_vec(clean_data, 'responseTime')
-    # plt.show()
-
+    # plot_ecdf_vec(clean_data, 'responseTime', sample_size=None)
+    
     ###############################################
 
     # SCALAR ANALYSIS (USELESS????)
 
-    clean_data = scalar_parse('bin', 'l2')
-    lorenz_curve(clean_data, 'responseTime')
+    # clean_data = scalar_parse('bin', 'l2')
+    # lorenz_curve(clean_data, 'responseTime')
 
     # load all datasets of type UNIFORM
     # ds_uni = load_all_uni()
