@@ -52,16 +52,9 @@ def lorenz_curve_vec(data, attribute):
     for i in range(0, len(clean_data)):
         # sort the data
         vec = clean_data.value.iloc[i]
-        vec.sort()
-
-        n = len(vec)
-        T = vec.sum()
-        x = [j/n for j in range(1, n+1)]
-        y = vec.cumsum()/T
-
-        plt.plot([0, 1], [0, 1], 'k')
-        plt.plot(x, y)
+        plot_lorenz_curve(vec)
     
+    plt.plot([0, 1], [0, 1], 'k')
     plt.title("Lorenz Curve for " + attribute)
     plt.show()
     return
@@ -122,26 +115,31 @@ def gini(data):
 
 
 def lorenz_curve(data, attribute, value='value'):
-    # sort the data
-    sorted_samples = data[data.name == attribute].sort_values([value])[value]
-
-    # Gini index
-    print("Gini: ", gini(sorted_samples.to_list()))
-
-    # compute required stuff
-    n = len(sorted_samples)
-    T = sorted_samples.sum()
-    x = [i/n for i in range(1, n+1)]
-    y = sorted_samples.cumsum()/T
     
-    # plot stuff
-    plt.plot([0, 1], [0, 1], 'k') # 45deg line
-    plt.plot(x, y) # actual lorenz curve
-
+    # prepare the plot
+    selected_ds = data[data.name == attribute]
+    plot_lorenz_curve(selected_ds[value].values)
+    
     # prettify the plot
+    plt.plot([0, 1], [0, 1], 'k')
     plt.title("Lorenz Curve for " + attribute)
     plt.show()
     return
+
+
+def plot_lorenz_curve(data):
+    # sort the data
+    sorted_data = data.sort()
+    print(type(data))
+    print(type(sorted_data))
+
+    # compute required stuff
+    n = sorted_data.size
+    T = sorted_data.sum()
+    x = [i/n for i in range(1, n+1)]
+    y = sorted_data.cumsum()/T
+    return
+
 
 
 def plot_ecdf(data, attribute):
@@ -258,22 +256,22 @@ def main():
     print("\n\nPerformance Evaluation - Python Data Analysis\n")
     
     # VECTOR ANALYSIS
-    clean_data = vector_parse('bin', 'l13')
+    # clean_data = vector_parse('bin', 'l5')
     # print(clean_data.head(100))
 
     # Lorenz curve...
-    lorenz_curve(clean_data, 'responseTime', value='mean')
+    # lorenz_curve(clean_data, 'responseTime', value='mean')
     # lorenz_curve_vec(clean_data, 'responseTime')
 
     # plot_ecdf_vec(clean_data, 'responseTime')
-    plt.show()
+    # plt.show()
 
     ###############################################
 
     # SCALAR ANALYSIS (USELESS????)
 
-    # clean_data = scalar_parse('bin', 'l13')
-    # lorenz_curve(clean_data, 'responseTime')
+    clean_data = scalar_parse('bin', 'l13')
+    lorenz_curve(clean_data, 'responseTime')
 
     # load all datasets of type UNIFORM
     # ds_uni = load_all_uni()
