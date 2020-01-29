@@ -1,3 +1,5 @@
 simulations/RoundRobinSimulation/results/*
 .settings/language.settings.xml
 /.computed/
+DataAnalysis/data/binomial/lambda5/vec_res.csv
+DataAnalysis/data/binomial/lambda13/vec_res.csv

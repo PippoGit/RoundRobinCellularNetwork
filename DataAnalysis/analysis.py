@@ -42,11 +42,12 @@ CSV_PATH = {
 
 
 def lorenz_curve_vec(data, attribute):
-    # med_vec = data.value.sum()
-    # print(med_vec)
-    # return
+    # consider only the values for attribute
     clean_data = data[data.name == attribute]
+
+    # for each iteration
     for i in range(0, len(clean_data)):
+        # sort the data
         vec = clean_data.value.iloc[i]
         vec.sort()
 
@@ -226,7 +227,7 @@ def main():
     print("\n\nPerformance Evaluation - Python Data Analysis\n")
     
     # VECTOR ANALYSIS
-    clean_data = vector_parse('bin', 'l13')
+    clean_data = vector_parse('bin', 'l5')
     
     # Some output...
     print("Head:")
