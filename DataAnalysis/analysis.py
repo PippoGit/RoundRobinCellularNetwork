@@ -1,11 +1,10 @@
 # core stuff
 import pandas as pd
 import numpy  as np
+import csv
 
 # plotty stuff
 import matplotlib.pyplot     as plt
-import matplotlib.lines      as mlines
-import matplotlib.transforms as mtransforms
 
 # CONSTANTS
 DATA_PATH = "./data/"
@@ -37,9 +36,50 @@ LAMBDA_PATH = {
 }
 
 CSV_PATH = {
-    'sca' : "sca/results.csv",
-    'vec' : "vec/results.csv"
+    'sca' : "sca_res.csv",
+    'vec' : "vec_res.csv"
 }
+
+
+def lorenz_curve_vec(data, attribute):
+    # med_vec = data.value.sum()
+    # print(med_vec)
+    # return
+    clean_data = data[data.name == attribute]
+    for i in range(0, len(clean_data)):
+        vec = clean_data.value.iloc[i]
+        vec.sort()
+
+        n = len(vec)
+        T = vec.sum()
+        x = [j/n for j in range(1, n+1)]
+        y = vec.cumsum()/T
+
+        plt.plot([0, 1], [0, 1], 'k')
+        plt.plot(x, y)
+    
+    plt.title("Lorenz Curve for " + attribute)
+    plt.show()
+    return
+
+
+def vector_parse(cqi, pkt_lambda):
+    path_csv = DATA_PATH + MODE_PATH[cqi] + LAMBDA_PATH[pkt_lambda] + CSV_PATH['vec']
+    data = pd.read_csv(path_csv, delimiter=",", quoting=csv.QUOTE_NONE, encoding='utf-8')
+    
+    clean_data = data[['run', 'vecvalue', 'type', 'name']]
+
+    clean_data = clean_data[clean_data.type == 'vector']
+    clean_data.reset_index(inplace=True, drop=True)
+
+    # fix values...
+    clean_data.name = clean_data.name.apply(lambda x: x.split(':')[0])
+    clean_data.vecvalue = clean_data.vecvalue.apply(lambda x: np.array([float(i) for i in x.replace('"', '').split(' ')]))
+    
+    # rename vecvalue for simplicity...
+    clean_data = clean_data.rename({'vecvalue':'value'}, axis=1)
+    return clean_data[['run', 'name', 'value']]
+
 
 # Parse CSV file
 def scalar_parse(cqi, pkt_lambda):
@@ -71,11 +111,11 @@ def gini(data):
     return (fair_area - area) / fair_area
 
 
-
 def lorenz_curve(data, attribute):
     # sort the data
     sorted_samples = data[data.name == attribute].sort_values(['value']).value
 
+    # Gini index
     print("Gini: ", gini(sorted_samples.to_list()))
 
     # compute required stuff
@@ -83,19 +123,10 @@ def lorenz_curve(data, attribute):
     T = sorted_samples.sum()
     x = [i/n for i in range(1, n+1)]
     y = sorted_samples.cumsum()/T
-
-    # # plot lorenz curve
-    # _, ax = plt.subplots() # ignore fig return value
-    # ax.plot(x, y)
     
-    # # add the 45deg line
-    # line = mlines.Line2D([0, 1], [0, 1], color='red')
-    # transform = ax.transAxes
-    # line.set_transform(transform)
-    # ax.add_line(line)
-    
+    # plot stuff
+    plt.plot([0, 1], [0, 1], 'k') # 45deg line
     plt.plot(x, y) # actual lorenz curve
-    plt.plot([0, 0], [1, 1], 'k') # 45deg line
 
     # prettify the plot
     plt.title("Lorenz Curve for " + attribute)
@@ -145,7 +176,7 @@ def scalar_analysis(cqi_mode, pkt_lambda, verbose=0):
         print("Clean dataset for lambda2-scalar")
         print(clean_data.head())
 
-    if(verbose > 0):
+    # if(verbose > 0):
         print("** Info about mean throughput: ")
         describe_attribute(clean_data, 'throughput')
 
@@ -156,9 +187,10 @@ def scalar_analysis(cqi_mode, pkt_lambda, verbose=0):
         describe_attribute(clean_data, 'NumServedUser')
 
     # check iid
-    check_iid(clean_data, 'responseTime')
-    check_iid(clean_data, 'throughput')
-    check_iid(clean_data, 'NumServedUser')
+    if(verbose > 0):
+        check_iid(clean_data, 'responseTime')
+        check_iid(clean_data, 'throughput')
+        check_iid(clean_data, 'NumServedUser')
 
     # plot lorenz curve for response time
     lorenz_curve(clean_data, 'responseTime')
@@ -193,11 +225,27 @@ def load_all_uni():
 def main():
     print("\n\nPerformance Evaluation - Python Data Analysis\n")
     
-    scalar_analysis('uni', 'l01', verbose=0)
+    # VECTOR ANALYSIS
+    clean_data = vector_parse('bin', 'l13')
+    
+    # Some output...
+    print("Head:")
+    print(clean_data.head())
+    print("Tail:")
+    print(clean_data.tail())
+
+    # Lorenz curve...
+    lorenz_curve_vec(clean_data, 'responseTime')
+
+    #########
+
+    # scalar_analysis('bin', 'l13', verbose=0)
+
+
 
     # load all datasets of type UNIFORM
-    ds_uni = load_all_uni()
-    ds_bin = load_all_bin()
+    # ds_uni = load_all_uni()
+    # ds_bin = load_all_bin()
 
     # attr = ['throughput', 'responseTime', 'NumServedUser']
 
