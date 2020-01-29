@@ -73,11 +73,11 @@ def vector_parse(cqi, pkt_lambda):
     clean_data.name     = clean_data.name.apply(lambda x: x.split(':')[0])
     clean_data.vecvalue = clean_data.vecvalue.apply(lambda x: np.array([float(i) for i in x.replace('"', '').split(' ')]))
     
+    # compute aggvalues for each iteration
     clean_data['mean'] = clean_data.vecvalue.apply(lambda x: x.mean())
     clean_data['max'] = clean_data.vecvalue.apply(lambda x: x.max())
     clean_data['min'] = clean_data.vecvalue.apply(lambda x: x.min())
     clean_data['std'] = clean_data.vecvalue.apply(lambda x: x.std())
-
 
     # rename vecvalue for simplicity...
     clean_data = clean_data.rename({'vecvalue':'value'}, axis=1)
@@ -115,10 +115,9 @@ def gini(data):
 
 
 def lorenz_curve(data, attribute, value='value'):
-    
     # prepare the plot
     selected_ds = data[data.name == attribute]
-    plot_lorenz_curve(selected_ds[value].values)
+    plot_lorenz_curve(selected_ds[value].to_numpy())
     
     # prettify the plot
     plt.plot([0, 1], [0, 1], 'k')
@@ -129,15 +128,19 @@ def lorenz_curve(data, attribute, value='value'):
 
 def plot_lorenz_curve(data):
     # sort the data
-    sorted_data = data.sort()
-    print(type(data))
-    print(type(sorted_data))
+    sorted_data = np.sort(data)
+    print(sorted_data)
 
     # compute required stuff
     n = sorted_data.size
     T = sorted_data.sum()
-    x = [i/n for i in range(1, n+1)]
-    y = sorted_data.cumsum()/T
+    x = [i/n for i in range(0, n+1)]
+    y = sorted_data.cumsum()/T 
+    print(y)
+    y = np.hstack((0, y)) # add y=0
+
+    # plot
+    plt.plot(x, y)
     return
 
 
@@ -270,7 +273,7 @@ def main():
 
     # SCALAR ANALYSIS (USELESS????)
 
-    clean_data = scalar_parse('bin', 'l13')
+    clean_data = scalar_parse('bin', 'l2')
     lorenz_curve(clean_data, 'responseTime')
 
     # load all datasets of type UNIFORM

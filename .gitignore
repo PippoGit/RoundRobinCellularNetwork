@@ -3,3 +3,7 @@ simulations/RoundRobinSimulation/results/*
 /.computed/
 DataAnalysis/data/binomial/lambda5/vec_res.csv
 DataAnalysis/data/binomial/lambda13/vec_res.csv
+DataAnalysis/.DS_Store
+DataAnalysis/data/.DS_Store
+DataAnalysis/data/binomial/.DS_Store
+.DS_Store
