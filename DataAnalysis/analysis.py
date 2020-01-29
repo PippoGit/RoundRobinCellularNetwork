@@ -50,7 +50,7 @@ CSV_PATH = {
 def vector_parse(cqi, pkt_lambda):
     path_csv = DATA_PATH + MODE_PATH[cqi] + LAMBDA_PATH[pkt_lambda] + CSV_PATH['vec']
     data = pd.read_csv(path_csv, delimiter=",", quoting=csv.QUOTE_NONE, encoding='utf-8')
-    
+
     clean_data = data[['run', 'vecvalue', 'type', 'name']]
 
     clean_data = clean_data[clean_data.type == 'vector']
@@ -59,7 +59,7 @@ def vector_parse(cqi, pkt_lambda):
     # fix values...
     clean_data.name     = clean_data.name.apply(lambda x: x.split(':')[0])
     clean_data.vecvalue = clean_data.vecvalue.apply(lambda x: np.array([float(i) for i in x.replace('"', '').split(' ')]))
-    
+
     # compute aggvalues for each iteration
     clean_data['mean'] = clean_data.vecvalue.apply(lambda x: x.mean())
     clean_data['max'] = clean_data.vecvalue.apply(lambda x: x.max())
@@ -85,9 +85,15 @@ def scalar_parse(cqi, pkt_lambda):
     return data[['run', 'name', 'value']]
 
 
-def describe_attribute(data, name):
+def describe_attribute(data, name, value='value'):
     # print brief summary of attribute name (with percentiles and stuff)
-    print(data[data.name == name].describe(percentiles=[.25, .50, .75, .95]))
+    print(data[data.name == name][value].describe(percentiles=[.25, .50, .75, .95]))
+    return
+
+
+def describe_attribute_vec(data, name, iteration=0):
+    values = pd.Series(data[data.name == name].value.iloc[iteration])
+    print(values.describe(percentiles=[.25, .50, .75, .95]))
     return
 
 ####################################################
@@ -319,8 +325,9 @@ def main():
     
     # preamble
     print(clean_data.head(100))
+    
     # check_iid_vec(clean_data, 'responseTime')
-    describe_attribute(clean_data, 'throughput')
+    describe_attribute_vec(clean_data, 'throughput')
 
     # Lorenz curve...
     lorenz_curve_vec(clean_data, 'responseTime')
