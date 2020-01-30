@@ -7,3 +7,5 @@ simulations/RoundRobinSimulation/results/*
 **/vec_res.csv
 
 DataAnalysis/.vscode/*
+*.csv
+**/.vscode/*

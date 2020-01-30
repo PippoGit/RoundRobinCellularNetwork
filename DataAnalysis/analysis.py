@@ -47,45 +47,64 @@ CSV_PATH = {
 #                      PARSER                      #
 ####################################################
 
+def parse_if_number(s):
+    try: return float(s)
+    except: return True if s=="true" else False if s=="false" else s if s else None
+
+
+def parse_ndarray(s):
+    return np.fromstring(s, sep=' ') if s else None
+
+
+def parse_name_attr(s):
+    return s.split(':')[0] if s else None
+
+
 def vector_parse(cqi, pkt_lambda):
     path_csv = DATA_PATH + MODE_PATH[cqi] + LAMBDA_PATH[pkt_lambda] + CSV_PATH['vec']
-    data = pd.read_csv(path_csv, delimiter=",", quoting=csv.QUOTE_NONE, encoding='utf-8')
+    
+    # vec files are huge, try to reduce their size ASAP!!
+    data = pd.read_csv(path_csv, 
+        delimiter=",", quoting=csv.QUOTE_NONNUMERIC, encoding='utf-8',
+        usecols=['run', 'type', 'module', 'name', 'vecvalue'],
+        converters = {
+            'vecvalue' : parse_ndarray,
+            'name'     : parse_name_attr
+        }
+    )
 
-    clean_data = data[['run', 'vecvalue', 'type', 'name']]
-
-    clean_data = clean_data[clean_data.type == 'vector']
-    clean_data.reset_index(inplace=True, drop=True)
-
-    # fix values...
-    clean_data.name     = clean_data.name.apply(lambda x: x.split(':')[0])
-    clean_data.vecvalue = clean_data.vecvalue.apply(lambda x: np.array([float(i) for i in x.replace('"', '').split(' ')]))
+    # remove useless rows
+    data = data[data.type == 'vector']
+    data.reset_index(inplace=True, drop=True)
 
     # compute aggvalues for each iteration
-    clean_data['mean'] = clean_data.vecvalue.apply(lambda x: x.mean())
-    clean_data['max'] = clean_data.vecvalue.apply(lambda x: x.max())
-    clean_data['min'] = clean_data.vecvalue.apply(lambda x: x.min())
-    clean_data['std'] = clean_data.vecvalue.apply(lambda x: x.std())
+    data['mean'] = data.vecvalue.apply(lambda x: x.mean())
+    data['max']  = data.vecvalue.apply(lambda x: x.max())
+    data['min']  = data.vecvalue.apply(lambda x: x.min())
+    data['std']  = data.vecvalue.apply(lambda x: x.std())
 
     # rename vecvalue for simplicity...
-    clean_data = clean_data.rename({'vecvalue':'value'}, axis=1)
-    return clean_data[['run', 'name', 'value', 'mean', 'max', 'min', 'std']]
+    data = data.rename({'vecvalue':'value'}, axis=1)
+    return data[['run', 'name', 'value', 'mean', 'max', 'min', 'std']]
 
 
 # Parse CSV file
 def scalar_parse(cqi, pkt_lambda):
     path_csv = DATA_PATH + MODE_PATH[cqi] + LAMBDA_PATH[pkt_lambda] + CSV_PATH['sca']
-    data = pd.read_csv(path_csv, usecols=['run', 'type', 'name', 'value'])
+    data = pd.read_csv(path_csv, 
+        usecols=['run', 'type', 'name', 'value'],
+        converters = {
+            'name'     : parse_name_attr
+        }
+    )
     
     # remove useless rows (first 100-ish rows)
     data = data[data.type == 'scalar']
     data.reset_index(inplace=True, drop=True)
-
-    # clean name value
-    data.name = data.name.apply(lambda x: x.split(':')[0])
     return data[['run', 'name', 'value']]
 
 
-def describe_attribute(data, name, value='value'):
+def describe_attribute_sca(data, name, value='value'):
     # print brief summary of attribute name (with percentiles and stuff)
     print(data[data.name == name][value].describe(percentiles=[.25, .50, .75, .95]))
     return
@@ -122,7 +141,7 @@ def lorenz_curve_sca(data, attribute, value='value'):
     
     # prettify the plot
     plt.plot([0, 1], [0, 1], 'k')
-    plt.title("Lorenz Curve for " + attribute)
+    plt.title("Lorenz Curve for " + attribute + " - " + value)
     plt.show()
     return
 
@@ -279,13 +298,13 @@ def scalar_analysis(cqi_mode, pkt_lambda, verbose=0):
 
     if(verbose > 0):
         print("** Info about mean throughput: ")
-        describe_attribute(clean_data, 'throughput')
+        describe_attribute_sca(clean_data, 'throughput')
 
         print("** Info about mean response time: ")
-        describe_attribute(clean_data, 'responseTime')
+        describe_attribute_sca(clean_data, 'responseTime')
         
         print("** Info about mean num served user (throughput 2): ")
-        describe_attribute(clean_data, 'NumServedUser')
+        describe_attribute_sca(clean_data, 'NumServedUser')
 
     # check iid
     if(verbose > 0):
@@ -328,9 +347,11 @@ def main():
     
     # check_iid_vec(clean_data, 'responseTime')
     describe_attribute_vec(clean_data, 'throughput')
+    describe_attribute_sca(clean_data, 'throughput', value='max')
+    lorenz_curve_sca(clean_data, 'responseTime', value='max')
 
     # Lorenz curve...
-    lorenz_curve_vec(clean_data, 'responseTime')
+    # lorenz_curve_vec(clean_data, 'responseTime')
 
     # plot_ecdf_vec(clean_data, 'responseTime', sample_size=None)
     
@@ -352,7 +373,7 @@ def main():
     #     print("\nUNIFORM (l13, l2, l5)")
     #     for a in attr:
     #         print("INFO ABOUT " + a )
-    #         describe_attribute(ds, a)
+    #         describe_attribute_sca(ds, a)
     #         print("****")
     #     print("\n\n")
     
@@ -360,7 +381,7 @@ def main():
     #     print("\n\n\nBINOMIAL (l09, l2, l5)")
     #     for a in attr:
     #         print("INFO ABOUT " + a )
-    #         describe_attribute(ds, a)
+    #         describe_attribute_sca(ds, a)
     #         print("****")
     #     print("\n\n")
     
