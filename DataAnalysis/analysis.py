@@ -64,8 +64,8 @@ def vector_parse(cqi, pkt_lambda):
     path_csv = DATA_PATH + MODE_PATH[cqi] + LAMBDA_PATH[pkt_lambda] + CSV_PATH['vec']
     
     # vec files are huge, try to reduce their size ASAP!!
-    data = pd.read_csv(
-        path_csv, delimiter=",", quoting=csv.QUOTE_NONNUMERIC, encoding='utf-8',
+    data = pd.read_csv(path_csv, 
+        delimiter=",", quoting=csv.QUOTE_NONNUMERIC, encoding='utf-8',
         usecols=['run', 'type', 'module', 'name', 'vecvalue'],
         converters = {
             'vecvalue' : parse_ndarray,
@@ -73,14 +73,9 @@ def vector_parse(cqi, pkt_lambda):
         }
     )
 
-    # data = data[['run', 'vecvalue', 'type', 'name']]
-
+    # remove useless rows
     data = data[data.type == 'vector']
     data.reset_index(inplace=True, drop=True)
-
-    # fix values...
-    # data.name     = data.name.apply(lambda x: x.split(':')[0])
-    # data.vecvalue = data.vecvalue.apply(lambda x:  np.fromstring(x, sep=' ') if s else None  np.array([float(i) for i in x.replace('"', '').split(' ')]))
 
     # compute aggvalues for each iteration
     data['mean'] = data.vecvalue.apply(lambda x: x.mean())
@@ -96,18 +91,20 @@ def vector_parse(cqi, pkt_lambda):
 # Parse CSV file
 def scalar_parse(cqi, pkt_lambda):
     path_csv = DATA_PATH + MODE_PATH[cqi] + LAMBDA_PATH[pkt_lambda] + CSV_PATH['sca']
-    data = pd.read_csv(path_csv, usecols=['run', 'type', 'name', 'value'])
+    data = pd.read_csv(path_csv, 
+        usecols=['run', 'type', 'name', 'value'],
+        converters = {
+            'name'     : parse_name_attr
+        }
+    )
     
     # remove useless rows (first 100-ish rows)
     data = data[data.type == 'scalar']
     data.reset_index(inplace=True, drop=True)
-
-    # clean name value
-    data.name = data.name.apply(lambda x: x.split(':')[0])
     return data[['run', 'name', 'value']]
 
 
-def describe_attribute(data, name, value='value'):
+def describe_attribute_sca(data, name, value='value'):
     # print brief summary of attribute name (with percentiles and stuff)
     print(data[data.name == name][value].describe(percentiles=[.25, .50, .75, .95]))
     return
@@ -301,13 +298,13 @@ def scalar_analysis(cqi_mode, pkt_lambda, verbose=0):
 
     if(verbose > 0):
         print("** Info about mean throughput: ")
-        describe_attribute(clean_data, 'throughput')
+        describe_attribute_sca(clean_data, 'throughput')
 
         print("** Info about mean response time: ")
-        describe_attribute(clean_data, 'responseTime')
+        describe_attribute_sca(clean_data, 'responseTime')
         
         print("** Info about mean num served user (throughput 2): ")
-        describe_attribute(clean_data, 'NumServedUser')
+        describe_attribute_sca(clean_data, 'NumServedUser')
 
     # check iid
     if(verbose > 0):
@@ -343,13 +340,14 @@ def main():
     print("\n\nPerformance Evaluation - Python Data Analysis\n")
     
     # VECTOR ANALYSIS
-    clean_data = vector_parse('bin', 'l13')
+    clean_data = vector_parse('bin', 'l5')
     
     # preamble
     print(clean_data.head(100))
     
     # check_iid_vec(clean_data, 'responseTime')
     describe_attribute_vec(clean_data, 'throughput')
+    describe_attribute_sca(clean_data, 'throughput', value='max')
 
     # Lorenz curve...
     # lorenz_curve_vec(clean_data, 'responseTime')
@@ -374,7 +372,7 @@ def main():
     #     print("\nUNIFORM (l13, l2, l5)")
     #     for a in attr:
     #         print("INFO ABOUT " + a )
-    #         describe_attribute(ds, a)
+    #         describe_attribute_sca(ds, a)
     #         print("****")
     #     print("\n\n")
     
@@ -382,7 +380,7 @@ def main():
     #     print("\n\n\nBINOMIAL (l09, l2, l5)")
     #     for a in attr:
     #         print("INFO ABOUT " + a )
-    #         describe_attribute(ds, a)
+    #         describe_attribute_sca(ds, a)
     #         print("****")
     #     print("\n\n")
     
