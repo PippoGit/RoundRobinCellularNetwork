@@ -47,28 +47,50 @@ CSV_PATH = {
 #                      PARSER                      #
 ####################################################
 
+def parse_if_number(s):
+    try: return float(s)
+    except: return True if s=="true" else False if s=="false" else s if s else None
+
+
+def parse_ndarray(s):
+    return np.fromstring(s, sep=' ') if s else None
+
+
+def parse_name_attr(s):
+    return s.split(':')[0] if s else None
+
+
 def vector_parse(cqi, pkt_lambda):
     path_csv = DATA_PATH + MODE_PATH[cqi] + LAMBDA_PATH[pkt_lambda] + CSV_PATH['vec']
-    data = pd.read_csv(path_csv, delimiter=",", quoting=csv.QUOTE_NONE, encoding='utf-8')
+    
+    # vec files are huge, try to reduce their size ASAP!!
+    data = pd.read_csv(
+        path_csv, delimiter=",", quoting=csv.QUOTE_NONNUMERIC, encoding='utf-8',
+        usecols=['run', 'type', 'module', 'name', 'vecvalue'],
+        converters = {
+            'vecvalue' : parse_ndarray,
+            'name'     : parse_name_attr
+        }
+    )
 
-    clean_data = data[['run', 'vecvalue', 'type', 'name']]
+    # data = data[['run', 'vecvalue', 'type', 'name']]
 
-    clean_data = clean_data[clean_data.type == 'vector']
-    clean_data.reset_index(inplace=True, drop=True)
+    data = data[data.type == 'vector']
+    data.reset_index(inplace=True, drop=True)
 
     # fix values...
-    clean_data.name     = clean_data.name.apply(lambda x: x.split(':')[0])
-    clean_data.vecvalue = clean_data.vecvalue.apply(lambda x: np.array([float(i) for i in x.replace('"', '').split(' ')]))
+    # data.name     = data.name.apply(lambda x: x.split(':')[0])
+    # data.vecvalue = data.vecvalue.apply(lambda x:  np.fromstring(x, sep=' ') if s else None  np.array([float(i) for i in x.replace('"', '').split(' ')]))
 
     # compute aggvalues for each iteration
-    clean_data['mean'] = clean_data.vecvalue.apply(lambda x: x.mean())
-    clean_data['max'] = clean_data.vecvalue.apply(lambda x: x.max())
-    clean_data['min'] = clean_data.vecvalue.apply(lambda x: x.min())
-    clean_data['std'] = clean_data.vecvalue.apply(lambda x: x.std())
+    data['mean'] = data.vecvalue.apply(lambda x: x.mean())
+    data['max']  = data.vecvalue.apply(lambda x: x.max())
+    data['min']  = data.vecvalue.apply(lambda x: x.min())
+    data['std']  = data.vecvalue.apply(lambda x: x.std())
 
     # rename vecvalue for simplicity...
-    clean_data = clean_data.rename({'vecvalue':'value'}, axis=1)
-    return clean_data[['run', 'name', 'value', 'mean', 'max', 'min', 'std']]
+    data = data.rename({'vecvalue':'value'}, axis=1)
+    return data[['run', 'name', 'value', 'mean', 'max', 'min', 'std']]
 
 
 # Parse CSV file
@@ -330,7 +352,7 @@ def main():
     describe_attribute_vec(clean_data, 'throughput')
 
     # Lorenz curve...
-    lorenz_curve_vec(clean_data, 'responseTime')
+    # lorenz_curve_vec(clean_data, 'responseTime')
 
     # plot_ecdf_vec(clean_data, 'responseTime', sample_size=None)
     
