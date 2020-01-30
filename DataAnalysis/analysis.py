@@ -141,7 +141,7 @@ def lorenz_curve_sca(data, attribute, value='value'):
     
     # prettify the plot
     plt.plot([0, 1], [0, 1], 'k')
-    plt.title("Lorenz Curve for " + attribute)
+    plt.title("Lorenz Curve for " + attribute + " - " + value)
     plt.show()
     return
 
@@ -340,7 +340,7 @@ def main():
     print("\n\nPerformance Evaluation - Python Data Analysis\n")
     
     # VECTOR ANALYSIS
-    clean_data = vector_parse('bin', 'l5')
+    clean_data = vector_parse('bin', 'l13')
     
     # preamble
     print(clean_data.head(100))
@@ -348,6 +348,7 @@ def main():
     # check_iid_vec(clean_data, 'responseTime')
     describe_attribute_vec(clean_data, 'throughput')
     describe_attribute_sca(clean_data, 'throughput', value='max')
+    lorenz_curve_sca(clean_data, 'responseTime', value='max')
 
     # Lorenz curve...
     # lorenz_curve_vec(clean_data, 'responseTime')
