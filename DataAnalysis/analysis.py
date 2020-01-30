@@ -209,16 +209,14 @@ def ecdf_sca(data, attribute, value='value', show=True):
 
 
 def plot_ecdf(data):
+    # sort the values
     sorted_data = np.sort(data)
-    F_x = []
-    n = sorted_data.size
-
-    for x in sorted_data:
-        s = 0
-        for i in range(0, n):
-            s = s + 1 if sorted_data[i] < x else s
-        F_x.append(s/n)
     
+    # eval y
+    n = sorted_data.size
+    F_x = [(sorted_data[sorted_data <= x].size)/n for x in sorted_data]
+
+    # plot the plot
     plt.plot(sorted_data, F_x)
     return
 
@@ -229,7 +227,7 @@ def plot_ecdf_vec(data, attribute, iteration=0, sample_size=1000, replace=False)
     sample = sample.value.iloc[iteration]
 
     # consider a sample
-    if sample_size != None:
+    if sample_size is not None:
         sample = sample[np.random.choice(sample.shape[0], sample_size, replace=replace)]
     
     plot_ecdf(sample)
@@ -340,21 +338,23 @@ def main():
     print("\n\nPerformance Evaluation - Python Data Analysis\n")
     
     # VECTOR ANALYSIS
-    clean_data = vector_parse('bin', 'l13')
+    clean_data = vector_parse('uni', 'l2')
     
     # preamble
     print(clean_data.head(100))
     
     # check_iid_vec(clean_data, 'responseTime')
-    describe_attribute_vec(clean_data, 'throughput')
-    describe_attribute_sca(clean_data, 'throughput', value='max')
-    lorenz_curve_sca(clean_data, 'responseTime', value='max')
+    # for it in range(0, 100):
+    #    describe_attribute_vec(clean_data, 'responseTime', iteration=it)
 
-    # Lorenz curve...
-    # lorenz_curve_vec(clean_data, 'responseTime')
+    # describe_attribute_sca(clean_data, 'throughput', value='max')
+    # lorenz_curve_sca(clean_data, 'responseTime', value='max')
 
-    # plot_ecdf_vec(clean_data, 'responseTime', sample_size=None)
-    
+    # some analysis
+    lorenz_curve_vec(clean_data, 'responseTime')
+    plot_ecdf_vec(clean_data, 'responseTime', iteration=0, sample_size=1000)
+    check_iid_vec(clean_data, 'responseTime', iteration=0, sample_size=1000)
+
     ###############################################
 
     # SCALAR ANALYSIS (USELESS????)
