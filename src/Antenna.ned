@@ -16,7 +16,7 @@ simple Antenna
     	@statistic[throughput](source="throughput"; record=mean,vector);  
     	  
         @signal[responseTimeGlobal](type=simtime_t);
-    	@statistic[responseTime](source="responseTimeGlobal"; record=mean,vector);    
+    	@statistic[responseTimeGlobal](source="responseTimeGlobal"; record=mean,vector);    
        
         @signal[NumServedUser](type=long);
     	@statistic[NumServedUser](source="NumServedUser"; record=mean,vector);       
