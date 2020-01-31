@@ -15,8 +15,8 @@ simple Antenna
         @signal[throughput](type=long);
     	@statistic[throughput](source="throughput"; record=mean,vector);  
     	  
-        @signal[responseTime](type=double);
-    	@statistic[responseTime](source="responseTime"; record=mean,vector);    
+        @signal[responseTimeGlobal](type=simtime_t);
+    	@statistic[responseTime](source="responseTimeGlobal"; record=mean,vector);    
        
         @signal[NumServedUser](type=long);
     	@statistic[NumServedUser](source="NumServedUser"; record=mean,vector);       
@@ -25,7 +25,7 @@ simple Antenna
        @statisticTemplate[tptUserTemplate](record=vector);  
 
        @signal[responseTime*](type=simtime_t);
-       @statisticTemplate[responseTimeUserTemplate](record=vector);         
+       @statisticTemplate[responseTimeUserTemplate](record=mean,vector);         
        
     gates:
  		// output out;   

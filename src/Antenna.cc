@@ -18,7 +18,7 @@ void Antenna::initialize()
     currentUser = users.end()-1; // this will make the first call to roundrobin() to set currentUser to begin()
 
     //signals
-    responseTime_s  = registerSignal("responseTime");
+    responseTimeGlobal_s  = registerSignal("responseTimeGlobal");
     throughput_s    = registerSignal("throughput");
     numServedUser_s = registerSignal("NumServedUser");
 
@@ -310,6 +310,7 @@ void Antenna::downlinkPropagation()
 
         // emit responsetime...
         emit(users[info.recipient].responseTime_s, info.propagationTime - info.arrivalTime);
+        emit(responseTimeGlobal_s,  info.propagationTime - info.arrivalTime);
 
         // Increment bytes sent for this user...
         users[info.recipient].incrementServedBytes(info.size);

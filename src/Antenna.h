@@ -47,7 +47,7 @@ class Antenna : public cSimpleModule
 
     // Signal
     //simsignal_t waitTime_s;
-    simsignal_t responseTime_s;
+    simsignal_t responseTimeGlobal_s;
     simsignal_t throughput_s;
     simsignal_t numServedUser_s;
 
