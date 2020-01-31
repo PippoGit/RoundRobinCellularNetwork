@@ -28,7 +28,7 @@ public:
     // double remainingBytes;
 
     omnetpp::simsignal_t throughput_s;
-
+    omnetpp::simsignal_t responseTime_s;
 
 public:
     UserInformation();

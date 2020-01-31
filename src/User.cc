@@ -7,7 +7,6 @@ int User::NEXT_USER_ID;
 void User::initialize()
 {
     userID = NEXT_USER_ID++;
-
 }
 
 void User::handleMessage(cMessage *msg)

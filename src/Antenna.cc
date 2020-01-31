@@ -27,6 +27,8 @@ void Antenna::initialize()
         std::string signal_name;
         std::stringstream sstream;
 
+        //////////////////////////////
+        // TPT SIGNALS
         sstream << "tptUser-" << i;
         signal_name = sstream.str();
         sstream.str(std::string()); // clear the stream
@@ -35,6 +37,21 @@ void Antenna::initialize()
         cProperty *statisticTemplate = getProperties()->get("statisticTemplate", "tptUserTemplate");
         getEnvir()->addResultRecorders(this, signal, signal_name.c_str(), statisticTemplate);
         users[i].throughput_s = signal;
+                                    //
+        //////////////////////////////
+
+        //////////////////////////////
+        // RESPONSE TIME SIGNALS
+        sstream << "responseTime-" << i;
+        signal_name = sstream.str();
+        sstream.str(std::string()); // clear the stream
+
+        signal = registerSignal(signal_name.c_str());
+        statisticTemplate = getProperties()->get("statisticTemplate", "responseTimeUserTemplate");
+        getEnvir()->addResultRecorders(this, signal, signal_name.c_str(), statisticTemplate);
+        users[i].responseTime_s = signal;
+                                    //
+        //////////////////////////////
 
         PacketTimer *tmr = new PacketTimer();
         tmr->setUserId(i);
@@ -291,7 +308,8 @@ void Antenna::downlinkPropagation()
         Antenna::packet_info_t info = packetsInformation.at(id);
         info.propagationTime = simTime();
 
-        emit(responseTime_s, info.propagationTime.dbl() - info.arrivalTime.dbl());
+        // emit responsetime...
+        emit(users[info.recipient].responseTime_s, info.propagationTime - info.arrivalTime);
 
         // Increment bytes sent for this user...
         users[info.recipient].incrementServedBytes(info.size);
