@@ -7,8 +7,6 @@
 #include "constants.h"
 #include "PacketTimer_m.h"
 
-
-
 class UserInformation {
 private:
     int id;

@@ -2,6 +2,22 @@
 
 Define_Module(Antenna);
 
+simsignal_t Antenna::createDynamicSignal(std::string prefix, int userId, std::string template) 
+{
+    simsignal_t signal;
+    std::string signal_name;
+    std::stringstream sstream;
+
+    sstream << prefix << "-" << userId;
+    signal_name = sstream.str();
+    
+    signal = registerSignal(signal_name.c_str());
+
+    cProperty *statisticTemplate = getProperties()->get("statisticTemplate", template.c_str());
+    getEnvir()->addResultRecorders(this, signal, signal_name.c_str(), statisticTemplate);
+    return signal;
+}
+
 void Antenna::initialize()
 {
     EV_DEBUG << "[ANTENNA-INITIALIZE] Initializing antenna..." << endl;
@@ -24,34 +40,8 @@ void Antenna::initialize()
 
     for(int i=0; i < NUM_USERS; i++)
     {
-        std::string signal_name;
-        std::stringstream sstream;
-
-        //////////////////////////////
-        // TPT SIGNALS
-        sstream << "tptUser-" << i;
-        signal_name = sstream.str();
-        sstream.str(std::string()); // clear the stream
-
-        simsignal_t signal = registerSignal(signal_name.c_str());
-        cProperty *statisticTemplate = getProperties()->get("statisticTemplate", "tptUserTemplate");
-        getEnvir()->addResultRecorders(this, signal, signal_name.c_str(), statisticTemplate);
-        users[i].throughput_s = signal;
-                                    //
-        //////////////////////////////
-
-        //////////////////////////////
-        // RESPONSE TIME SIGNALS
-        sstream << "responseTime-" << i;
-        signal_name = sstream.str();
-        sstream.str(std::string()); // clear the stream
-
-        signal = registerSignal(signal_name.c_str());
-        statisticTemplate = getProperties()->get("statisticTemplate", "responseTimeUserTemplate");
-        getEnvir()->addResultRecorders(this, signal, signal_name.c_str(), statisticTemplate);
-        users[i].responseTime_s = signal;
-                                    //
-        //////////////////////////////
+        users[i].throughput_s   = createDynamicSignal("tptUser", i, "tptUserTemplate");
+        users[i].responseTime_s = createDynamicSignal("responseTime", i, "responseTimeUserTemplate");
 
         PacketTimer *tmr = new PacketTimer();
         tmr->setUserId(i);
