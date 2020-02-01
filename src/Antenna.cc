@@ -28,27 +28,24 @@ void Antenna::initialize()
     EV_DEBUG << "[ANTENNA-INITIALIZE] Building UserInformation data structure" << endl;
     users.reserve(NUM_USERS);
     for(int i=0; i < NUM_USERS; i++)
-        users.push_back(UserInformation());
+    {
+        UserInformation u(i);
+        u.throughput_s   = createDynamicSignal("tptUser", i, "tptUserTemplate");
+        u.responseTime_s = createDynamicSignal("responseTime", i, "responseTimeUserTemplate");
+        PacketTimer *tmr = u.newPktTimer();
+        
+        users.push_back(u);
+        scheduleAt(simTime(), tmr);
+    }
+
 
     EV_DEBUG << "[ANTENNA-INITIALIZE] Initializing first iterator" << endl;
     currentUser = users.end()-1; // this will make the first call to roundrobin() to set currentUser to begin()
 
     //signals
     responseTimeGlobal_s  = registerSignal("responseTimeGlobal");
-    throughput_s    = registerSignal("throughput");
-    numServedUser_s = registerSignal("NumServedUser");
-
-    for(int i=0; i < NUM_USERS; i++)
-    {
-        users[i].throughput_s   = createDynamicSignal("tptUser", i, "tptUserTemplate");
-        users[i].responseTime_s = createDynamicSignal("responseTime", i, "responseTimeUserTemplate");
-
-        PacketTimer *tmr = new PacketTimer();
-        tmr->setUserId(i);
-        tmr->setKind(MSG_PKT_TIMER);
-        users[i].setTimer(tmr);
-        scheduleAt(simTime(), tmr);
-    }
+    throughput_s          = registerSignal("throughput");
+    numServedUser_s       = registerSignal("NumServedUser");
 
     // schedule first iteration of RR algorithm
     frame = nullptr;

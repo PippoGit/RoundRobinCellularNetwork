@@ -53,6 +53,8 @@ public:
 
     virtual void setTimer(PacketTimer *t);
     PacketTimer* getTimer() { return timer; };
+
+    virtual PacketTimer* newPktTimer();
 };
 
 #endif /* USERINFORMATION_H_ */
