@@ -44,6 +44,47 @@ CSV_PATH = {
 }
 
 ####################################################
+#                       UTIL                       #
+####################################################
+
+def running_avg(x):
+    return np.cumsum(x) / np.arange(1, x.size + 1)
+
+
+def plot_avg_vector(data, attribute, start=0, duration=None):
+    # all the vectors have the same duration.... so np
+    duration = data['time'].iloc[0].max() if duration is None else duration
+    
+    # get the data....
+    sel = data[data.name == attribute]
+    for row in sel.itertuples():
+        plt.plot(row.time, running_avg(row.value))
+    
+    # plot the data
+    plt.xlim(start, duration)
+    plt.show()
+    return
+
+
+# TODO: This function here...
+def plot_all_vectors(data, attribute, start=0, duration=None):
+    # all the vectors have the same duration.... so np
+    duration = data['time'].iloc[0].max() if duration is None else duration
+    pass    
+
+
+# TODO: This function here...
+def time_avg_vector(data, attribute, start=0, duration=None):
+    duration = data['time'].iloc[0].max() if duration is None else duration
+    sel = data[data.name == attribute]
+    pass
+
+####################################################
+#                       UTIL                       #
+####################################################
+
+
+####################################################
 #                      PARSER                      #
 ####################################################
 
@@ -60,14 +101,20 @@ def parse_name_attr(s):
     return s.split(':')[0] if s else None
 
 
+def parse_run(s):
+    return int(s.split('-')[1]) if s else None
+ 
+
 def vector_parse(cqi, pkt_lambda):
     path_csv = DATA_PATH + MODE_PATH[cqi] + LAMBDA_PATH[pkt_lambda] + CSV_PATH['vec']
     
     # vec files are huge, try to reduce their size ASAP!!
     data = pd.read_csv(path_csv, 
         delimiter=",", quoting=csv.QUOTE_NONNUMERIC, encoding='utf-8',
-        usecols=['run', 'type', 'module', 'name', 'vecvalue'],
+        usecols=['run', 'type', 'module', 'name', 'vecvalue', 'vectime'],
         converters = {
+            'run'      : parse_run,
+            'vectime'  : parse_ndarray, # i guess
             'vecvalue' : parse_ndarray,
             'name'     : parse_name_attr
         }
@@ -83,9 +130,15 @@ def vector_parse(cqi, pkt_lambda):
     data['min']  = data.vecvalue.apply(lambda x: x.min())
     data['std']  = data.vecvalue.apply(lambda x: x.std())
 
+    # TODO: Maybe this one can be removed in the future when we know
+    # for sure if all the timevec has the same duration (which is very
+    # likely to be honest)
+    data['duration']  = data.vectime.apply(lambda x: x.max())
+
+
     # rename vecvalue for simplicity...
-    data = data.rename({'vecvalue':'value'}, axis=1)
-    return data[['run', 'name', 'value', 'mean', 'max', 'min', 'std']]
+    data = data.rename({'vecvalue':'value', 'vectime':'time'}, axis=1)
+    return data[['run', 'name', 'time', 'value', 'mean', 'max', 'min', 'std', 'max_duration']].sort_values(['run', 'name'])
 
 
 # Parse CSV file
@@ -94,14 +147,15 @@ def scalar_parse(cqi, pkt_lambda):
     data = pd.read_csv(path_csv, 
         usecols=['run', 'type', 'name', 'value'],
         converters = {
-            'name'     : parse_name_attr
+            'run'  : parse_run,   
+            'name' : parse_name_attr
         }
     )
     
     # remove useless rows (first 100-ish rows)
     data = data[data.type == 'scalar']
     data.reset_index(inplace=True, drop=True)
-    return data[['run', 'name', 'value']]
+    return data[['run', 'name', 'value']].sort_values(['run', 'name'])
 
 
 def describe_attribute_sca(data, name, value='value'):
@@ -114,6 +168,26 @@ def describe_attribute_vec(data, name, iteration=0):
     values = pd.Series(data[data.name == name].value.iloc[iteration])
     print(values.describe(percentiles=[.25, .50, .75, .95]))
     return
+
+
+def aggregate_responsetime(data, numIterations=10, numUsers=10):
+    sel = data[data.attribute.starts_with("responseTime-")]
+    
+    rsp_matrix = pd.DataFrame()
+    stats      = pd.DataFrame()
+
+    for i in range(0, numUsers):
+        # get the data
+        tmp = sel[sel.attribute == ("responseTime-"+str(i))].value.mean()
+        
+        # eval the stats (idk if this is actually useful)
+        stats['user-'+str(i)]['mean'] = rsp_matrix['user-'+str(i)].mean()
+        stats['user-'+str(i)]['max']  = rsp_matrix['user-'+str(i)].max()
+        stats['user-'+str(i)]['min']  = rsp_matrix['user-'+str(i)].min()
+
+
+    return rsp_matrix, stats
+
 
 ####################################################
 #                      PARSER                      #
@@ -338,11 +412,14 @@ def main():
     print("\n\nPerformance Evaluation - Python Data Analysis\n")
     
     # VECTOR ANALYSIS
-    clean_data = vector_parse('uni', 'l2')
-    
+    clean_data = vector_parse('bin', 'l5')
+
     # preamble
     print(clean_data.head(100))
-    
+    plot_avg_vector(clean_data, "tptUser-0")
+    return 
+
+
     # check_iid_vec(clean_data, 'responseTime')
     # for it in range(0, 100):
     #    describe_attribute_vec(clean_data, 'responseTime', iteration=it)
@@ -351,9 +428,9 @@ def main():
     # lorenz_curve_sca(clean_data, 'responseTime', value='max')
 
     # some analysis
-    lorenz_curve_vec(clean_data, 'responseTime')
-    plot_ecdf_vec(clean_data, 'responseTime', iteration=0, sample_size=1000)
-    check_iid_vec(clean_data, 'responseTime', iteration=0, sample_size=1000)
+    # lorenz_curve_vec(clean_data, 'responseTime')
+    # plot_ecdf_vec(clean_data, 'responseTime', iteration=0, sample_size=1000)
+    # check_iid_vec(clean_data, 'responseTime', iteration=0, sample_size=1000)
 
     ###############################################
 
