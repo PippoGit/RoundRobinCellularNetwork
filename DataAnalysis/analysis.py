@@ -51,7 +51,7 @@ def running_avg(x):
     return np.cumsum(x) / np.arange(1, x.size + 1)
 
 
-def plot_avg_vector(data, attribute, start=0, duration=None):
+def plot_avg_vector(data, attribute, start=0, duration=None, warmup=0):
     # all the vectors have the same duration.... so np
     duration = data['time'].iloc[0].max() if duration is None else duration
     
@@ -61,23 +61,26 @@ def plot_avg_vector(data, attribute, start=0, duration=None):
         plt.plot(row.time, running_avg(row.value))
     
     # plot the data
-    plt.xlim(start, duration)
+    plt.xlim(start+warmup, duration)
     plt.show()
     return
 
 
 # TODO: This function here...
-def plot_all_vectors(data, attribute, start=0, duration=None):
+def plot_avg_vector2nrw(data, attribute, start=0, duration=None, warmup=0):
     # all the vectors have the same duration.... so np
     duration = data['time'].iloc[0].max() if duration is None else duration
-    pass    
-
-
-# TODO: This function here...
-def time_avg_vector(data, attribute, start=0, duration=None):
-    duration = data['time'].iloc[0].max() if duration is None else duration
+    
+    # get the data....
     sel = data[data.name == attribute]
-    pass
+    for row in sel.itertuples():
+        plt.plot(row.time, row.value)
+    
+    # plot the data
+    plt.xlim(start+warmup, duration)
+    plt.show()  
+    return  
+
 
 ####################################################
 #                       UTIL                       #
@@ -131,14 +134,14 @@ def vector_parse(cqi, pkt_lambda):
     data['std']  = data.vecvalue.apply(lambda x: x.std())
 
     # TODO: Maybe this one can be removed in the future when we know
-    # for sure if all the timevec has the same duration (which is very
+    # for sure if all the timevec have the same duration (which is very
     # likely to be honest)
     data['duration']  = data.vectime.apply(lambda x: x.max())
 
 
     # rename vecvalue for simplicity...
     data = data.rename({'vecvalue':'value', 'vectime':'time'}, axis=1)
-    return data[['run', 'name', 'time', 'value', 'mean', 'max', 'min', 'std', 'max_duration']].sort_values(['run', 'name'])
+    return data[['run', 'name', 'time', 'value', 'mean', 'max', 'min', 'std', 'duration']].sort_values(['run', 'name'])
 
 
 # Parse CSV file
@@ -412,11 +415,13 @@ def main():
     print("\n\nPerformance Evaluation - Python Data Analysis\n")
     
     # VECTOR ANALYSIS
-    clean_data = vector_parse('bin', 'l5')
+    clean_data = vector_parse('uni', 'l09')
 
     # preamble
     print(clean_data.head(100))
-    plot_avg_vector(clean_data, "tptUser-0")
+    plot_avg_vector(clean_data, "responseTimeGlobal")
+    plot_avg_vector(clean_data, "responseTime-0")
+    
     return 
 
 
