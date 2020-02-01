@@ -32,10 +32,9 @@ void Antenna::initialize()
         UserInformation u(i);
         u.throughput_s   = createDynamicSignal("tptUser", i, "tptUserTemplate");
         u.responseTime_s = createDynamicSignal("responseTime", i, "responseTimeUserTemplate");
-        PacketTimer *tmr = u.newPktTimer();
         
+        scheduleAt(simTime(), u->getTimer());
         users.push_back(u);
-        scheduleAt(simTime(), tmr);
     }
 
 
@@ -49,9 +48,9 @@ void Antenna::initialize()
 
     // schedule first iteration of RR algorithm
     frame = nullptr;
-    scheduleAt(simTime(), timer);
     numSentBytesPerTimeslot   = 0;
     numServedUsersPerTimeslot = 0;
+    scheduleAt(simTime(), timer);
 }
 
 

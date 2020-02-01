@@ -10,18 +10,13 @@
 UserInformation::UserInformation(int id)
 {
     this->id = id;
-    this->CQI = 0; //before FIRST utilization the CQI should be generated
+    this->CQI = 0;
     this->numPendingPackets = 0;
-}
 
-PacketTimer* UserInformation::newPktTimer()
-{
-    PacketTimer *tmr = new PacketTimer();
-    tmr->setUserId(i);
-    tmr->setKind(MSG_PKT_TIMER);
-    setTimer(tmr);
-    
-    return tmr;
+    // set the timer
+    this->timer = new PacketTimer();
+    this->timer->setKind(MSG_PKT_TIMER);
+    this->timer->setUserId(id);
 }
 
 void UserInformation::setTimer(PacketTimer* t)
