@@ -51,7 +51,7 @@ class Antenna : public cSimpleModule
     simsignal_t throughput_s;
     simsignal_t numServedUser_s;
 
-    virtual simsignal_t createDynamicSignal(std::string prefix, int userId, std::string template);
+    virtual simsignal_t createDynamicSignal(std::string prefix, int userId, std::string templateName);
 
   protected:
     virtual ~Antenna();

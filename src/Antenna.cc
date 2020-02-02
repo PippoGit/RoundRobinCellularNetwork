@@ -2,7 +2,7 @@
 
 Define_Module(Antenna);
 
-simsignal_t Antenna::createDynamicSignal(std::string prefix, int userId, std::string template) 
+simsignal_t Antenna::createDynamicSignal(std::string prefix, int userId, std::string templateName)
 {
     simsignal_t signal;
     std::string signal_name;
@@ -13,7 +13,7 @@ simsignal_t Antenna::createDynamicSignal(std::string prefix, int userId, std::st
     
     signal = registerSignal(signal_name.c_str());
 
-    cProperty *statisticTemplate = getProperties()->get("statisticTemplate", template.c_str());
+    cProperty *statisticTemplate = getProperties()->get("statisticTemplate", templateName.c_str());
     getEnvir()->addResultRecorders(this, signal, signal_name.c_str(), statisticTemplate);
     return signal;
 }
@@ -33,7 +33,13 @@ void Antenna::initialize()
         u.throughput_s   = createDynamicSignal("tptUser", i, "tptUserTemplate");
         u.responseTime_s = createDynamicSignal("responseTime", i, "responseTimeUserTemplate");
         
-        scheduleAt(simTime(), u->getTimer());
+        // set the timer
+        PacketTimer *pt = new PacketTimer();
+        pt->setKind(MSG_PKT_TIMER);
+        pt->setUserId(i);
+        u.setTimer(pt);
+
+        scheduleAt(simTime(),pt);
         users.push_back(u);
     }
 

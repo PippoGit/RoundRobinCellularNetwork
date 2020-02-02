@@ -29,7 +29,7 @@ public:
     omnetpp::simsignal_t responseTime_s;
 
 public:
-    UserInformation();
+    UserInformation(int id);
     virtual ~UserInformation();
     virtual void generateCQI(omnetpp::cRNG*RNG, bool isBinomial);
     virtual int getId();

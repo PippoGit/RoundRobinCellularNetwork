@@ -12,11 +12,6 @@ UserInformation::UserInformation(int id)
     this->id = id;
     this->CQI = 0;
     this->numPendingPackets = 0;
-
-    // set the timer
-    this->timer = new PacketTimer();
-    this->timer->setKind(MSG_PKT_TIMER);
-    this->timer->setUserId(id);
 }
 
 void UserInformation::setTimer(PacketTimer* t)
