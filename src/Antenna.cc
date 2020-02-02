@@ -301,14 +301,13 @@ void Antenna::downlinkPropagation()
         info.propagationTime = simTime();
 
         // emit responsetime...
-        if(simTime() >= getSimulation()->getWarmupPeriod()) {
+        // TEST !!!!!!
+        if(info.arrivalTime >= getSimulation()->getWarmupPeriod()) {
             emit(users[info.recipient].responseTime_s, info.propagationTime - info.arrivalTime);
+            users[info.recipient].incrementServedBytes(info.size);
+            emit(responseTimeGlobal_s,  info.propagationTime - info.arrivalTime);
         }
-
-        emit(responseTimeGlobal_s,  info.propagationTime - info.arrivalTime);
-
-        // Increment bytes sent for this user...
-        users[info.recipient].incrementServedBytes(info.size);
+        ////////
 
         packetsInformation.erase(id); // remove the packet from the hash table
     }
@@ -316,9 +315,11 @@ void Antenna::downlinkPropagation()
     broadcastFrame(frame);
     EV_DEBUG << "[DOWNLINK] Broadcast propagation of the frame" << endl;
 
-    EV_DEBUG << "[ANTENNA] Emitting signals for global statistics " << endl;
-    emit(throughput_s,    numSentBytesPerTimeslot);   //Tpt defined as bytes sent per timeslot
-    emit(numServedUser_s, numServedUsersPerTimeslot); // Tpt defined as num of served users per timeslot
+    if(simTime() >= getSimulation()->getWarmupPeriod()) {
+        EV_DEBUG << "[ANTENNA] Emitting signals for global statistics " << endl;
+        emit(throughput_s,    numSentBytesPerTimeslot);   //Tpt defined as bytes sent per timeslot
+        emit(numServedUser_s, numServedUsersPerTimeslot); // Tpt defined as num of served users per timeslot
+    }
 
     // Emit statitics per user
     EV_DEBUG << "[ANTENNA] Emitting signals for user's statistics " << endl;
