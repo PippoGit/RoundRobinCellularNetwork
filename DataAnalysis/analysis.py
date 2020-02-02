@@ -50,7 +50,23 @@ CSV_PATH = {
 def running_avg(x):
     return np.cumsum(x) / np.arange(1, x.size + 1)
 
+###########
+#TODO: DON'T USE THE FOLLOWING FUNCTIONS !!!!!!!!!!!
+###########
 
+def avg_vector(data, attribute, start=0, duration=None):
+    # get the data....
+    sel = data[data.name == attribute]
+    avg_vector = []
+
+    for row in sel.itertuples():
+        ravg = running_avg(row.value);
+        avg_vector.append(ravg)
+    return avg_vector
+
+#TODO: i don't know if this is really the avg vector, i think this is the 
+# average vector only if there is just one vector 
+# IT SHOULD BE TESTED!!!!!!!!
 def plot_avg_vector(data, attribute, start=0, duration=None, warmup=0):
     # all the vectors have the same duration.... so np
     duration = data['time'].iloc[0].max() if duration is None else duration
@@ -64,22 +80,6 @@ def plot_avg_vector(data, attribute, start=0, duration=None, warmup=0):
     plt.xlim(start+warmup, duration)
     plt.show()
     return
-
-
-# TODO: This function here...
-def plot_avg_vector2nrw(data, attribute, start=0, duration=None, warmup=0):
-    # all the vectors have the same duration.... so np
-    duration = data['time'].iloc[0].max() if duration is None else duration
-    
-    # get the data....
-    sel = data[data.name == attribute]
-    for row in sel.itertuples():
-        plt.plot(row.time, row.value)
-    
-    # plot the data
-    plt.xlim(start+warmup, duration)
-    plt.show()  
-    return  
 
 
 ####################################################
@@ -419,9 +419,9 @@ def main():
 
     # preamble
     print(clean_data.head(100))
-    plot_avg_vector(clean_data, "responseTimeGlobal")
+    # plot_avg_vector(clean_data, "responseTimeGlobal")
     plot_avg_vector(clean_data, "responseTime-0")
-    
+
     return 
 
 
@@ -475,8 +475,6 @@ def main():
     #         labels=['L = 0.9', 'L = 2.0', 'L = 5.0'])
 
     # end
-    return
-
 
 if __name__ == '__main__':
     main()
