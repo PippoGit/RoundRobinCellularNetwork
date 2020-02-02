@@ -9,7 +9,8 @@ import matplotlib.pyplot     as plt
 # CONSTANTS
 WARMUP_PERIOD  = 70
 NUM_ITERATIONS = 100
-SIM_TIME       = 100
+SIM_TIME       = 200
+NUM_USERS      = 10
 
 SAMPLE_SIZE    = 1000
 SEED_SAMPLING  = 42
@@ -76,9 +77,8 @@ def running_avg(x):
 ###########################################################
 
 
-def plot_mean_vectors(data, attribute, start=0, duration=None, iterations=[0]):
+def plot_mean_vectors(data, attribute, start=0, duration=SIM_TIME, iterations=[0]):
     sel = data[data.name == attribute]    
-    duration = SIM_TIME if duration is None else duration
     
     # plot a mean vector for each iteration
     for i in iterations:
@@ -91,6 +91,21 @@ def plot_mean_vectors(data, attribute, start=0, duration=None, iterations=[0]):
     plt.show()
     return
 
+
+def plot_mean_vectors_user(data, prefix, start=0, duration=SIM_TIME, iterations=[0], users=range(0, NUM_USERS)):
+    sel = data[data.name.str.startswith(prefix + '-')]
+
+    for u in users:
+        usr = sel[sel.name == prefix + "-" + str(u)]
+        for i in iterations:
+            tmp = usr[(usr.run == i)]
+            for row in tmp.itertuples():
+                plt.plot(row.time, running_avg(row.value))
+
+    # plot the data
+    plt.xlim(start, duration)
+    plt.show()
+    return
 
 ####################################################
 #                       UTIL                       #
