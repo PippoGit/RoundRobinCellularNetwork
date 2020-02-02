@@ -50,31 +50,34 @@ CSV_PATH = {
 def running_avg(x):
     return np.cumsum(x) / np.arange(1, x.size + 1)
 
-###########
-#TODO: DON'T USE THE FOLLOWING FUNCTIONS !!!!!!!!!!!
-###########
+############################################################
+#            DON'T USE THE FOLLOWING FUNCTION              #
+############################################################
+#
+# def avg_vector(data, attribute, start=0, duration=None):
+#     # get the data....
+#     sel = data[data.name == attribute]
+#     avg_vector = []
+#     for row in sel.itertuples():
+#         ravg = running_avg(row.value);
+#         avg_vector.append(ravg)
+#     return avg_vector
+#
+###########################################################
 
-def avg_vector(data, attribute, start=0, duration=None):
+
+def plot_mean_vectors(data, attribute, start=0, duration=None, warmup=0, iterations=[0]):
     # get the data....
     sel = data[data.name == attribute]
-    avg_vector = []
-
-    for row in sel.itertuples():
-        ravg = running_avg(row.value);
-        avg_vector.append(ravg)
-    return avg_vector
-
-#TODO: i don't know if this is really the avg vector, i think this is the 
-# average vector only if there is just one vector 
-# IT SHOULD BE TESTED!!!!!!!!
-def plot_avg_vector(data, attribute, start=0, duration=None, warmup=0):
-    # all the vectors have the same duration.... so np
-    duration = data['time'].iloc[0].max() if duration is None else duration
     
-    # get the data....
-    sel = data[data.name == attribute]
-    for row in sel.itertuples():
-        plt.plot(row.time, running_avg(row.value))
+    # all the vectors have the same duration.... so np
+    duration = sel['time'].iloc[0].max() if duration is None else duration
+    
+    # plot a mean vector for each iteration
+    for i in iterations:
+        tmp = sel[sel.run == i]
+        for row in tmp.itertuples():
+            plt.plot(row.time, running_avg(row.value))
     
     # plot the data
     plt.xlim(start+warmup, duration)
@@ -419,8 +422,7 @@ def main():
 
     # preamble
     print(clean_data.head(100))
-    # plot_avg_vector(clean_data, "responseTimeGlobal")
-    plot_avg_vector(clean_data, "responseTime-0")
+    plot_mean_vectors(clean_data, "responseTime-0")
 
     return 
 
