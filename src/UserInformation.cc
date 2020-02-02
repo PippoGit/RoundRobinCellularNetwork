@@ -6,13 +6,17 @@
  */
 
 #include "UserInformation.h"
-int NEXT_USER_ID;
 
-UserInformation::UserInformation()
+UserInformation::UserInformation(int id)
 {
-    id = NEXT_USER_ID++; // this thing should work because stuff don't change over time... (iguess)
-    CQI = 0; //before FIRST utilization the CQI should be generated
-    numPendingPackets = 0;
+    this->id = id;
+    this->CQI = 0;
+    this->numPendingPackets = 0;
+
+    // set the timer
+    this->timer = new PacketTimer();
+    this->timer->setKind(MSG_PKT_TIMER);
+    this->timer->setUserId(id);
 }
 
 void UserInformation::setTimer(PacketTimer* t)

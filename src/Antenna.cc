@@ -2,6 +2,22 @@
 
 Define_Module(Antenna);
 
+simsignal_t Antenna::createDynamicSignal(std::string prefix, int userId, std::string template) 
+{
+    simsignal_t signal;
+    std::string signal_name;
+    std::stringstream sstream;
+
+    sstream << prefix << "-" << userId;
+    signal_name = sstream.str();
+    
+    signal = registerSignal(signal_name.c_str());
+
+    cProperty *statisticTemplate = getProperties()->get("statisticTemplate", template.c_str());
+    getEnvir()->addResultRecorders(this, signal, signal_name.c_str(), statisticTemplate);
+    return signal;
+}
+
 void Antenna::initialize()
 {
     EV_DEBUG << "[ANTENNA-INITIALIZE] Initializing antenna..." << endl;
@@ -12,59 +28,29 @@ void Antenna::initialize()
     EV_DEBUG << "[ANTENNA-INITIALIZE] Building UserInformation data structure" << endl;
     users.reserve(NUM_USERS);
     for(int i=0; i < NUM_USERS; i++)
-        users.push_back(UserInformation());
+    {
+        UserInformation u(i);
+        u.throughput_s   = createDynamicSignal("tptUser", i, "tptUserTemplate");
+        u.responseTime_s = createDynamicSignal("responseTime", i, "responseTimeUserTemplate");
+        
+        scheduleAt(simTime(), u->getTimer());
+        users.push_back(u);
+    }
+
 
     EV_DEBUG << "[ANTENNA-INITIALIZE] Initializing first iterator" << endl;
     currentUser = users.end()-1; // this will make the first call to roundrobin() to set currentUser to begin()
 
     //signals
     responseTimeGlobal_s  = registerSignal("responseTimeGlobal");
-    throughput_s    = registerSignal("throughput");
-    numServedUser_s = registerSignal("NumServedUser");
-
-    for(int i=0; i < NUM_USERS; i++)
-    {
-        std::string signal_name;
-        std::stringstream sstream;
-
-        //////////////////////////////
-        // TPT SIGNALS
-        sstream << "tptUser-" << i;
-        signal_name = sstream.str();
-        sstream.str(std::string()); // clear the stream
-
-        simsignal_t signal = registerSignal(signal_name.c_str());
-        cProperty *statisticTemplate = getProperties()->get("statisticTemplate", "tptUserTemplate");
-        getEnvir()->addResultRecorders(this, signal, signal_name.c_str(), statisticTemplate);
-        users[i].throughput_s = signal;
-                                    //
-        //////////////////////////////
-
-        //////////////////////////////
-        // RESPONSE TIME SIGNALS
-        sstream << "responseTime-" << i;
-        signal_name = sstream.str();
-        sstream.str(std::string()); // clear the stream
-
-        signal = registerSignal(signal_name.c_str());
-        statisticTemplate = getProperties()->get("statisticTemplate", "responseTimeUserTemplate");
-        getEnvir()->addResultRecorders(this, signal, signal_name.c_str(), statisticTemplate);
-        users[i].responseTime_s = signal;
-                                    //
-        //////////////////////////////
-
-        PacketTimer *tmr = new PacketTimer();
-        tmr->setUserId(i);
-        tmr->setKind(MSG_PKT_TIMER);
-        users[i].setTimer(tmr);
-        scheduleAt(simTime(), tmr);
-    }
+    throughput_s          = registerSignal("throughput");
+    numServedUser_s       = registerSignal("NumServedUser");
 
     // schedule first iteration of RR algorithm
     frame = nullptr;
-    scheduleAt(simTime(), timer);
     numSentBytesPerTimeslot   = 0;
     numServedUsersPerTimeslot = 0;
+    scheduleAt(simTime(), timer);
 }
 
 
