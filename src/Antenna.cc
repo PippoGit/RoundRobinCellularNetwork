@@ -301,7 +301,10 @@ void Antenna::downlinkPropagation()
         info.propagationTime = simTime();
 
         // emit responsetime...
-        emit(users[info.recipient].responseTime_s, info.propagationTime - info.arrivalTime);
+        if(simTime() >= getSimulation()->getWarmupPeriod()) {
+            emit(users[info.recipient].responseTime_s, info.propagationTime - info.arrivalTime);
+        }
+
         emit(responseTimeGlobal_s,  info.propagationTime - info.arrivalTime);
 
         // Increment bytes sent for this user...
@@ -321,7 +324,8 @@ void Antenna::downlinkPropagation()
     EV_DEBUG << "[ANTENNA] Emitting signals for user's statistics " << endl;
     for(auto it=users.begin(); it!=users.end(); ++it)
     {
-       emit(it->throughput_s, it->getServedBytes());
+        if(simTime() >= getSimulation()->getWarmupPeriod())
+            emit(it->throughput_s, it->getServedBytes());
     }
 
     pendingPackets.clear(); // clear the pending packets data structure...
