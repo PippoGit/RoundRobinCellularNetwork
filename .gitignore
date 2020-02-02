@@ -9,3 +9,6 @@ simulations/RoundRobinSimulation/results/*
 DataAnalysis/.vscode/*
 *.csv
 **/.vscode/*
+*.vec
+*.vci
+*.anf
