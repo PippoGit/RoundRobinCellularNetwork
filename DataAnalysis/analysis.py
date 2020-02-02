@@ -6,10 +6,15 @@ import csv
 # plotty stuff
 import matplotlib.pyplot     as plt
 
-# Just to not fuck things up
-np.random.seed(42)
-
 # CONSTANTS
+WARMUP_PERIOD  = 70
+NUM_ITERATIONS = 100
+SIM_TIME       = 100
+
+SAMPLE_SIZE    = 1000
+SEED_SAMPLING  = 42
+
+# DATA PATHs
 DATA_PATH = "./data/"
 
 MODE_DESCRIPTION = {
@@ -34,6 +39,7 @@ LAMBDA_PATH = {
     'l01' : "lambda01/",
     'l09' : "lambda09/",
     'l13' : "lambda13/",
+    'l1'  : "lambda1/",
     'l2'  : "lambda2/",
     'l5'  : "lambda5/"
 }
@@ -42,6 +48,10 @@ CSV_PATH = {
     'sca' : "sca_res.csv",
     'vec' : "vec_res.csv"
 }
+
+# Just to not fuck things up
+np.random.seed(SEED_SAMPLING)
+
 
 ####################################################
 #                       UTIL                       #
@@ -66,12 +76,9 @@ def running_avg(x):
 ###########################################################
 
 
-def plot_mean_vectors(data, attribute, start=0, duration=None, warmup=0, iterations=[0]):
-    # get the data....
-    sel = data[data.name == attribute]
-    
-    # all the vectors have the same duration.... so np
-    duration = sel['time'].iloc[0].max() if duration is None else duration
+def plot_mean_vectors(data, attribute, start=0, duration=None, iterations=[0]):
+    sel = data[data.name == attribute]    
+    duration = SIM_TIME if duration is None else duration
     
     # plot a mean vector for each iteration
     for i in iterations:
@@ -80,7 +87,7 @@ def plot_mean_vectors(data, attribute, start=0, duration=None, warmup=0, iterati
             plt.plot(row.time, running_avg(row.value))
     
     # plot the data
-    plt.xlim(start+warmup, duration)
+    plt.xlim(start, duration)
     plt.show()
     return
 
@@ -130,21 +137,16 @@ def vector_parse(cqi, pkt_lambda):
     data = data[data.type == 'vector']
     data.reset_index(inplace=True, drop=True)
 
-    # compute aggvalues for each iteration
-    data['mean'] = data.vecvalue.apply(lambda x: x.mean())
-    data['max']  = data.vecvalue.apply(lambda x: x.max())
-    data['min']  = data.vecvalue.apply(lambda x: x.min())
-    data['std']  = data.vecvalue.apply(lambda x: x.std())
-
-    # TODO: Maybe this one can be removed in the future when we know
-    # for sure if all the timevec have the same duration (which is very
-    # likely to be honest)
-    data['duration']  = data.vectime.apply(lambda x: x.max())
-
+    # # compute aggvalues for each iteration
+    # data['mean']  = data.vecvalue.apply(lambda x: x.mean())
+    # data['max']   = data.vecvalue.apply(lambda x: x.max())
+    # data['min']   = data.vecvalue.apply(lambda x: x.min())
+    # data['std']   = data.vecvalue.apply(lambda x: x.std())
+    # data['count'] = data.vecvalue.apply(lambda x: x.size)
 
     # rename vecvalue for simplicity...
     data = data.rename({'vecvalue':'value', 'vectime':'time'}, axis=1)
-    return data[['run', 'name', 'time', 'value', 'mean', 'max', 'min', 'std', 'duration']].sort_values(['run', 'name'])
+    return data[['run', 'name', 'time', 'value']].sort_values(['run', 'name'])
 
 
 # Parse CSV file
@@ -176,23 +178,32 @@ def describe_attribute_vec(data, name, iteration=0):
     return
 
 
-def aggregate_responsetime(data, numIterations=10, numUsers=10):
-    sel = data[data.attribute.starts_with("responseTime-")]
+def vector_stats(data, group=False):
+    # compute stats for each iteration
+    stats = pd.DataFrame()
+    stats['name']  = data.name
+    stats['run']   = data.run
+    stats['mean']  = data.value.apply(lambda x: x.mean())
+    stats['max']   = data.value.apply(lambda x: x.max())
+    stats['min']   = data.value.apply(lambda x: x.min())
+    stats['std']   = data.value.apply(lambda x: x.std())
+    stats['count'] = data.value.apply(lambda x: x.size)
+    return stats.groupby(['name']).mean().drop('run', axis=1) if group else stats
+
+
+def users_bandwidth(data, group=False):
+    sel = data[data.name.str.startswith('tptUser')]
+    stats = vector_stats(sel)
     
-    rsp_matrix = pd.DataFrame()
-    stats      = pd.DataFrame()
+    stats['user'] = sel.name.apply(lambda x: int(x.split('-')[1]))
+    stats['run']  = sel.run
 
-    for i in range(0, numUsers):
-        # get the data
-        tmp = sel[sel.attribute == ("responseTime-"+str(i))].value.mean()
-        
-        # eval the stats (idk if this is actually useful)
-        stats['user-'+str(i)]['mean'] = rsp_matrix['user-'+str(i)].mean()
-        stats['user-'+str(i)]['max']  = rsp_matrix['user-'+str(i)].max()
-        stats['user-'+str(i)]['min']  = rsp_matrix['user-'+str(i)].min()
+    stats['mean_Mbps'] = (stats['mean'] * 1000)/125000
+    stats['max_Mbps']  = (stats['max']  * 1000)/125000
+    stats['min_Mbps']  = (stats['min']  * 1000)/125000
 
-
-    return rsp_matrix, stats
+    stats = stats[['user', 'run', 'mean_Mbps', 'max_Mbps', 'min_Mbps']]
+    return stats.groupby(['user']).mean().drop('run', axis=1) if group else stats
 
 
 ####################################################
@@ -209,8 +220,8 @@ def gini(data):
     height, area = 0, 0
     for value in sorted_list:
         height += value
-        area += height - value / 2.
-    fair_area = height * len(data) / 2.
+        area += height - value/2.
+    fair_area = height * len(data)/2.
     return (fair_area - area) / fair_area
 
 
@@ -422,7 +433,7 @@ def main():
 
     # preamble
     print(clean_data.head(100))
-    plot_mean_vectors(clean_data, "responseTime-0")
+    plot_mean_vectors(clean_data, "responseTime-0", start=WARMUP_PERIOD)
 
     return 
 
