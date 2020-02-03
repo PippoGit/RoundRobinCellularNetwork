@@ -39,7 +39,7 @@ void Antenna::initialize()
         pt->setUserId(i);
         u.setTimer(pt);
 
-        scheduleAt(simTime(),pt);
+        scheduleAt(simTime() + exponential((simtime_t) par("lambda"), RNG_INTERARRIVAL),pt);
         users.push_back(u);
     }
 
@@ -84,7 +84,7 @@ void Antenna::initUsersInformation()
 void Antenna::roundrobin()
 {
     currentUser = (currentUser == users.end()-1)?users.begin():currentUser+1;
-    EV_DEBUG << "[ROUND_ROBIN] it's the turn of " << (currentUser - users.begin()) << endl;
+    EV_DEBUG << "[ROUND_ROBIN] it's the turn of " << currentUser->getId() << endl;
 }
 
 
@@ -115,7 +115,7 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
     // It's the turn of CurrentUser, let's take its queue and info...
     cQueue *queue     = currentUser->getQueue();
     int uCQI          = currentUser->CQIToBytes();
-    int currentUserId = (currentUser - users.begin());
+    int currentUserId = currentUser->getId();
 
     int    remainingRBs        = (to-from);
     double totalRemainingBytes = (remainingRBs * uCQI);
@@ -302,11 +302,11 @@ void Antenna::downlinkPropagation()
 
         // emit responsetime...
         // TEST !!!!!!
-        if(info.arrivalTime >= getSimulation()->getWarmupPeriod()) {
+        //if(simTime() >= 40) {
             emit(users[info.recipient].responseTime_s, info.propagationTime - info.arrivalTime);
             users[info.recipient].incrementServedBytes(info.size);
             emit(responseTimeGlobal_s,  info.propagationTime - info.arrivalTime);
-        }
+        //}
         ////////
 
         packetsInformation.erase(id); // remove the packet from the hash table
@@ -315,17 +315,17 @@ void Antenna::downlinkPropagation()
     broadcastFrame(frame);
     EV_DEBUG << "[DOWNLINK] Broadcast propagation of the frame" << endl;
 
-    if(simTime() >= getSimulation()->getWarmupPeriod()) {
+    //if(simTime() >= 40) {
         EV_DEBUG << "[ANTENNA] Emitting signals for global statistics " << endl;
         emit(throughput_s,    numSentBytesPerTimeslot);   //Tpt defined as bytes sent per timeslot
         emit(numServedUser_s, numServedUsersPerTimeslot); // Tpt defined as num of served users per timeslot
-    }
+    //}
 
     // Emit statitics per user
     EV_DEBUG << "[ANTENNA] Emitting signals for user's statistics " << endl;
     for(auto it=users.begin(); it!=users.end(); ++it)
     {
-        if(simTime() >= getSimulation()->getWarmupPeriod())
+        //if(simTime() >= 40)
             emit(it->throughput_s, it->getServedBytes());
     }
 
