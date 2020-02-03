@@ -22,7 +22,7 @@ simple Antenna
     	@statistic[NumServedUser](source="NumServedUser"; record=mean,vector);       
        
        @signal[tptUser*](type=long);
-       @statisticTemplate[tptUserTemplate](record=vector);  
+       @statisticTemplate[tptUserTemplate](record=mean, vector);  
 
        @signal[responseTime*](type=simtime_t);
        @statisticTemplate[responseTimeUserTemplate](record=mean,vector);         
