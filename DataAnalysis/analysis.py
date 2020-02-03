@@ -54,6 +54,22 @@ CSV_PATH = {
 np.random.seed(SEED_SAMPLING)
 
 
+def one_iter_lorenz(data, attribute, iteration=0):
+    # consider only the values for attribute
+    clean_data = data[data.name == attribute]
+
+    # for each iteration
+    # for i in range(0, len(clean_data)):
+    # sort the data
+    vec = clean_data.value.iloc[iteration]
+    plot_lorenz_curve(vec)
+    
+    plt.plot([0, 1], [0, 1], 'k')
+    plt.title("Lorenz Curve for " + attribute)
+    plt.show()
+    return
+
+
 ####################################################
 #                       UTIL                       #
 ####################################################
@@ -75,6 +91,16 @@ def running_avg(x):
 #     return avg_vector
 #
 ###########################################################
+
+
+def filter_data(data, attribute, start=0):
+    sel = data[data.name == attribute]
+
+    for i, row in sel.iterrows():
+        tmp = np.where(row.time < start, np.nan, row.value)
+        sel.at[i, 'value'] = tmp[~np.isnan(tmp)]
+    return sel
+
 
 
 def plot_mean_vectors(data, attribute, start=0, duration=SIM_TIME, iterations=[0]):
@@ -178,6 +204,9 @@ def scalar_parse(cqi, pkt_lambda):
     # remove useless rows (first 100-ish rows)
     data = data[data.type == 'scalar']
     data.reset_index(inplace=True, drop=True)
+    
+    # data['user'] = data.name.apply(lambda x: x.split['-'][1] if '-' in x else 'global')
+    
     return data[['run', 'name', 'value']].sort_values(['run', 'name'])
 
 
@@ -506,3 +535,21 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+
+def test_lorenz(data, attribute, users=range(0, NUM_USERS), iterations=range(0, NUM_ITERATIONS)):
+    # val = pd.DataFrame()
+    sel = data[data.name.str.startswith(attribute + '-')]
+    sorted_data = pd.DataFrame()
+
+    for r in iterations:
+        sorted_data['run-' + str(r)] = np.sort(sel[sel.run == r].value.values)
+    
+    return sorted_data.mean(axis=1)
+    
+    # plot_lorenz_curve(sorted_data.mean(axis=1))
+    # plt.show()
+
+    # return
+
