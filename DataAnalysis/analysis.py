@@ -77,6 +77,16 @@ def one_iter_lorenz(data, attribute, iteration=0):
 def running_avg(x):
     return np.cumsum(x) / np.arange(1, x.size + 1)
 
+
+def winavg(x, N):
+    xpad = np.concatenate((np.zeros(N), x)) # pad with zeroes
+    s = np.cumsum(xpad)
+    ss = s[N:] - s[:-N]
+    ss[N-1:] /= N
+    ss[:N-1] /= np.arange(1, min(N-1,ss.size)+1)
+    return ss
+    
+
 ############################################################
 #            DON'T USE THE FOLLOWING FUNCTION              #
 ############################################################
