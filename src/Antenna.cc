@@ -302,11 +302,11 @@ void Antenna::downlinkPropagation()
 
         // emit responsetime...
         // TEST !!!!!!
-        //if(simTime() >= 40) {
+        if (simTime() > getSimulation()->getWarmupPeriod()) {
             emit(users[info.recipient].responseTime_s, info.propagationTime - info.arrivalTime);
             users[info.recipient].incrementServedBytes(info.size);
             emit(responseTimeGlobal_s,  info.propagationTime - info.arrivalTime);
-        //}
+        }
         ////////
 
         packetsInformation.erase(id); // remove the packet from the hash table
@@ -315,17 +315,17 @@ void Antenna::downlinkPropagation()
     broadcastFrame(frame);
     EV_DEBUG << "[DOWNLINK] Broadcast propagation of the frame" << endl;
 
-    //if(simTime() >= 40) {
+    if (simTime() > getSimulation()->getWarmupPeriod()) {
         EV_DEBUG << "[ANTENNA] Emitting signals for global statistics " << endl;
         emit(throughput_s,    numSentBytesPerTimeslot);   //Tpt defined as bytes sent per timeslot
         emit(numServedUser_s, numServedUsersPerTimeslot); // Tpt defined as num of served users per timeslot
-    //}
+    }
 
     // Emit statitics per user
     EV_DEBUG << "[ANTENNA] Emitting signals for user's statistics " << endl;
     for(auto it=users.begin(); it!=users.end(); ++it)
     {
-        //if(simTime() >= 40)
+        if (simTime() > getSimulation()->getWarmupPeriod())
             emit(it->throughput_s, it->getServedBytes());
     }
 
