@@ -85,22 +85,6 @@ def winavg(x, N):
     ss[N-1:] /= N
     ss[:N-1] /= np.arange(1, min(N-1,ss.size)+1)
     return ss
-    
-
-############################################################
-#            DON'T USE THE FOLLOWING FUNCTION              #
-############################################################
-#
-# def avg_vector(data, attribute, start=0, duration=None):
-#     # get the data....
-#     sel = data[data.name == attribute]
-#     avg_vector = []
-#     for row in sel.itertuples():
-#         ravg = running_avg(row.value);
-#         avg_vector.append(ravg)
-#     return avg_vector
-#
-###########################################################
 
 
 def filter_data(data, attribute, start=0):
@@ -548,18 +532,51 @@ if __name__ == '__main__':
 
 
 
-def test_lorenz(data, attribute, users=range(0, NUM_USERS), iterations=range(0, NUM_ITERATIONS)):
+
+
+### TOBEDONE  !!!!!
+
+def test_lorenz(data, attribute, users=range(0, NUM_USERS), iterations=range(0, NUM_ITERATIONS), win=1000):
     # val = pd.DataFrame()
     sel = data[data.name.str.startswith(attribute + '-')]
     sorted_data = pd.DataFrame()
-
     for r in iterations:
-        sorted_data['run-' + str(r)] = np.sort(sel[sel.run == r].value.values)
-    
-    return sorted_data.mean(axis=1)
-    
-    # plot_lorenz_curve(sorted_data.mean(axis=1))
-    # plt.show()
+        tmp = sel[sel.run == r]
+        tmp['winavg'] = tmp.value.apply(lambda x: winavg(x, win))        
+        sorted_data['run-' + str(r)] = np.sort(tmp['winavg'].values)
+        
+    plot_lorenz_curve(sorted_data.mean(axis=1))
+    plt.show()
+    return
 
-    # return
 
+
+
+def plot_winavg_vectors(data, attribute, start=0, duration=100, iterations=[0], win=100):
+    sel = data[data.name == attribute]    
+    
+    # plot a mean vector for each iteration
+    for i in iterations:
+        tmp = sel[sel.run == i]
+        for row in tmp.itertuples():
+            plt.plot(row.time, winavg(row.value, win))
+    
+    # plot the data
+    plt.xlim(start, duration)
+    plt.show()
+    return
+
+
+def plot_winavg_lorenz(data, attribute, iterations=[0], win=100):
+    sel = data[data.name == attribute]    
+    
+    # plot a mean vector for each iteration
+    for i in iterations:
+        tmp = sel[sel.run == i]
+        for row in tmp.itertuples():
+            plot_lorenz_curve(winavg(row.value, win))
+    
+    # plot the data
+    plt.title("Lorenz Curve for WinAvg(" + str(win) + ") " + attribute)
+    plt.show()
+    return
