@@ -535,16 +535,20 @@ if __name__ == '__main__':
 
 
 ### TOBEDONE  !!!!!
-
 def test_lorenz(data, attribute, users=range(0, NUM_USERS), iterations=range(0, NUM_ITERATIONS), win=1000):
     # val = pd.DataFrame()
     sel = data[data.name.str.startswith(attribute + '-')]
+    sel['user'] = sel.name.apply(lambda x:int(x.split('-')[1]))
     sorted_data = pd.DataFrame()
+
     for r in iterations:
         tmp = sel[sel.run == r]
-        tmp['winavg'] = tmp.value.apply(lambda x: winavg(x, win))        
-        sorted_data['run-' + str(r)] = np.sort(tmp['winavg'].values)
-        
+        sorted_data['run-' + str(r)] = np.sort(tmp.value.values)
+    
+    print(sel.head(100))
+    print(sorted_data.head(100))
+
+    # return sorted_data
     plot_lorenz_curve(sorted_data.mean(axis=1))
     plt.show()
     return
