@@ -38,8 +38,7 @@ void Antenna::initialize()
         pt->setKind(MSG_PKT_TIMER);
         pt->setUserId(i);
         u.setTimer(pt);
-
-        scheduleAt(simTime() + exponential((simtime_t) par("lambda"), RNG_INTERARRIVAL),pt);
+        scheduleAt(simTime() + (i+1)*0.001 /*exponential((simtime_t) par("lambda"), RNG_INTERARRIVAL)*/,pt);
         users.push_back(u);
     }
 
@@ -56,7 +55,7 @@ void Antenna::initialize()
     frame = nullptr;
     numSentBytesPerTimeslot   = 0;
     numServedUsersPerTimeslot = 0;
-    scheduleAt(simTime(), timer);
+    scheduleAt(simTime() + 0.001, timer);
 }
 
 
@@ -71,8 +70,8 @@ void Antenna::initUsersInformation()
     for(std::vector<UserInformation>::iterator it = users.begin(); it != users.end(); ++it)
     {
         double p = (it->getId()<3)? successProbGroup1: (it->getId()<7)? successProbGroup2: successProbGroup3;
-        int cqi = (isBinomial)?binomial(BINOMIAL_N, p):intuniform(MIN_CQI, MAX_CQI);
-        EV <<"User: "<<it->getId()<< " - p: "<<p<<" - cqi: "<<cqi<<endl;
+        int cqi = 10; // (isBinomial)?binomial(BINOMIAL_N, p):intuniform(MIN_CQI, MAX_CQI);
+        EV << "User: " << it->getId() << " - p: " << p << " - cqi: "<<cqi<<endl;
         it->setCQI(cqi);
         it->shouldBeServed();
     }
@@ -124,7 +123,6 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
     EV_DEBUG << "    USER CQI        : " << uCQI << endl;
     EV_DEBUG << "    REMAINING RBs   : " << remainingRBs << endl;
     EV_DEBUG << "    REMAINING BYTES : " << totalRemainingBytes << endl;
-
 
     while(!(queue->isEmpty() || from == to))
     {
@@ -237,7 +235,7 @@ void Antenna::createFrame()
 
         // Fill the frame with current user's queue and update currentRB index
         fillFrameWithCurrentUser(currentRB, vframe.end());
-    } while(currentRB != vframe.end());
+    } while(false/*currentRB != vframe.end()*/);
 
     // 3) send the frame to all the users DURING NEXT TIMESLOT!
     this->frame = vectorToFrame(vframe);
@@ -285,7 +283,7 @@ void Antenna::handlePacket(int userId)
     EV_DEBUG << "[UPLINK] Scheduling next packet for User-" << userId << endl;
     simtime_t lambda = par("lambda");
     EV_DEBUG << " LAMBDA: " << lambda << " DOUBLE: " << lambda.dbl() << endl;
-    scheduleAt(simTime() + exponential(lambda, RNG_INTERARRIVAL), users[userId].getTimer());
+    scheduleAt(simTime() + (userId+1)*0.001 /* exponential(lambda, RNG_INTERARRIVAL)*/, users[userId].getTimer());
     EV_DEBUG << "[UPLINK] Done!" << endl;
 }
 
