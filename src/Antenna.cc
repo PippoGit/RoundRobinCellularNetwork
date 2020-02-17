@@ -50,6 +50,7 @@ void Antenna::initialize()
     responseTimeGlobal_s  = registerSignal("responseTimeGlobal");
     throughput_s          = registerSignal("throughput");
     numServedUser_s       = registerSignal("NumServedUser");
+    numberRB_s			  = registerSignal("numberRB");
 
     // schedule first iteration of RR algorithm
     frame = nullptr;
@@ -90,10 +91,13 @@ void Antenna::roundrobin()
 Frame* Antenna::vectorToFrame(std::vector<ResourceBlock> &v)
 {
     Frame *f = new Frame();
+    int c=0;
     for(auto it=v.begin(); it != v.end(); ++it)
     {
         f->setRBFrame(it - v.begin(), *it);
+        c += (it->getRecipient() > 0);
     }
+    f->setAllocatedRBs(c);
     return f;
 }
 
@@ -211,6 +215,7 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
     // If the last RB was not filled (AND the frame is not full)
     if(!(from == to || from->isAvailable()))
         ++from; // the next user should start at from+1
+
 }
 
 
@@ -309,7 +314,7 @@ void Antenna::downlinkPropagation()
 
         packetsInformation.erase(id); // remove the packet from the hash table
     }
-
+    emit(numberRB_s, frame->getAllocatedRBs());
     broadcastFrame(frame);
     EV_DEBUG << "[DOWNLINK] Broadcast propagation of the frame" << endl;
 

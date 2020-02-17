@@ -181,6 +181,7 @@ Register_Class(Frame)
 
 Frame::Frame(const char *name, short kind) : ::omnetpp::cMessage(name,kind)
 {
+    this->allocatedRBs = 0;
 }
 
 Frame::Frame(const Frame& other) : ::omnetpp::cMessage(other)
@@ -204,18 +205,21 @@ void Frame::copy(const Frame& other)
 {
     for (unsigned int i=0; i<FRAME_SIZE; i++)
         this->RBFrame[i] = other.RBFrame[i];
+    this->allocatedRBs = other.allocatedRBs;
 }
 
 void Frame::parsimPack(omnetpp::cCommBuffer *b) const
 {
     ::omnetpp::cMessage::parsimPack(b);
     doParsimArrayPacking(b,this->RBFrame,FRAME_SIZE);
+    doParsimPacking(b,this->allocatedRBs);
 }
 
 void Frame::parsimUnpack(omnetpp::cCommBuffer *b)
 {
     ::omnetpp::cMessage::parsimUnpack(b);
     doParsimArrayUnpacking(b,this->RBFrame,FRAME_SIZE);
+    doParsimUnpacking(b,this->allocatedRBs);
 }
 
 unsigned int Frame::getRBFrameArraySize() const
@@ -233,6 +237,16 @@ void Frame::setRBFrame(unsigned int k, const ResourceBlock& RBFrame)
 {
     if (k>=FRAME_SIZE) throw omnetpp::cRuntimeError("Array of size FRAME_SIZE indexed by %lu", (unsigned long)k);
     this->RBFrame[k] = RBFrame;
+}
+
+int Frame::getAllocatedRBs() const
+{
+    return this->allocatedRBs;
+}
+
+void Frame::setAllocatedRBs(int allocatedRBs)
+{
+    this->allocatedRBs = allocatedRBs;
 }
 
 class FrameDescriptor : public omnetpp::cClassDescriptor
@@ -300,7 +314,7 @@ const char *FrameDescriptor::getProperty(const char *propertyname) const
 int FrameDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 1+basedesc->getFieldCount() : 1;
+    return basedesc ? 2+basedesc->getFieldCount() : 2;
 }
 
 unsigned int FrameDescriptor::getFieldTypeFlags(int field) const
@@ -313,8 +327,9 @@ unsigned int FrameDescriptor::getFieldTypeFlags(int field) const
     }
     static unsigned int fieldTypeFlags[] = {
         FD_ISARRAY | FD_ISCOMPOUND,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<1) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<2) ? fieldTypeFlags[field] : 0;
 }
 
 const char *FrameDescriptor::getFieldName(int field) const
@@ -327,8 +342,9 @@ const char *FrameDescriptor::getFieldName(int field) const
     }
     static const char *fieldNames[] = {
         "RBFrame",
+        "allocatedRBs",
     };
-    return (field>=0 && field<1) ? fieldNames[field] : nullptr;
+    return (field>=0 && field<2) ? fieldNames[field] : nullptr;
 }
 
 int FrameDescriptor::findField(const char *fieldName) const
@@ -336,6 +352,7 @@ int FrameDescriptor::findField(const char *fieldName) const
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount() : 0;
     if (fieldName[0]=='R' && strcmp(fieldName, "RBFrame")==0) return base+0;
+    if (fieldName[0]=='a' && strcmp(fieldName, "allocatedRBs")==0) return base+1;
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
@@ -349,8 +366,9 @@ const char *FrameDescriptor::getFieldTypeString(int field) const
     }
     static const char *fieldTypeStrings[] = {
         "ResourceBlock",
+        "int",
     };
-    return (field>=0 && field<1) ? fieldTypeStrings[field] : nullptr;
+    return (field>=0 && field<2) ? fieldTypeStrings[field] : nullptr;
 }
 
 const char **FrameDescriptor::getFieldPropertyNames(int field) const
@@ -419,6 +437,7 @@ std::string FrameDescriptor::getFieldValueAsString(void *object, int field, int 
     Frame *pp = (Frame *)object; (void)pp;
     switch (field) {
         case 0: {std::stringstream out; out << pp->getRBFrame(i); return out.str();}
+        case 1: return long2string(pp->getAllocatedRBs());
         default: return "";
     }
 }
@@ -433,6 +452,7 @@ bool FrameDescriptor::setFieldValueAsString(void *object, int field, int i, cons
     }
     Frame *pp = (Frame *)object; (void)pp;
     switch (field) {
+        case 1: pp->setAllocatedRBs(string2long(value)); return true;
         default: return false;
     }
 }
