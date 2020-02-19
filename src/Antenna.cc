@@ -27,6 +27,7 @@ void Antenna::initialize()
 
     EV_DEBUG << "[ANTENNA-INITIALIZE] Building UserInformation data structure" << endl;
     users.reserve(NUM_USERS);
+    simtime_t lambda = par("lambda");
     for(int i=0; i < NUM_USERS; i++)
     {
         UserInformation u(i);
@@ -38,7 +39,7 @@ void Antenna::initialize()
         pt->setKind(MSG_PKT_TIMER);
         pt->setUserId(i);
         u.setTimer(pt);
-        scheduleAt(simTime() + /*(i+1)*0.001 */ exponential((simtime_t) par("lambda"), RNG_INTERARRIVAL),pt);
+        scheduleAt(simTime() + /*(i+1)*0.001 */ exponential(lambda, RNG_INTERARRIVAL),pt);
         users.push_back(u);
     }
 
@@ -95,9 +96,12 @@ Frame* Antenna::vectorToFrame(std::vector<ResourceBlock> &v)
     for(auto it=v.begin(); it != v.end(); ++it)
     {
         f->setRBFrame(it - v.begin(), *it);
-        c += (it->getRecipient() > 0);
+        c += (it->getRecipient() >= 0);
+        //EV_DEBUG << "CONTO RB  "<< c << endl;
     }
     f->setAllocatedRBs(c);
+    EV_DEBUG << "CONTO RB  "<< c << endl;
+
     return f;
 }
 
@@ -205,6 +209,7 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
                 if(from->isFull())
                     ++from;
             }
+            EV_DEBUG << "   FINAL INDEX:          " << (FRAME_SIZE) - (to - from) << endl;
             /////////////////////////////////////////////////////
             queue->remove(p);
             delete p; // also delete the packet!
@@ -235,12 +240,10 @@ void Antenna::createFrame()
         EV_DEBUG << "[CREATE_FRAME] Round Robin Starting Up..." <<endl;
         roundrobin();
 
-        if(currentUser == lastUser)
-           break;
 
         // Fill the frame with current user's queue and update currentRB index
         fillFrameWithCurrentUser(currentRB, vframe.end());
-    } while(currentRB != vframe.end());
+    } while(currentRB != vframe.end() && currentUser != lastUser );
 
     // 3) send the frame to all the users DURING NEXT TIMESLOT!
     this->frame = vectorToFrame(vframe);
