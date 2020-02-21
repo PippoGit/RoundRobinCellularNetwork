@@ -21,6 +21,9 @@ simple Antenna
         @signal[NumServedUser](type=long);
     	@statistic[NumServedUser](source="NumServedUser"; record=mean,vector);       
        
+       	 @signal[numberRB](type=long);
+    	@statistic[numberRB](source="numberRB"; record=mean,vector);  
+
        @signal[tptUser*](type=long);
        @statisticTemplate[tptUserTemplate](record=mean, vector);  
 

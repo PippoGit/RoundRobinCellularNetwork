@@ -45,11 +45,13 @@ class Antenna : public cSimpleModule
     int  numServedUsersPerTimeslot;
     long numSentBytesPerTimeslot;
 
+
     // Signal
     //simsignal_t waitTime_s;
     simsignal_t responseTimeGlobal_s;
     simsignal_t throughput_s;
     simsignal_t numServedUser_s;
+    simsignal_t numberRB_s;
 
     virtual simsignal_t createDynamicSignal(std::string prefix, int userId, std::string templateName);
 
