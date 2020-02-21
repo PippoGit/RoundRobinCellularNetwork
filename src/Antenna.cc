@@ -35,7 +35,6 @@ void Antenna::initialize()
     EV_DEBUG << "[ANTENNA-INITIALIZE] Building UserInformation data structure" << endl;
     users.reserve(NUM_USERS);
     simtime_t lambda = par("lambda");
-
     for(int i=0; i < NUM_USERS; i++)
     {
         UserInformation u(i);
@@ -54,7 +53,6 @@ void Antenna::initialize()
 
     EV_DEBUG << "[ANTENNA-INITIALIZE] Initializing first iterator" << endl;
     currentUser = users.end()-1; // this will make the first call to roundrobin() to set currentUser to begin()
-
 
 
     // schedule first iteration of RR algorithm
