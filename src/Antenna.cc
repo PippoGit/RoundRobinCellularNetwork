@@ -20,13 +20,22 @@ simsignal_t Antenna::createDynamicSignal(std::string prefix, int userId, std::st
 
 void Antenna::initialize()
 {
+    //signals
+    responseTimeGlobal_s  = registerSignal("responseTimeGlobal");
+    throughput_s          = registerSignal("throughput");
+    numServedUser_s       = registerSignal("NumServedUser");
+    numberRB_s            = registerSignal("numberRB");
+
     EV_DEBUG << "[ANTENNA-INITIALIZE] Initializing antenna..." << endl;
     NUM_USERS = this->getParentModule()->par("nUsers");
+    //if(NUM_USERS==0) return;
     timer = new cMessage("roundrobin");
     timer->setKind(MSG_RR_TIMER);
 
     EV_DEBUG << "[ANTENNA-INITIALIZE] Building UserInformation data structure" << endl;
     users.reserve(NUM_USERS);
+    simtime_t lambda = par("lambda");
+
     for(int i=0; i < NUM_USERS; i++)
     {
         UserInformation u(i);
@@ -38,7 +47,7 @@ void Antenna::initialize()
         pt->setKind(MSG_PKT_TIMER);
         pt->setUserId(i);
         u.setTimer(pt);
-        scheduleAt(simTime() + /*(i+1)*0.001 */ exponential((simtime_t) par("lambda"), RNG_INTERARRIVAL),pt);
+        scheduleAt(simTime() + /*(i+1)*0.001 */ exponential(lambda, RNG_INTERARRIVAL),pt);
         users.push_back(u);
     }
 
@@ -46,10 +55,7 @@ void Antenna::initialize()
     EV_DEBUG << "[ANTENNA-INITIALIZE] Initializing first iterator" << endl;
     currentUser = users.end()-1; // this will make the first call to roundrobin() to set currentUser to begin()
 
-    //signals
-    responseTimeGlobal_s  = registerSignal("responseTimeGlobal");
-    throughput_s          = registerSignal("throughput");
-    numServedUser_s       = registerSignal("NumServedUser");
+
 
     // schedule first iteration of RR algorithm
     frame = nullptr;
@@ -82,18 +88,26 @@ void Antenna::initUsersInformation()
 
 void Antenna::roundrobin()
 {
-    currentUser = (currentUser == users.end()-1)?users.begin():currentUser+1;
-    EV_DEBUG << "[ROUND_ROBIN] it's the turn of " << currentUser->getId() << endl;
+    if(NUM_USERS > 0) {
+        currentUser = (currentUser == users.end()-1)?users.begin():currentUser+1;
+        EV_DEBUG << "[ROUND_ROBIN] it's the turn of " << currentUser->getId() << endl;
+    }
 }
 
 
 Frame* Antenna::vectorToFrame(std::vector<ResourceBlock> &v)
 {
     Frame *f = new Frame();
+    int c=0;
     for(auto it=v.begin(); it != v.end(); ++it)
     {
         f->setRBFrame(it - v.begin(), *it);
+        c += (it->getRecipient() >= 0);
+        //EV_DEBUG << "CONTO RB  "<< c << endl;
     }
+    f->setAllocatedRBs(c);
+    EV_DEBUG << "CONTO RB  "<< c << endl;
+
     return f;
 }
 
@@ -112,6 +126,7 @@ void Antenna::broadcastFrame(Frame *f)
 void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &from, std::vector<ResourceBlock>::iterator to)
 {
     // It's the turn of CurrentUser, let's take its queue and info...
+    if(NUM_USERS == 0) return;
     cQueue *queue     = currentUser->getQueue();
     int uCQI          = currentUser->CQIToBytes();
     int currentUserId = currentUser->getId();
@@ -201,6 +216,7 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
                 if(from->isFull())
                     ++from;
             }
+            EV_DEBUG << "   FINAL INDEX:          " << (FRAME_SIZE) - (to - from) << endl;
             /////////////////////////////////////////////////////
             queue->remove(p);
             delete p; // also delete the packet!
@@ -211,6 +227,7 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
     // If the last RB was not filled (AND the frame is not full)
     if(!(from == to || from->isAvailable()))
         ++from; // the next user should start at from+1
+
 }
 
 
@@ -230,12 +247,10 @@ void Antenna::createFrame()
         EV_DEBUG << "[CREATE_FRAME] Round Robin Starting Up..." <<endl;
         roundrobin();
 
-        if(currentUser == lastUser)
-           break;
 
         // Fill the frame with current user's queue and update currentRB index
         fillFrameWithCurrentUser(currentRB, vframe.end());
-    } while(currentRB != vframe.end());
+    } while(currentRB != vframe.end() && currentUser != lastUser );
 
     // 3) send the frame to all the users DURING NEXT TIMESLOT!
     this->frame = vectorToFrame(vframe);
@@ -309,7 +324,7 @@ void Antenna::downlinkPropagation()
 
         packetsInformation.erase(id); // remove the packet from the hash table
     }
-
+    emit(numberRB_s, frame->getAllocatedRBs());
     broadcastFrame(frame);
     EV_DEBUG << "[DOWNLINK] Broadcast propagation of the frame" << endl;
 
@@ -354,7 +369,8 @@ void Antenna::handleMessage(cMessage *msg)
 
 void Antenna::finish() {
     // drop(timer);
-
+    //NUM_USERS = this->getParentModule()->par("nUsers");
+    //if(NUM_USERS==0) return;
     cancelAndDelete(timer);
     for(auto it=users.begin(); it!=users.end(); ++it)
         cancelAndDelete(it->getTimer());
