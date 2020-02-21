@@ -28,7 +28,8 @@ LAMBDA_DESCRIPTION = {
     'l09' : "Lambda = 0.9",
     'l13' : "Lambda = 1.3",
     'l2'  : "Lambda = 2.0",
-    'l5'  : "Lambda = 5.0"
+    'l5'  : "Lambda = 5.0",
+    'l14' : "Lambda = 1.4"
 }
 
 MODE_PATH = {
@@ -41,6 +42,7 @@ LAMBDA_PATH = {
     'l09' : "lambda09/",
     'l13' : "lambda13/",
     'l1'  : "lambda1/",
+    'l14' : "lambda14/",
     'l2'  : "lambda2/",
     'l5'  : "lambda5/"
 }
@@ -213,6 +215,14 @@ def describe_attribute_sca(data, name, value='value'):
 def describe_attribute_vec(data, name, iteration=0):
     values = pd.Series(data[data.name == name].value.iloc[iteration])
     print(values.describe(percentiles=[.25, .50, .75, .95]))
+    return
+
+
+def describe_all_attr_sca(data):
+    attr = ['responseTime-0', 'responseTime-1', 'responseTime-2', 'responseTime-3', 'responseTime-4', 'responseTime-5', 'responseTime-6', 'responseTime-7', 'responseTime-8', 'responseTime-9', 'responseTimeGlobal', 'throughput', 'NumServedUser', 'tptUser-0', 'tptUser-1', 'tptUser-2', 'tptUser-3', 'tptUser-4', 'tptUser-5', 'tptUser-6', 'tptUser-7', 'tptUser-8', 'tptUser-9']
+    for a in attr:
+        print("attribute " + a)
+        describe_attribute_sca(data, a)
     return
 
 
@@ -532,10 +542,7 @@ if __name__ == '__main__':
 
 
 
-
-
-### TOBEDONE  !!!!!
-def test_lorenz(data, attribute, users=range(0, NUM_USERS), iterations=range(0, NUM_ITERATIONS), win=1000):
+def test_lorenz(data, attribute, users=range(0, NUM_USERS), iterations=range(0, NUM_ITERATIONS)):
     # val = pd.DataFrame()
     sel = data[data.name.str.startswith(attribute + '-')]
     sel['user'] = sel.name.apply(lambda x:int(x.split('-')[1]))
@@ -555,7 +562,6 @@ def test_lorenz(data, attribute, users=range(0, NUM_USERS), iterations=range(0, 
 
 
 
-
 def plot_winavg_vectors(data, attribute, start=0, duration=100, iterations=[0], win=100):
     sel = data[data.name == attribute]    
     
@@ -567,20 +573,5 @@ def plot_winavg_vectors(data, attribute, start=0, duration=100, iterations=[0], 
     
     # plot the data
     plt.xlim(start, duration)
-    plt.show()
-    return
-
-
-def plot_winavg_lorenz(data, attribute, iterations=[0], win=100):
-    sel = data[data.name == attribute]    
-    
-    # plot a mean vector for each iteration
-    for i in iterations:
-        tmp = sel[sel.run == i]
-        for row in tmp.itertuples():
-            plot_lorenz_curve(winavg(row.value, win))
-    
-    # plot the data
-    plt.title("Lorenz Curve for WinAvg(" + str(win) + ") " + attribute)
     plt.show()
     return
