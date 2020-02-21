@@ -26,10 +26,11 @@ MODE_DESCRIPTION = {
 LAMBDA_DESCRIPTION = {
     'l01' : "Lambda = 0.1",
     'l09' : "Lambda = 0.9",
+    'l1'  : "Lambda = 1",
     'l13' : "Lambda = 1.3",
+    'l14' : "Lambda = 1.4",
     'l2'  : "Lambda = 2.0",
-    'l5'  : "Lambda = 5.0",
-    'l14' : "Lambda = 1.4"
+    'l5'  : "Lambda = 5.0"
 }
 
 MODE_PATH = {
@@ -218,14 +219,6 @@ def describe_attribute_vec(data, name, iteration=0):
     return
 
 
-def describe_all_attr_sca(data):
-    attr = ['responseTime-0', 'responseTime-1', 'responseTime-2', 'responseTime-3', 'responseTime-4', 'responseTime-5', 'responseTime-6', 'responseTime-7', 'responseTime-8', 'responseTime-9', 'responseTimeGlobal', 'throughput', 'NumServedUser', 'tptUser-0', 'tptUser-1', 'tptUser-2', 'tptUser-3', 'tptUser-4', 'tptUser-5', 'tptUser-6', 'tptUser-7', 'tptUser-8', 'tptUser-9']
-    for a in attr:
-        print("attribute " + a)
-        describe_attribute_sca(data, a)
-    return
-
-
 def vector_stats(data, group=False):
     # compute stats for each iteration
     stats = pd.DataFrame()
@@ -237,6 +230,18 @@ def vector_stats(data, group=False):
     stats['std']   = data.value.apply(lambda x: x.std())
     stats['count'] = data.value.apply(lambda x: x.size)
     return stats.groupby(['name']).mean().drop('run', axis=1) if group else stats
+
+
+def scalar_stats(data, attr=None):
+    stats = pd.DataFrame()
+    attributes = data.name.unique() if attr is None else attr
+    for attr in attributes:
+        stats[attr] = data[data.name == attr].value.describe(percentiles=[.25, .50, .75, .95])
+
+    stats['meanResponseTime'] = stats[['responseTime-' + str(i) for i in range(0, NUM_USERS)]].mean(axis=1)
+    stats['meanThroughput'] = stats[['tptUser-' + str(i) for i in range(0, NUM_USERS)]].mean(axis=1)
+    
+    return stats
 
 
 def users_bandwidth(data, group=False):
@@ -575,3 +580,17 @@ def plot_winavg_vectors(data, attribute, start=0, duration=100, iterations=[0], 
     plt.xlim(start, duration)
     plt.show()
     return
+
+
+
+
+
+
+def stats_to_csv(m, l):
+    attr = ['NumServedUser', 'numberRB', 'meanThroughput', 'meanResponseTime', 'responseTimeGlobal', 'throughput']
+
+    data = scalar_parse(m, l)
+    stats = scalar_stats(data)[attr].drop('count')
+    stats.to_csv('stats_' + m + '_' + l + '.csv', index=False)
+
+    return stats
