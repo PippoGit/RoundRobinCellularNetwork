@@ -587,3 +587,5 @@ def unibin_ci_plot(lambda_val, ci, attr):
     # Show graphic
     plt.title("Comparison for " + attr + " and " + LAMBDA_DESCRIPTION[lambda_val])
     plt.show()
+
+    return
