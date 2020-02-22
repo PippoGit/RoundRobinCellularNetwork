@@ -237,11 +237,29 @@ def vector_stats(data, group=False):
 def scalar_stats(data, attr=None):
     stats = pd.DataFrame()
     attributes = data.name.unique() if attr is None else attr
-    for attr in attributes:
+
+    # STATS FOR EACH SIGNAL
+    for attr in attributes: 
         stats[attr] = data[data.name == attr].value.describe(percentiles=[.25, .50, .75, .95])
 
-    stats['meanResponseTime'] = stats[['responseTime-' + str(i) for i in range(0, NUM_USERS)]].T['mean'].describe(percentiles=[.25, .50, .75, .95])
-    stats['meanThroughput']   = stats[['tptUser-' + str(i) for i in range(0, NUM_USERS)]].T['mean'].describe(percentiles=[.25, .50, .75, .95])
+    # MEAN-STATS:
+    # ALTERNATIVA 2:
+    stats['meanResponseTime'] = data[data.name.isin(['responseTime-' + str(i) for i in range(0, 10)])].groupby('run').mean().describe(percentiles=[.25, .50, .75, .95])
+    stats['meanThroughput']   = data[data.name.isin(['tptUser-' + str(i) for i in range(0, 10)])].groupby('run').mean().describe(percentiles=[.25, .50, .75, .95])
+
+    # ALTERNATIVA 1:
+    # stats['meanResponseTime'] = stats[['responseTime-' + str(i) for i in range(0, NUM_USERS)]].T['mean'].describe(percentiles=[.25, .50, .75, .95])
+    # stats['meanThroughput']   = stats[['tptUser-' + str(i) for i in range(0, NUM_USERS)]].T['mean'].describe(percentiles=[.25, .50, .75, .95])
+    
+    # Transpose...
+    stats = stats.T
+
+    # COMPUTE CI
+    stats['ci95_l'] = stats['mean'] - 1.96*(stats['std']/stats['count'])
+    stats['ci95_h'] = stats['mean'] + 1.96*(stats['std']/stats['count'])
+    stats['ci99_l'] = stats['mean'] - 2.58*(stats['std']/stats['count']) 
+    stats['ci99_h'] = stats['mean'] + 2.58*(stats['std']/stats['count'])
+
     return stats
 
 
@@ -587,11 +605,16 @@ def plot_winavg_vectors(data, attribute, start=0, duration=100, iterations=[0], 
 
 
 
-def stats_to_csv(m, l):
-    attr = ['NumServedUser', 'numberRB', 'meanThroughput', 'meanResponseTime', 'responseTimeGlobal', 'throughput']
+def stats_to_csv():
+    exp = {
+        'uni' : ['l09', 'l2', 'l5'],
+        'bin' : ['l14', 'l15', 'l2', 'l5']
+    }
 
-    data = scalar_parse(m, l)
-    stats = scalar_stats(data)[attr].drop('count')
-    stats.to_csv('stats_' + m + '_' + l + '.csv', index=False)
+    for m in exp.keys():
+        for l in exp[m]:
+            data = scalar_parse(m, l)
+            stats = scalar_stats(data)
+            stats.to_csv('stats_' + m + '_' + l + '.csv')
 
-    return stats
+    return
