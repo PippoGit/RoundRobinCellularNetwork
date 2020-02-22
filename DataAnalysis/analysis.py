@@ -507,60 +507,8 @@ def main():
     # preamble
     print(clean_data.head(100))
     plot_mean_vectors(clean_data, "responseTime-0", start=WARMUP_PERIOD)
-
     return 
 
-
-    # check_iid_vec(clean_data, 'responseTime')
-    # for it in range(0, 100):
-    #    describe_attribute_vec(clean_data, 'responseTime', iteration=it)
-
-    # describe_attribute_sca(clean_data, 'throughput', value='max')
-    # lorenz_curve_sca(clean_data, 'responseTime', value='max')
-
-    # some analysis
-    # lorenz_curve_vec(clean_data, 'responseTime')
-    # plot_ecdf_vec(clean_data, 'responseTime', iteration=0, sample_size=1000)
-    # check_iid_vec(clean_data, 'responseTime', iteration=0, sample_size=1000)
-
-    ###############################################
-
-    # SCALAR ANALYSIS (USELESS????)
-
-    # clean_data = scalar_parse('bin', 'l2')
-    # lorenz_curve(clean_data, 'responseTime')
-
-    # load all datasets of type UNIFORM
-    # ds_uni = load_all_uni()
-    # ds_bin = load_all_bin()
-
-    # attr = ['throughput', 'responseTime', 'NumServedUser']
-
-
-    # for ds in ds_uni:
-    #     print("\nUNIFORM (l13, l2, l5)")
-    #     for a in attr:
-    #         print("INFO ABOUT " + a )
-    #         describe_attribute_sca(ds, a)
-    #         print("****")
-    #     print("\n\n")
-    
-    # for ds in ds_uni:
-    #     print("\n\n\nBINOMIAL (l09, l2, l5)")
-    #     for a in attr:
-    #         print("INFO ABOUT " + a )
-    #         describe_attribute_sca(ds, a)
-    #         print("****")
-    #     print("\n\n")
-    
-    
-
-    # print all ecdf all together  
-    # all_ecdf(ds_bin, 
-    #         attribute='responseTime',
-    #         labels=['L = 0.9', 'L = 2.0', 'L = 5.0'])
-
-    # end
 
 if __name__ == '__main__':
     main()
@@ -622,7 +570,7 @@ def stats_to_csv():
 
 
 
-def ci_plot(lambda_val, ci, attr):
+def unibin_ci_plot(lambda_val, ci, attr):
     # get the data...
     stats1 = scalar_stats(scalar_parse('uni', lambda_val))
     stats2 = scalar_stats(scalar_parse('bin', lambda_val))
@@ -637,4 +585,5 @@ def ci_plot(lambda_val, ci, attr):
     plt.bar('bin', bar2, yerr=error, align='center', alpha=0.5, ecolor='black', capsize=10)
     
     # Show graphic
+    plt.title("Comparison for " + attr + " and " + LAMBDA_DESCRIPTION[lambda_val])
     plt.show()
