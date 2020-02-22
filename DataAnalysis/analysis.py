@@ -1,7 +1,6 @@
 # core stuff
 import pandas as pd
 import numpy  as np
-from scipy import stats
 import csv
 
 # plotty stuff
@@ -586,11 +585,8 @@ def unibin_ci_plot(lambda_val, ci, attr):
 
 
 
-def all_lorenz(data, attribute, users=range(0, NUM_USERS), iterations=range(0, NUM_ITERATIONS)):
-    # val = pd.DataFrame()
-
-    # for each run plot a lorenz curve
-
+def all_lorenz(mode, lambda_val, attribute, users=range(0, NUM_USERS), iterations=range(0, NUM_ITERATIONS)):
+    data = scalar_parse(mode, lambda_val)
 
     # Plot the mean lorenz
     sel = data[data.name.str.startswith(attribute + '-')]
@@ -605,7 +601,18 @@ def all_lorenz(data, attribute, users=range(0, NUM_USERS), iterations=range(0, N
     # return sorted_data
     plot_lorenz_curve(sorted_data.mean(axis=1))
 
-    plt.plot([0, 1], [0, 1], 'k', alpha=0.5)
-    plt.title("Lorenz Curve for " + attribute)
+    plt.plot([0, 1], [0, 1], 'k', alpha=0.85)
+    plt.title("Lorenz Curve for " + attribute + " and " + LAMBDA_DESCRIPTION[lambda_val])
+    plt.savefig("lorenz_" + attribute + "_" + mode + "_" + lambda_val + ".pdf")
     plt.show()
+    return
+
+
+def plot_to_img():
+    mode = 'bin'
+    lambdas = ['l2', 'l5', 'l14', 'l15']
+
+    for l in lambdas:
+        all_lorenz(mode, l, 'responseTime')
+    
     return
