@@ -29,6 +29,7 @@ LAMBDA_DESCRIPTION = {
     'l1'  : "Lambda = 1",
     'l13' : "Lambda = 1.3",
     'l14' : "Lambda = 1.4",
+    'l15' : "Lambda = 1.5",
     'l2'  : "Lambda = 2.0",
     'l5'  : "Lambda = 5.0"
 }
@@ -41,9 +42,10 @@ MODE_PATH = {
 LAMBDA_PATH = {
     'l01' : "lambda01/",
     'l09' : "lambda09/",
-    'l13' : "lambda13/",
     'l1'  : "lambda1/",
+    'l13' : "lambda13/",
     'l14' : "lambda14/",
+    'l15' : "lambda15/",
     'l2'  : "lambda2/",
     'l5'  : "lambda5/"
 }
@@ -238,9 +240,8 @@ def scalar_stats(data, attr=None):
     for attr in attributes:
         stats[attr] = data[data.name == attr].value.describe(percentiles=[.25, .50, .75, .95])
 
-    stats['meanResponseTime'] = stats[['responseTime-' + str(i) for i in range(0, NUM_USERS)]].mean(axis=1)
-    stats['meanThroughput'] = stats[['tptUser-' + str(i) for i in range(0, NUM_USERS)]].mean(axis=1)
-    
+    stats['meanResponseTime'] = stats[['responseTime-' + str(i) for i in range(0, NUM_USERS)]].T['mean'].describe(percentiles=[.25, .50, .75, .95])
+    stats['meanThroughput']   = stats[['tptUser-' + str(i) for i in range(0, NUM_USERS)]].T['mean'].describe(percentiles=[.25, .50, .75, .95])
     return stats
 
 
