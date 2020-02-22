@@ -260,13 +260,12 @@ def scalar_stats(data, attr=None):
     stats['ci95_h'] = stats['mean'] + 1.96*(stats['std']/np.sqrt(stats['count']))
     stats['ci99_l'] = stats['mean'] - 2.58*(stats['std']/np.sqrt(stats['count']))
     stats['ci99_h'] = stats['mean'] + 2.58*(stats['std']/np.sqrt(stats['count']))
-
     return stats
 
 
 def users_bandwidth(data, group=False):
     sel = data[data.name.str.startswith('tptUser')]
-    stats = vector_stats(sel)
+    stats = scalar_stats(data) # vector_stats(sel)
     
     stats['user'] = sel.name.apply(lambda x: int(x.split('-')[1]))
     stats['run']  = sel.run
@@ -326,7 +325,7 @@ def lorenz_curve_vec(data, attribute):
     return
 
 
-def plot_lorenz_curve(data):
+def plot_lorenz_curve(data, color=None, alpha=1):
     # sort the data
     sorted_data = np.sort(data)
 
@@ -338,7 +337,7 @@ def plot_lorenz_curve(data):
     y = np.hstack((0, y))
 
     # plot
-    plt.plot(x, y)
+    plt.plot(x, y, color=color, alpha=alpha)
     return
 
 ####################################################
@@ -550,10 +549,6 @@ def plot_winavg_vectors(data, attribute, start=0, duration=100, iterations=[0], 
     return
 
 
-
-
-
-
 def stats_to_csv():
     exp = {
         'uni' : ['l09', 'l2', 'l5'],
@@ -579,13 +574,38 @@ def unibin_ci_plot(lambda_val, ci, attr):
     bar2 = stats2['mean'][attr]
     
     error = np.array([bar1 - stats1['ci' + str(ci) + '_l'][attr], stats1['ci' + str(ci) + '_h'][attr] - bar1]).reshape(2,1)
-    plt.bar('uni', bar1, yerr=error, align='center', alpha=0.5, ecolor='black', capsize=10)
+    plt.bar('uni', bar1, yerr=error, align='center', alpha=0.5, ecolor='black', capsize=7)
     
     error = np.array([bar2 - stats2['ci' + str(ci) + '_l'][attr], stats2['ci' + str(ci) + '_h'][attr] - bar2]).reshape(2,1)
-    plt.bar('bin', bar2, yerr=error, align='center', alpha=0.5, ecolor='black', capsize=10)
+    plt.bar('bin', bar2, yerr=error, align='center', alpha=0.5, ecolor='black', capsize=7)
     
     # Show graphic
     plt.title("Comparison for " + attr + " and " + LAMBDA_DESCRIPTION[lambda_val])
     plt.show()
+    return
 
+
+
+def all_lorenz(data, attribute, users=range(0, NUM_USERS), iterations=range(0, NUM_ITERATIONS)):
+    # val = pd.DataFrame()
+
+    # for each run plot a lorenz curve
+
+
+    # Plot the mean lorenz
+    sel = data[data.name.str.startswith(attribute + '-')]
+    sel['user'] = sel.name.apply(lambda x:int(x.split('-')[1]))
+    sorted_data = pd.DataFrame()
+
+    for r in iterations:
+        tmp = sel[sel.run == r]
+        sorted_data['run-' + str(r)] = np.sort(tmp.value.values)
+        plot_lorenz_curve(sorted_data['run-' + str(r)], color='grey', alpha=0.25)
+
+    # return sorted_data
+    plot_lorenz_curve(sorted_data.mean(axis=1))
+
+    plt.plot([0, 1], [0, 1], 'k', alpha=0.5)
+    plt.title("Lorenz Curve for " + attribute)
+    plt.show()
     return
