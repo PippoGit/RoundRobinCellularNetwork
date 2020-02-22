@@ -1,10 +1,11 @@
 # core stuff
 import pandas as pd
 import numpy  as np
+from scipy import stats
 import csv
 
 # plotty stuff
-import matplotlib.pyplot     as plt
+import matplotlib.pyplot as plt
 
 # CONSTANTS
 WARMUP_PERIOD  = 70
@@ -255,10 +256,10 @@ def scalar_stats(data, attr=None):
     stats = stats.T
 
     # COMPUTE CI
-    stats['ci95_l'] = stats['mean'] - 1.96*(stats['std']/stats['count'])
-    stats['ci95_h'] = stats['mean'] + 1.96*(stats['std']/stats['count'])
-    stats['ci99_l'] = stats['mean'] - 2.58*(stats['std']/stats['count']) 
-    stats['ci99_h'] = stats['mean'] + 2.58*(stats['std']/stats['count'])
+    stats['ci95_l'] = stats['mean'] - 1.96*(stats['std']/np.sqrt(stats['count']))
+    stats['ci95_h'] = stats['mean'] + 1.96*(stats['std']/np.sqrt(stats['count']))
+    stats['ci99_l'] = stats['mean'] - 2.58*(stats['std']/np.sqrt(stats['count']))
+    stats['ci99_h'] = stats['mean'] + 2.58*(stats['std']/np.sqrt(stats['count']))
 
     return stats
 
@@ -618,3 +619,22 @@ def stats_to_csv():
             stats.to_csv('stats_' + m + '_' + l + '.csv')
 
     return
+
+
+
+def ci_plot(lambda_val, ci, attr):
+    # get the data...
+    stats1 = scalar_stats(scalar_parse('uni', lambda_val))
+    stats2 = scalar_stats(scalar_parse('bin', lambda_val))
+
+    bar1 = stats1['mean'][attr]    
+    bar2 = stats2['mean'][attr]
+    
+    error = np.array([bar1 - stats1['ci' + str(ci) + '_l'][attr], stats1['ci' + str(ci) + '_h'][attr] - bar1]).reshape(2,1)
+    plt.bar('uni', bar1, yerr=error, align='center', alpha=0.5, ecolor='black', capsize=10)
+    
+    error = np.array([bar2 - stats2['ci' + str(ci) + '_l'][attr], stats2['ci' + str(ci) + '_h'][attr] - bar2]).reshape(2,1)
+    plt.bar('bin', bar2, yerr=error, align='center', alpha=0.5, ecolor='black', capsize=10)
+    
+    # Show graphic
+    plt.show()
