@@ -37,7 +37,8 @@ LAMBDA_DESCRIPTION = {
 
 MODE_PATH = {
     'bin' : "binomial/",
-    'uni' : "uniform/"
+    'uni' : "uniform/",
+    'bin_np' : "bin_np/"
 }
 
 LAMBDA_PATH = {
@@ -565,10 +566,10 @@ def stats_to_csv():
 
 
 
-def unibin_ci_plot(lambda_val, ci, attr):
+def unibin_ci_plot(lambda_val, ci, attr, bin_mode='bin'):
     # get the data...
     stats1 = scalar_stats(scalar_parse('uni', lambda_val))
-    stats2 = scalar_stats(scalar_parse('bin', lambda_val))
+    stats2 = scalar_stats(scalar_parse(bin_mode, lambda_val))
 
     bar1 = stats1['mean'][attr]    
     bar2 = stats2['mean'][attr]
@@ -577,7 +578,7 @@ def unibin_ci_plot(lambda_val, ci, attr):
     plt.bar('uni', bar1, yerr=error, align='center', alpha=0.5, ecolor='black', capsize=7)
     
     error = np.array([bar2 - stats2['ci' + str(ci) + '_l'][attr], stats2['ci' + str(ci) + '_h'][attr] - bar2]).reshape(2,1)
-    plt.bar('bin', bar2, yerr=error, align='center', alpha=0.5, ecolor='black', capsize=7)
+    plt.bar(bin_mode, bar2, yerr=error, align='center', alpha=0.5, ecolor='black', capsize=7)
     
     # Show graphic
     plt.title("Comparison for " + attr + " and " + LAMBDA_DESCRIPTION[lambda_val])
