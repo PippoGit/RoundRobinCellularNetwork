@@ -236,7 +236,7 @@ def vector_stats(data, group=False):
     return stats.groupby(['name']).mean().drop('run', axis=1) if group else stats
 
 
-def scalar_stats(data, attr=None):
+def scalar_stats(data, attr=None, users=range(0,NUM_USERS)):
     stats = pd.DataFrame()
     attributes = data.name.unique() if attr is None else attr
 
@@ -245,14 +245,10 @@ def scalar_stats(data, attr=None):
         stats[attr] = data[data.name == attr].value.describe(percentiles=[.25, .50, .75, .95])
 
     # MEAN-STATS:
-    # ALTERNATIVA 2:
-    stats['meanResponseTime'] = data[data.name.isin(['responseTime-' + str(i) for i in range(0, 10)])].groupby('run').mean().describe(percentiles=[.25, .50, .75, .95])
-    stats['meanThroughput']   = data[data.name.isin(['tptUser-' + str(i) for i in range(0, 10)])].groupby('run').mean().describe(percentiles=[.25, .50, .75, .95])
+    stats['meanResponseTime'] = data[data.name.isin(['responseTime-' + str(i) for i in users])].groupby('run').mean().describe(percentiles=[.25, .50, .75, .95])
+    stats['meanThroughput']   = data[data.name.isin(['tptUser-' + str(i) for i in users])].groupby('run').mean().describe(percentiles=[.25, .50, .75, .95])
+    stats['meanCQI']   = data[data.name.isin(['CQI-' + str(i) for i in users])].groupby('run').mean().describe(percentiles=[.25, .50, .75, .95])
 
-    # ALTERNATIVA 1:
-    # stats['meanResponseTime'] = stats[['responseTime-' + str(i) for i in range(0, NUM_USERS)]].T['mean'].describe(percentiles=[.25, .50, .75, .95])
-    # stats['meanThroughput']   = stats[['tptUser-' + str(i) for i in range(0, NUM_USERS)]].T['mean'].describe(percentiles=[.25, .50, .75, .95])
-    
     # Transpose...
     stats = stats.T
 
@@ -593,7 +589,7 @@ def all_lorenz(mode, lambda_val, attribute, users=range(0, NUM_USERS), iteration
 
     # Plot the mean lorenz
     sel = data[data.name.str.startswith(attribute + '-')]
-    sel['user'] = sel.name.apply(lambda x:int(x.split('-')[1]))
+    sel['user'] = sel.name.str.split('-', expand=True)[1].astype(int)
     sorted_data = pd.DataFrame()
 
     for r in iterations:
@@ -605,8 +601,7 @@ def all_lorenz(mode, lambda_val, attribute, users=range(0, NUM_USERS), iteration
     plot_lorenz_curve(sorted_data.mean(axis=1))
 
     plt.plot([0, 1], [0, 1], 'k', alpha=0.85)
-    plt.title("Lorenz Curve for " + attribute + " and " + LAMBDA_DESCRIPTION[lambda_val])
-    plt.savefig("lorenz_" + attribute + "_" + mode + "_" + lambda_val + ".pdf")
+    plt.title(attribute + ": " + MODE_DESCRIPTION[mode] + ' and ' + LAMBDA_DESCRIPTION[lambda_val])
     plt.show()
     return
 
@@ -617,11 +612,13 @@ def plot_to_img():
 
     for l in lambdas:
         all_lorenz(mode, l, 'responseTime')
+        plt.savefig("lorenz_responseTime_" + mode + "_" + l + ".pdf")
     
     return
 
 
-
+# this function works only with "nameSignal-user" kind of statistics 
+# (responseTime-#numuser or tptUser-#numuser)
 def histo_users(mode, lambda_val, attribute, ci=95, users=range(0, NUM_USERS)):
     stats = scalar_stats(scalar_parse(mode, lambda_val))
 
