@@ -78,7 +78,7 @@ void Antenna::initUsersInformation()
     for(std::vector<UserInformation>::iterator it = users.begin(); it != users.end(); ++it)
     {
         double p = (it->getId()<3)? successProbGroup1: (it->getId()<7)? successProbGroup2: successProbGroup3;
-        int cqi = (isBinomial)?binomial(BINOMIAL_N, p,RNG_CQI):intuniform(MIN_CQI, MAX_CQI, RNG_CQI);
+        int cqi = (isBinomial)?binomial(BINOMIAL_N, p, RNG_CQI_BASE + it->getId()):intuniform(MIN_CQI, MAX_CQI, RNG_CQI_BASE + it->getId());
         //int cqi = (isBinomial)?binomial(BINOMIAL_N, p):intuniform(MIN_CQI, MAX_CQI);
         EV << "User: " << it->getId() << " - p: " << p << " - cqi: "<<cqi<<endl;
         it->setCQI(cqi);
