@@ -20,7 +20,8 @@ DATA_PATH = "./data/"
 
 MODE_DESCRIPTION = {
     'bin' : "Binomial CQIs",
-    'uni' : "Uniform CQIs"
+    'uni' : "Uniform CQIs",
+    'bin_np' : "Binomial CQIs (new)"
 }
 
 LAMBDA_DESCRIPTION = {
@@ -552,7 +553,8 @@ def plot_winavg_vectors(data, attribute, start=0, duration=100, iterations=[0], 
 def stats_to_csv():
     exp = {
         'uni' : ['l09', 'l2', 'l5'],
-        'bin' : ['l14', 'l15', 'l2', 'l5']
+        'bin' : ['l14', 'l15', 'l2', 'l5'],
+        'bin_np' : ['l15', 'l2', 'l5']
     }
 
     for m in exp.keys():
@@ -565,7 +567,7 @@ def stats_to_csv():
 
 
 
-def unibin_ci_plot(lambda_val, ci, attr, bin_mode='bin'):
+def unibin_ci_plot(lambda_val, attr, ci=95, bin_mode='bin'):
     # get the data...
     stats1 = scalar_stats(scalar_parse('uni', lambda_val))
     stats2 = scalar_stats(scalar_parse(bin_mode, lambda_val))
@@ -574,10 +576,10 @@ def unibin_ci_plot(lambda_val, ci, attr, bin_mode='bin'):
     bar2 = stats2['mean'][attr]
     
     error = np.array([bar1 - stats1['ci' + str(ci) + '_l'][attr], stats1['ci' + str(ci) + '_h'][attr] - bar1]).reshape(2,1)
-    plt.bar('uni', bar1, yerr=error, align='center', alpha=0.5, ecolor='black', capsize=7)
+    plt.bar(MODE_DESCRIPTION['uni'], bar1, yerr=error, align='center', alpha=0.5, ecolor='black', capsize=7)
     
     error = np.array([bar2 - stats2['ci' + str(ci) + '_l'][attr], stats2['ci' + str(ci) + '_h'][attr] - bar2]).reshape(2,1)
-    plt.bar(bin_mode, bar2, yerr=error, align='center', alpha=0.5, ecolor='black', capsize=7)
+    plt.bar(MODE_DESCRIPTION[bin_mode], bar2, yerr=error, align='center', alpha=0.5, ecolor='black', capsize=7)
     
     # Show graphic
     plt.title("Comparison for " + attr + " and " + LAMBDA_DESCRIPTION[lambda_val])
@@ -616,4 +618,20 @@ def plot_to_img():
     for l in lambdas:
         all_lorenz(mode, l, 'responseTime')
     
+    return
+
+
+
+def histo_users(mode, lambda_val, attribute, ci=95, users=range(0, NUM_USERS)):
+    stats = scalar_stats(scalar_parse(mode, lambda_val))
+
+    for u in users:
+        attr =  attribute + '-' + str(u)
+        bar = stats['mean'][attr]
+        error = np.array([bar - stats['ci' + str(ci) + '_l'][attr], stats['ci' + str(ci) + '_h'][attr] - bar]).reshape(2,1)
+        plt.bar('User '+ str(u), bar, yerr=error, align='center', alpha=0.5, ecolor='black', capsize=7)
+
+    # Show graphic
+    plt.title(attribute + ": " + MODE_DESCRIPTION[mode] + " and " + LAMBDA_DESCRIPTION[lambda_val])
+    plt.show()
     return
