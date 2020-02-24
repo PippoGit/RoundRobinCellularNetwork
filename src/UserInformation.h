@@ -27,6 +27,7 @@ public:
 
     omnetpp::simsignal_t throughput_s;
     omnetpp::simsignal_t responseTime_s;
+    omnetpp::simsignal_t CQI_s;
 
 public:
     UserInformation(int id);
@@ -47,7 +48,7 @@ public:
     virtual void shouldBeServed();
 
     virtual void setCQI(int cqi);
-
+    virtual int getCQI();
     virtual void incrementServedBytes(int bytes);
     virtual int  getServedBytes();
 
