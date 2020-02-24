@@ -7,10 +7,9 @@
 #define FRAME_SIZE 25
 #define BINOMIAL_N 14
 
-#define RNG_CQI 0
-#define RNG_SERVICE_DEMAND 1
-#define RNG_RECIPIENT 2
-#define RNG_INTERARRIVAL 3
+#define RNG_SERVICE_DEMAND 0
+#define RNG_INTERARRIVAL 1
+#define RNG_CQI_BASE 2
 
 #define MIN_CQI 1
 #define MAX_CQI 15

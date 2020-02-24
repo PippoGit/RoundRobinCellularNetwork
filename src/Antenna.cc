@@ -26,6 +26,7 @@ void Antenna::initialize()
     numServedUser_s       = registerSignal("NumServedUser");
     numberRB_s            = registerSignal("numberRB");
 
+
     EV_DEBUG << "[ANTENNA-INITIALIZE] Initializing antenna..." << endl;
     NUM_USERS = this->getParentModule()->par("nUsers");
     //if(NUM_USERS==0) return;
@@ -35,11 +36,13 @@ void Antenna::initialize()
     EV_DEBUG << "[ANTENNA-INITIALIZE] Building UserInformation data structure" << endl;
     users.reserve(NUM_USERS);
     simtime_t lambda = par("lambda");
+
     for(int i=0; i < NUM_USERS; i++)
     {
         UserInformation u(i);
         u.throughput_s   = createDynamicSignal("tptUser", i, "tptUserTemplate");
         u.responseTime_s = createDynamicSignal("responseTime", i, "responseTimeUserTemplate");
+        u.CQI_s          = createDynamicSignal("CQI", i, "CQIUserTemplate");
         
         // set the timer
         PacketTimer *pt = new PacketTimer();
@@ -53,6 +56,7 @@ void Antenna::initialize()
 
     EV_DEBUG << "[ANTENNA-INITIALIZE] Initializing first iterator" << endl;
     currentUser = users.end()-1; // this will make the first call to roundrobin() to set currentUser to begin()
+
 
 
     // schedule first iteration of RR algorithm
@@ -74,7 +78,8 @@ void Antenna::initUsersInformation()
     for(std::vector<UserInformation>::iterator it = users.begin(); it != users.end(); ++it)
     {
         double p = (it->getId()<3)? successProbGroup1: (it->getId()<7)? successProbGroup2: successProbGroup3;
-        int cqi = (isBinomial)?binomial(BINOMIAL_N, p):intuniform(MIN_CQI, MAX_CQI);
+        int cqi = (isBinomial)?binomial(BINOMIAL_N, p, RNG_CQI_BASE + it->getId()):intuniform(MIN_CQI, MAX_CQI, RNG_CQI_BASE + it->getId());
+        //int cqi = (isBinomial)?binomial(BINOMIAL_N, p):intuniform(MIN_CQI, MAX_CQI);
         EV << "User: " << it->getId() << " - p: " << p << " - cqi: "<<cqi<<endl;
         it->setCQI(cqi);
         it->shouldBeServed();
@@ -337,8 +342,13 @@ void Antenna::downlinkPropagation()
     for(auto it=users.begin(); it!=users.end(); ++it)
     {
         if (simTime() > getSimulation()->getWarmupPeriod())
+        {
             emit(it->throughput_s, it->getServedBytes());
+            emit(it->CQI_s, it->getCQI());
+        }
     }
+
+
 
     pendingPackets.clear(); // clear the pending packets data structure...
 }
@@ -378,7 +388,7 @@ void Antenna::finish() {
 
 Antenna::~Antenna()
 {
-    // delete []tptUser_s;
+    // delete []_s;
 
     // delete timer;
     // for(auto it=users.begin(); it!=users.end(); ++it)

@@ -28,7 +28,10 @@ simple Antenna
        @statisticTemplate[tptUserTemplate](record=mean, vector);  
 
        @signal[responseTime*](type=simtime_t);
-       @statisticTemplate[responseTimeUserTemplate](record=mean,vector);         
+       @statisticTemplate[responseTimeUserTemplate](record=mean,vector); 
+       
+       @signal[CQI*](type=simtime_t);
+       @statisticTemplate[CQIUserTemplate](record=mean,vector);                
        
     gates:
  		// output out;   
