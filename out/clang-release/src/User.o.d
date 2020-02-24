@@ -1,10 +1,10 @@
 ../out/clang-release/src/User.o: User.cc User.h \
-  C:/omnetpp-5.5.1/include\omnetpp.h Packet_m.h constants.h Frame_m.h \
+  D:/omnetpp-5.5.1/include\omnetpp.h Packet_m.h constants.h Frame_m.h \
   ResourceBlock.h
 
 User.h:
 
-C:/omnetpp-5.5.1/include\omnetpp.h:
+D:/omnetpp-5.5.1/include\omnetpp.h:
 
 Packet_m.h:
 

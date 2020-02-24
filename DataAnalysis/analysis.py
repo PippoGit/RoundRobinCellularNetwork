@@ -4,7 +4,7 @@ import numpy  as np
 import csv
 
 # plotty stuff
-import matplotlib.pyplot     as plt
+import matplotlib.pyplot as plt
 
 # CONSTANTS
 WARMUP_PERIOD  = 70
@@ -20,27 +20,34 @@ DATA_PATH = "./data/"
 
 MODE_DESCRIPTION = {
     'bin' : "Binomial CQIs",
-    'uni' : "Uniform CQIs"
+    'uni' : "Uniform CQIs",
+    'bin_np' : "Binomial CQIs (new)"
 }
 
 LAMBDA_DESCRIPTION = {
     'l01' : "Lambda = 0.1",
     'l09' : "Lambda = 0.9",
+    'l1'  : "Lambda = 1",
     'l13' : "Lambda = 1.3",
+    'l14' : "Lambda = 1.4",
+    'l15' : "Lambda = 1.5",
     'l2'  : "Lambda = 2.0",
     'l5'  : "Lambda = 5.0"
 }
 
 MODE_PATH = {
     'bin' : "binomial/",
-    'uni' : "uniform/"
+    'uni' : "uniform/",
+    'bin_np' : "bin_np/"
 }
 
 LAMBDA_PATH = {
     'l01' : "lambda01/",
     'l09' : "lambda09/",
-    'l13' : "lambda13/",
     'l1'  : "lambda1/",
+    'l13' : "lambda13/",
+    'l14' : "lambda14/",
+    'l15' : "lambda15/",
     'l2'  : "lambda2/",
     'l5'  : "lambda5/"
 }
@@ -229,9 +236,37 @@ def vector_stats(data, group=False):
     return stats.groupby(['name']).mean().drop('run', axis=1) if group else stats
 
 
+def scalar_stats(data, attr=None):
+    stats = pd.DataFrame()
+    attributes = data.name.unique() if attr is None else attr
+
+    # STATS FOR EACH SIGNAL
+    for attr in attributes: 
+        stats[attr] = data[data.name == attr].value.describe(percentiles=[.25, .50, .75, .95])
+
+    # MEAN-STATS:
+    # ALTERNATIVA 2:
+    stats['meanResponseTime'] = data[data.name.isin(['responseTime-' + str(i) for i in range(0, 10)])].groupby('run').mean().describe(percentiles=[.25, .50, .75, .95])
+    stats['meanThroughput']   = data[data.name.isin(['tptUser-' + str(i) for i in range(0, 10)])].groupby('run').mean().describe(percentiles=[.25, .50, .75, .95])
+
+    # ALTERNATIVA 1:
+    # stats['meanResponseTime'] = stats[['responseTime-' + str(i) for i in range(0, NUM_USERS)]].T['mean'].describe(percentiles=[.25, .50, .75, .95])
+    # stats['meanThroughput']   = stats[['tptUser-' + str(i) for i in range(0, NUM_USERS)]].T['mean'].describe(percentiles=[.25, .50, .75, .95])
+    
+    # Transpose...
+    stats = stats.T
+
+    # COMPUTE CI
+    stats['ci95_l'] = stats['mean'] - 1.96*(stats['std']/np.sqrt(stats['count']))
+    stats['ci95_h'] = stats['mean'] + 1.96*(stats['std']/np.sqrt(stats['count']))
+    stats['ci99_l'] = stats['mean'] - 2.58*(stats['std']/np.sqrt(stats['count']))
+    stats['ci99_h'] = stats['mean'] + 2.58*(stats['std']/np.sqrt(stats['count']))
+    return stats
+
+
 def users_bandwidth(data, group=False):
     sel = data[data.name.str.startswith('tptUser')]
-    stats = vector_stats(sel)
+    stats = scalar_stats(data) # vector_stats(sel)
     
     stats['user'] = sel.name.apply(lambda x: int(x.split('-')[1]))
     stats['run']  = sel.run
@@ -291,7 +326,7 @@ def lorenz_curve_vec(data, attribute):
     return
 
 
-def plot_lorenz_curve(data):
+def plot_lorenz_curve(data, color=None, alpha=1):
     # sort the data
     sorted_data = np.sort(data)
 
@@ -303,7 +338,7 @@ def plot_lorenz_curve(data):
     y = np.hstack((0, y))
 
     # plot
-    plt.plot(x, y)
+    plt.plot(x, y, color=color, alpha=alpha)
     return
 
 ####################################################
@@ -472,70 +507,15 @@ def main():
     # preamble
     print(clean_data.head(100))
     plot_mean_vectors(clean_data, "responseTime-0", start=WARMUP_PERIOD)
-
     return 
 
-
-    # check_iid_vec(clean_data, 'responseTime')
-    # for it in range(0, 100):
-    #    describe_attribute_vec(clean_data, 'responseTime', iteration=it)
-
-    # describe_attribute_sca(clean_data, 'throughput', value='max')
-    # lorenz_curve_sca(clean_data, 'responseTime', value='max')
-
-    # some analysis
-    # lorenz_curve_vec(clean_data, 'responseTime')
-    # plot_ecdf_vec(clean_data, 'responseTime', iteration=0, sample_size=1000)
-    # check_iid_vec(clean_data, 'responseTime', iteration=0, sample_size=1000)
-
-    ###############################################
-
-    # SCALAR ANALYSIS (USELESS????)
-
-    # clean_data = scalar_parse('bin', 'l2')
-    # lorenz_curve(clean_data, 'responseTime')
-
-    # load all datasets of type UNIFORM
-    # ds_uni = load_all_uni()
-    # ds_bin = load_all_bin()
-
-    # attr = ['throughput', 'responseTime', 'NumServedUser']
-
-
-    # for ds in ds_uni:
-    #     print("\nUNIFORM (l13, l2, l5)")
-    #     for a in attr:
-    #         print("INFO ABOUT " + a )
-    #         describe_attribute_sca(ds, a)
-    #         print("****")
-    #     print("\n\n")
-    
-    # for ds in ds_uni:
-    #     print("\n\n\nBINOMIAL (l09, l2, l5)")
-    #     for a in attr:
-    #         print("INFO ABOUT " + a )
-    #         describe_attribute_sca(ds, a)
-    #         print("****")
-    #     print("\n\n")
-    
-    
-
-    # print all ecdf all together  
-    # all_ecdf(ds_bin, 
-    #         attribute='responseTime',
-    #         labels=['L = 0.9', 'L = 2.0', 'L = 5.0'])
-
-    # end
 
 if __name__ == '__main__':
     main()
 
 
 
-
-
-### TOBEDONE  !!!!!
-def test_lorenz(data, attribute, users=range(0, NUM_USERS), iterations=range(0, NUM_ITERATIONS), win=1000):
+def test_lorenz(data, attribute, users=range(0, NUM_USERS), iterations=range(0, NUM_ITERATIONS)):
     # val = pd.DataFrame()
     sel = data[data.name.str.startswith(attribute + '-')]
     sel['user'] = sel.name.apply(lambda x:int(x.split('-')[1]))
@@ -555,7 +535,6 @@ def test_lorenz(data, attribute, users=range(0, NUM_USERS), iterations=range(0, 
 
 
 
-
 def plot_winavg_vectors(data, attribute, start=0, duration=100, iterations=[0], win=100):
     sel = data[data.name == attribute]    
     
@@ -571,16 +550,88 @@ def plot_winavg_vectors(data, attribute, start=0, duration=100, iterations=[0], 
     return
 
 
-def plot_winavg_lorenz(data, attribute, iterations=[0], win=100):
-    sel = data[data.name == attribute]    
+def stats_to_csv():
+    exp = {
+        'uni' : ['l09', 'l2', 'l5'],
+        'bin' : ['l14', 'l15', 'l2', 'l5'],
+        'bin_np' : ['l15', 'l2', 'l5']
+    }
+
+    for m in exp.keys():
+        for l in exp[m]:
+            data = scalar_parse(m, l)
+            stats = scalar_stats(data)
+            stats.to_csv('stats_' + m + '_' + l + '.csv')
+
+    return
+
+
+
+def unibin_ci_plot(lambda_val, attr, ci=95, bin_mode='bin'):
+    # get the data...
+    stats1 = scalar_stats(scalar_parse('uni', lambda_val))
+    stats2 = scalar_stats(scalar_parse(bin_mode, lambda_val))
+
+    bar1 = stats1['mean'][attr]    
+    bar2 = stats2['mean'][attr]
     
-    # plot a mean vector for each iteration
-    for i in iterations:
-        tmp = sel[sel.run == i]
-        for row in tmp.itertuples():
-            plot_lorenz_curve(winavg(row.value, win))
+    error = np.array([bar1 - stats1['ci' + str(ci) + '_l'][attr], stats1['ci' + str(ci) + '_h'][attr] - bar1]).reshape(2,1)
+    plt.bar(MODE_DESCRIPTION['uni'], bar1, yerr=error, align='center', alpha=0.5, ecolor='black', capsize=7)
     
-    # plot the data
-    plt.title("Lorenz Curve for WinAvg(" + str(win) + ") " + attribute)
+    error = np.array([bar2 - stats2['ci' + str(ci) + '_l'][attr], stats2['ci' + str(ci) + '_h'][attr] - bar2]).reshape(2,1)
+    plt.bar(MODE_DESCRIPTION[bin_mode], bar2, yerr=error, align='center', alpha=0.5, ecolor='black', capsize=7)
+    
+    # Show graphic
+    plt.title("Comparison for " + attr + " and " + LAMBDA_DESCRIPTION[lambda_val])
+    plt.show()
+    return
+
+
+
+def all_lorenz(mode, lambda_val, attribute, users=range(0, NUM_USERS), iterations=range(0, NUM_ITERATIONS)):
+    data = scalar_parse(mode, lambda_val)
+
+    # Plot the mean lorenz
+    sel = data[data.name.str.startswith(attribute + '-')]
+    sel['user'] = sel.name.apply(lambda x:int(x.split('-')[1]))
+    sorted_data = pd.DataFrame()
+
+    for r in iterations:
+        tmp = sel[sel.run == r]
+        sorted_data['run-' + str(r)] = np.sort(tmp.value.values)
+        plot_lorenz_curve(sorted_data['run-' + str(r)], color='grey', alpha=0.25)
+
+    # return sorted_data
+    plot_lorenz_curve(sorted_data.mean(axis=1))
+
+    plt.plot([0, 1], [0, 1], 'k', alpha=0.85)
+    plt.title("Lorenz Curve for " + attribute + " and " + LAMBDA_DESCRIPTION[lambda_val])
+    plt.savefig("lorenz_" + attribute + "_" + mode + "_" + lambda_val + ".pdf")
+    plt.show()
+    return
+
+
+def plot_to_img():
+    mode = 'bin'
+    lambdas = ['l2', 'l5', 'l14', 'l15']
+
+    for l in lambdas:
+        all_lorenz(mode, l, 'responseTime')
+    
+    return
+
+
+
+def histo_users(mode, lambda_val, attribute, ci=95, users=range(0, NUM_USERS)):
+    stats = scalar_stats(scalar_parse(mode, lambda_val))
+
+    for u in users:
+        attr =  attribute + '-' + str(u)
+        bar = stats['mean'][attr]
+        error = np.array([bar - stats['ci' + str(ci) + '_l'][attr], stats['ci' + str(ci) + '_h'][attr] - bar]).reshape(2,1)
+        plt.bar('User '+ str(u), bar, yerr=error, align='center', alpha=0.5, ecolor='black', capsize=7)
+
+    # Show graphic
+    plt.title(attribute + ": " + MODE_DESCRIPTION[mode] + " and " + LAMBDA_DESCRIPTION[lambda_val])
     plt.show()
     return
