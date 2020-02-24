@@ -29,6 +29,10 @@ void UserInformation::setCQI(int cqi)
 {
     CQI = cqi;
 }
+int UserInformation::getCQI()
+{
+    return CQI;
+}
 
 int UserInformation::getNumPendingPackets()
 {
