@@ -485,9 +485,9 @@ def plot_winavg_vectors(data, attribute, start=0, duration=100, iterations=[0], 
 
 def stats_to_csv():
     exp = {
-        'uni' : ['l09', 'l2', 'l5'],
-        'bin' : ['l14', 'l15', 'l2', 'l5'],
-        'bin_np' : ['l15', 'l2', 'l5']
+        'uni' : ['l09', 'l15', 'l2', 'l5'],
+        'bin_old' : ['l14', 'l15', 'l2', 'l5'],
+        'bin' : ['l15', 'l2', 'l5']
     }
 
     for m in exp.keys():
