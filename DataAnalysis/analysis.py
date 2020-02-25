@@ -61,22 +61,6 @@ CSV_PATH = {
 np.random.seed(SEED_SAMPLING)
 
 
-def one_iter_lorenz(data, attribute, iteration=0):
-    # consider only the values for attribute
-    clean_data = data[data.name == attribute]
-
-    # for each iteration
-    # for i in range(0, len(clean_data)):
-    # sort the data
-    vec = clean_data.value.iloc[iteration]
-    plot_lorenz_curve(vec)
-    
-    plt.plot([0, 1], [0, 1], 'k')
-    plt.title("Lorenz Curve for " + attribute)
-    plt.show()
-    return
-
-
 ####################################################
 #                       UTIL                       #
 ####################################################
@@ -436,7 +420,7 @@ def check_iid_sca(data, attribute, aggregate=False, users=range(0, NUM_USERS)):
         samples = data[data.name.isin([attribute + '-' + str(i) for i in users])].groupby('run').mean()
     else:
         samples = data[data.name == attribute].value
-    check_iid(samples, attribute)
+    check_iid(samples, attribute, aggregate=aggregate)
     return
 
 
@@ -451,13 +435,13 @@ def check_iid_vec(data, attribute, iteration=0, sample_size=1000, seed=42):
     return
 
 
-def check_iid(samples, attribute):
+def check_iid(samples, attribute, aggregate=False):
     pd.plotting.lag_plot(samples)
     plt.title("Lag-Plot for " + attribute)
     plt.show()
 
     pd.plotting.autocorrelation_plot(samples)
-    plt.title("Autocorrelation plot for " + attribute)
+    plt.title("Autocorrelation plot for " + attribute + (" (mean) " if aggregate else ""))
     plt.show()
     return
 
