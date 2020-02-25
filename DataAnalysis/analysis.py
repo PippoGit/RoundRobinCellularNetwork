@@ -25,14 +25,14 @@ MODE_DESCRIPTION = {
 }
 
 LAMBDA_DESCRIPTION = {
-    'l01' : "Lambda = 0.1",
-    'l09' : "Lambda = 0.9",
-    'l1'  : "Lambda = 1",
-    'l13' : "Lambda = 1.3",
-    'l14' : "Lambda = 1.4",
-    'l15' : "Lambda = 1.5",
-    'l2'  : "Lambda = 2.0",
-    'l5'  : "Lambda = 5.0"
+    'l01' : "λ = 0.1ms",
+    'l09' : "λ = 0.9ms",
+    'l1'  : "λ = 1.0ms",
+    'l13' : "λ = 1.3ms",
+    'l14' : "λ = 1.4ms",
+    'l15' : "λ = 1.5ms",
+    'l2'  : "λ = 2.0ms",
+    'l5'  : "λ = 5.0ms"
 }
 
 MODE_PATH = {
@@ -465,7 +465,6 @@ def main():
 
 if __name__ == '__main__':
     main()
-
 
 
 def plot_winavg_vectors(data, attribute, start=0, duration=100, iterations=[0], win=100):
