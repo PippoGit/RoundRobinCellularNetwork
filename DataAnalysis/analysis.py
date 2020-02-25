@@ -369,7 +369,7 @@ def all_lorenz(mode, lambda_val, attribute, users=range(0, NUM_USERS), iteration
 ####################################################
 
 
-def ecdf_sca(data, attribute, aggregate=False, users=range(0, NUM_USERS), show=True):
+def ecdf_sca(data, attribute, aggregate=False, users=range(0, NUM_USERS), save=False):
     if aggregate:
         selected_ds = data[data.name.isin([attribute + '-' + str(i) for i in users])].groupby('run').mean()
     else:
@@ -378,7 +378,10 @@ def ecdf_sca(data, attribute, aggregate=False, users=range(0, NUM_USERS), show=T
     plot_ecdf(selected_ds.value.to_numpy())
     plt.title("ECDF for " + attribute + (" (aggregated mean)" if aggregate else ""))
     
-    if show:
+    if save:
+        plt.savefig("ecdf_" + attribute + ".pdf", bbox_inches="tight")
+        plt.clf()
+    else:
         plt.show()
     return
 
@@ -419,34 +422,47 @@ def plot_ecdf_vec(data, attribute, iteration=0, sample_size=1000, replace=False)
 #                      IID                         #
 ####################################################
 
-def check_iid_sca(data, attribute, aggregate=False, users=range(0, NUM_USERS)):
+def check_iid_sca(data, attribute, aggregate=False, users=range(0, NUM_USERS), save=False):
     if aggregate:
         samples = data[data.name.isin([attribute + '-' + str(i) for i in users])].groupby('run').mean()
     else:
         samples = data[data.name == attribute].value
-    check_iid(samples, attribute, aggregate=aggregate)
+    check_iid(samples, attribute, aggregate=aggregate, save=save)
     return
 
 
-def check_iid_vec(data, attribute, iteration=0, sample_size=1000, seed=42):
+def check_iid_vec(data, attribute, iteration=0, sample_size=1000, seed=42, save=False):
     samples = pd.Series(data[data.name == attribute].value.iloc[iteration])
 
     # consider a sample
     if sample_size != None:
         samples = samples.sample(n=sample_size, random_state=seed)
 
-    check_iid(samples, attribute)
+    check_iid(samples, attribute, save)
     return
 
 
-def check_iid(samples, attribute, aggregate=False):
+def check_iid(samples, attribute, aggregate=False, save=False):
     pd.plotting.lag_plot(samples)
-    plt.title("Lag-Plot for " + attribute)
-    plt.show()
+    plt.title("Lag-Plot for " + attribute + (" (mean) " if aggregate else ""))
+    
+    plt.ylim(samples.min().value - samples.std().value, samples.max().value + samples.std().value)
+    plt.xlim(samples.min().value - samples.std().value, samples.max().value + samples.std().value)
+
+    if save:
+        plt.savefig("iid_lagplot_" + attribute + ".pdf", bbox_inches="tight")
+        plt.clf()
+    else:
+        plt.show()
 
     pd.plotting.autocorrelation_plot(samples)
     plt.title("Autocorrelation plot for " + attribute + (" (mean) " if aggregate else ""))
-    plt.show()
+    if save:
+        plt.savefig("iid_autocorrelation_" + attribute + ".pdf", bbox_inches="tight")
+        plt.clf()
+    else:
+        plt.show()
+
     return
 
 ####################################################
@@ -492,12 +508,11 @@ def stats_to_csv():
             data = scalar_parse(m, l)
             stats = scalar_stats(data)
             stats.to_csv('stats_' + m + '_' + l + '.csv')
-
     return
 
 
 
-def unibin_ci_plot(lambda_val, attr, bin_mode='bin', ci=95):
+def unibin_ci_plot(lambda_val, attr, bin_mode='bin', ci=95, save=False):
     # get the data...
     stats1 = scalar_stats(scalar_parse('uni', lambda_val))
     stats2 = scalar_stats(scalar_parse(bin_mode, lambda_val))
@@ -513,7 +528,11 @@ def unibin_ci_plot(lambda_val, attr, bin_mode='bin', ci=95):
     
     # Show graphic
     plt.title("Comparison for " + attr + " and " + LAMBDA_DESCRIPTION[lambda_val])
-    plt.show()
+    if save:
+        plt.savefig("compare_unibin_"+ attr + "_" + lambda_val + ".pdf", bbox_inches="tight")
+        plt.clf()
+    else:
+        plt.show()
     return
 
 
@@ -525,7 +544,7 @@ def plot_to_img(mode, lambdas):
 
 # this function works only with "nameSignal-user" kind of statistics 
 # (responseTime-#numuser or tptUser-#numuser)
-def histo_users(mode, lambda_val, attribute, ci=95, users=range(0, NUM_USERS)):
+def histo_users(mode, lambda_val, attribute, ci=95, users=range(0, NUM_USERS), save=False):
     stats = scalar_stats(scalar_parse(mode, lambda_val))
 
     for u in users:
@@ -536,5 +555,9 @@ def histo_users(mode, lambda_val, attribute, ci=95, users=range(0, NUM_USERS)):
 
     # Show graphic
     plt.title(attribute + ": " + MODE_DESCRIPTION[mode] + " and " + LAMBDA_DESCRIPTION[lambda_val])
-    plt.show()
+    if save:
+        plt.savefig("histousers_" + attribute + "_" + mode + "_" + lambda_val + ".pdf", bbox_inches="tight")
+        plt.clf()
+    else:
+        plt.show()
     return
