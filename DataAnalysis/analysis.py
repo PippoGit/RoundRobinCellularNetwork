@@ -388,7 +388,7 @@ def plot_ecdf(data):
     F_x = [(sorted_data[sorted_data <= x].size)/n for x in sorted_data]
 
     # plot the plot
-    plt.plot(sorted_data, F_x)
+    plt.step(sorted_data, F_x)
     return
 
 
