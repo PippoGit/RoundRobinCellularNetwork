@@ -431,8 +431,11 @@ def plot_ecdf_vec(data, attribute, iteration=0, sample_size=1000, replace=False)
 #                      IID                         #
 ####################################################
 
-def check_iid_sca(data, attribute, value='value'):
-    samples = data[data.name == attribute][value]
+def check_iid_sca(data, attribute, aggregate=False, users=range(0, NUM_USERS)):
+    if aggregate:
+        samples = data[data.name.isin([attribute + '-' + str(i) for i in users])].groupby('run').mean()
+    else:
+        samples = data[data.name == attribute].value
     check_iid(samples, attribute)
     return
 
