@@ -7,13 +7,13 @@ import csv
 import matplotlib.pyplot as plt
 
 # CONSTANTS
-WARMUP_PERIOD  = 70
+WARMUP_PERIOD  =   4   # not really used
 NUM_ITERATIONS = 100
-SIM_TIME       = 200
-NUM_USERS      = 10
+SIM_TIME       = 200  # not really used 
+NUM_USERS      =  10
 
-SAMPLE_SIZE    = 1000
-SEED_SAMPLING  = 42
+SAMPLE_SIZE    = 1000 # not really used
+SEED_SAMPLING  =   42 # not really used
 
 # DATA PATHs
 DATA_PATH = "./data/"
@@ -21,7 +21,7 @@ DATA_PATH = "./data/"
 MODE_DESCRIPTION = {
     'bin' : "Binomial CQIs",
     'uni' : "Uniform CQIs",
-    'bin_np' : "Binomial CQIs (new)"
+    'bin_old' : "Binomial CQIs (old)"
 }
 
 LAMBDA_DESCRIPTION = {
@@ -38,7 +38,7 @@ LAMBDA_DESCRIPTION = {
 MODE_PATH = {
     'bin' : "binomial/",
     'uni' : "uniform/",
-    'bin_np' : "bin_np/"
+    'bin_old' : "bin_old/"
 }
 
 LAMBDA_PATH = {
@@ -179,13 +179,6 @@ def vector_parse(cqi, pkt_lambda):
     data = data[data.type == 'vector']
     data.reset_index(inplace=True, drop=True)
 
-    # # compute aggvalues for each iteration
-    # data['mean']  = data.vecvalue.apply(lambda x: x.mean())
-    # data['max']   = data.vecvalue.apply(lambda x: x.max())
-    # data['min']   = data.vecvalue.apply(lambda x: x.min())
-    # data['std']   = data.vecvalue.apply(lambda x: x.std())
-    # data['count'] = data.vecvalue.apply(lambda x: x.size)
-
     # rename vecvalue for simplicity...
     data = data.rename({'vecvalue':'value', 'vectime':'time'}, axis=1)
     return data[['run', 'name', 'time', 'value']].sort_values(['run', 'name'])
@@ -260,19 +253,20 @@ def scalar_stats(data, attr=None, users=range(0,NUM_USERS)):
     return stats
 
 
-def users_bandwidth(data, group=False):
-    sel = data[data.name.str.startswith('tptUser')]
-    stats = scalar_stats(data) # vector_stats(sel)
+def users_bandwidth_sca(data, group=False):
+    stats = scalar_stats(data)
+    index = [row for row in stats.index if row.startswith('tptUser-')]
+    sel = stats.loc[index, :].reset_index()
+
+    bandwidth = pd.DataFrame()
+    bandwidth['user'] = sel['index'].str.split('-', expand=True)[1].astype(int)
+    bandwidth['mean_Mbps'] = (sel['mean'] * 1000)/125000
+    bandwidth['max_Mbps']  = (sel['max']  * 1000)/125000
+    bandwidth['min_Mbps']  = (sel['min']  * 1000)/125000
     
-    stats['user'] = sel.name.apply(lambda x: int(x.split('-')[1]))
-    stats['run']  = sel.run
-
-    stats['mean_Mbps'] = (stats['mean'] * 1000)/125000
-    stats['max_Mbps']  = (stats['max']  * 1000)/125000
-    stats['min_Mbps']  = (stats['min']  * 1000)/125000
-
-    stats = stats[['user', 'run', 'mean_Mbps', 'max_Mbps', 'min_Mbps']]
-    return stats.groupby(['user']).mean().drop('run', axis=1) if group else stats
+    bandwidth.index = bandwidth['user']
+    bandwidth = bandwidth.drop('user', axis=1)
+    return bandwidth
 
 
 ####################################################
@@ -284,26 +278,34 @@ def users_bandwidth(data, group=False):
 #                      LORENZ                      #
 ####################################################
 
-def gini(data):
+def gini(data, precision=3):
     sorted_list = sorted(data)
     height, area = 0, 0
     for value in sorted_list:
         height += value
         area += height - value/2.
     fair_area = height * len(data)/2.
-    return (fair_area - area) / fair_area
+    return round((fair_area - area) / fair_area, precision)
 
 
-def lorenz_curve_sca(data, attribute, value='value'):
-    # prepare the plot
-    selected_ds = data[data.name == attribute]
-    plot_lorenz_curve(selected_ds[value].to_numpy())
+def lorenz_curve_sca(data, attribute, users=range(0, NUM_USERS), iterations=range(0, NUM_ITERATIONS)):
+    # val = pd.DataFrame()
+    sel = data[data.name.str.startswith(attribute + '-')]
+    sel['user'] = sel.name.str.split('-', expand=True)[1].astype(int)
+    sorted_data = pd.DataFrame()
+
+    for r in iterations:
+        tmp = sel[sel.run == r]
+        sorted_data['run-' + str(r)] = np.sort(tmp.value.values)
     
-    # prettify the plot
-    plt.plot([0, 1], [0, 1], 'k')
-    plt.title("Lorenz Curve for " + attribute + " - " + value)
+
+    # return sorted_data
+    plot_lorenz_curve(sorted_data.mean(axis=1))
+    plt.plot([0, 1], [0, 1], 'k', alpha=0.85)
+    plt.title("Lorenz Curve for " + attribute + " -  Gini: " + str(gini(sorted_data.mean(axis=1))))
     plt.show()
     return
+
 
 
 def lorenz_curve_vec(data, attribute):
@@ -337,6 +339,34 @@ def plot_lorenz_curve(data, color=None, alpha=1):
     plt.plot(x, y, color=color, alpha=alpha)
     return
 
+
+def all_lorenz(mode, lambda_val, attribute, users=range(0, NUM_USERS), iterations=range(0, NUM_ITERATIONS), save=False):
+    data = scalar_parse(mode, lambda_val)
+
+    # Plot the mean lorenz
+    sel = data[data.name.str.startswith(attribute + '-')]
+    sel['user'] = sel.name.str.split('-', expand=True)[1].astype(int)
+    sorted_data = pd.DataFrame()
+
+    for r in iterations:
+        tmp = sel[sel.run == r]
+        sorted_data['run-' + str(r)] = np.sort(tmp.value.values)
+        plot_lorenz_curve(sorted_data['run-' + str(r)], color='grey', alpha=0.25)
+
+    # return sorted_data
+    plot_lorenz_curve(sorted_data.mean(axis=1))
+
+    plt.plot([0, 1], [0, 1], 'k', alpha=0.85)
+    plt.title(attribute + ": " + MODE_DESCRIPTION[mode] + ' and ' + LAMBDA_DESCRIPTION[lambda_val] + ' - Mean Gini: ' + str(gini(sorted_data.mean(axis=1))))
+    
+    if save:
+        plt.savefig("lorenz_responseTime_" + mode + "_" + lambda_val + ".pdf")
+        plt.clf()
+    else: 
+        plt.show()
+    
+    return
+
 ####################################################
 #                      LORENZ                      #
 ####################################################
@@ -345,16 +375,6 @@ def plot_lorenz_curve(data, color=None, alpha=1):
 ####################################################
 #                      ECDF                        #
 ####################################################
-
-def all_ecdf(ds_list, attribute, labels=None):
-    for ds in ds_list:
-        ecdf_sca(ds, attribute, show=False)
-
-    plt.title("ECDF for " + attribute)    
-    if labels:
-        plt.legend(labels)
-    plt.show()
-    return
 
 
 def ecdf_sca(data, attribute, value='value', show=True):
@@ -439,95 +459,12 @@ def check_iid(samples, attribute):
 ####################################################
 ####################################################
 
-
-def scalar_analysis(cqi_mode, pkt_lambda, verbose=0):
-    # parse csv
-    print("* * * Scalar analysis: ")
-    print("+ - - - - - - - - - - - - - - - - - - - - - - - - - -")
-    print("|  * CQI Generation : " + MODE_DESCRIPTION[cqi_mode])
-    print("|  * Exponential packet interarrival : " + LAMBDA_DESCRIPTION[pkt_lambda])
-    print("+ - - - - - - - - - - - - - - - - - - - - - - - - - -\n\n")
-
-    clean_data = scalar_parse(cqi_mode, pkt_lambda)
-    
-    if(verbose > 1):
-        print("Clean dataset for lambda2-scalar")
-        print(clean_data.head())
-
-    if(verbose > 0):
-        print("** Info about mean throughput: ")
-        describe_attribute_sca(clean_data, 'throughput')
-
-        print("** Info about mean response time: ")
-        describe_attribute_sca(clean_data, 'responseTime')
-        
-        print("** Info about mean num served user (throughput 2): ")
-        describe_attribute_sca(clean_data, 'NumServedUser')
-
-    # check iid
-    if(verbose > 0):
-        check_iid_sca(clean_data, 'responseTime')
-        check_iid_sca(clean_data, 'throughput')
-        check_iid_sca(clean_data, 'NumServedUser')
-
-    # plot lorenz curve for response time
-    lorenz_curve_sca(clean_data, 'responseTime')
-
-    # end of analysis
-    return
-
-
-def load_all_bin():
-    return [scalar_parse('bin', 'l13'),
-            scalar_parse('bin', 'l2'),
-            scalar_parse('bin', 'l5')]
-
-
-def load_all_uni():
-    return [scalar_parse('uni', 'l09'),
-            scalar_parse('uni', 'l2'),
-            scalar_parse('uni', 'l5')]
-
-
-####################################################
-####################################################
-####################################################
-
-
 def main():
     print("\n\nPerformance Evaluation - Python Data Analysis\n")
-    
-    # VECTOR ANALYSIS
-    clean_data = vector_parse('uni', 'l09')
-
-    # preamble
-    print(clean_data.head(100))
-    plot_mean_vectors(clean_data, "responseTime-0", start=WARMUP_PERIOD)
     return 
-
 
 if __name__ == '__main__':
     main()
-
-
-
-def test_lorenz(data, attribute, users=range(0, NUM_USERS), iterations=range(0, NUM_ITERATIONS)):
-    # val = pd.DataFrame()
-    sel = data[data.name.str.startswith(attribute + '-')]
-    sel['user'] = sel.name.apply(lambda x:int(x.split('-')[1]))
-    sorted_data = pd.DataFrame()
-
-    for r in iterations:
-        tmp = sel[sel.run == r]
-        sorted_data['run-' + str(r)] = np.sort(tmp.value.values)
-    
-    print(sel.head(100))
-    print(sorted_data.head(100))
-
-    # return sorted_data
-    plot_lorenz_curve(sorted_data.mean(axis=1))
-    plt.show()
-    return
 
 
 
@@ -563,7 +500,7 @@ def stats_to_csv():
 
 
 
-def unibin_ci_plot(lambda_val, attr, ci=95, bin_mode='bin'):
+def unibin_ci_plot(lambda_val, attr, bin_mode='bin', ci=95):
     # get the data...
     stats1 = scalar_stats(scalar_parse('uni', lambda_val))
     stats2 = scalar_stats(scalar_parse(bin_mode, lambda_val))
@@ -583,37 +520,9 @@ def unibin_ci_plot(lambda_val, attr, ci=95, bin_mode='bin'):
     return
 
 
-
-def all_lorenz(mode, lambda_val, attribute, users=range(0, NUM_USERS), iterations=range(0, NUM_ITERATIONS)):
-    data = scalar_parse(mode, lambda_val)
-
-    # Plot the mean lorenz
-    sel = data[data.name.str.startswith(attribute + '-')]
-    sel['user'] = sel.name.str.split('-', expand=True)[1].astype(int)
-    sorted_data = pd.DataFrame()
-
-    for r in iterations:
-        tmp = sel[sel.run == r]
-        sorted_data['run-' + str(r)] = np.sort(tmp.value.values)
-        plot_lorenz_curve(sorted_data['run-' + str(r)], color='grey', alpha=0.25)
-
-    # return sorted_data
-    plot_lorenz_curve(sorted_data.mean(axis=1))
-
-    plt.plot([0, 1], [0, 1], 'k', alpha=0.85)
-    plt.title(attribute + ": " + MODE_DESCRIPTION[mode] + ' and ' + LAMBDA_DESCRIPTION[lambda_val])
-    plt.show()
-    return
-
-
-def plot_to_img():
-    mode = 'bin'
-    lambdas = ['l2', 'l5', 'l14', 'l15']
-
+def plot_to_img(mode, lambdas):
     for l in lambdas:
-        all_lorenz(mode, l, 'responseTime')
-        plt.savefig("lorenz_responseTime_" + mode + "_" + l + ".pdf")
-    
+        all_lorenz(mode, l, 'responseTime', save=True)
     return
 
 
@@ -626,7 +535,7 @@ def histo_users(mode, lambda_val, attribute, ci=95, users=range(0, NUM_USERS)):
         attr =  attribute + '-' + str(u)
         bar = stats['mean'][attr]
         error = np.array([bar - stats['ci' + str(ci) + '_l'][attr], stats['ci' + str(ci) + '_h'][attr] - bar]).reshape(2,1)
-        plt.bar('User '+ str(u), bar, yerr=error, align='center', alpha=0.5, ecolor='black', capsize=7)
+        plt.bar('User '+ str(u), bar, yerr=error, align='center', alpha=0.5, ecolor='k', capsize=7)
 
     # Show graphic
     plt.title(attribute + ": " + MODE_DESCRIPTION[mode] + " and " + LAMBDA_DESCRIPTION[lambda_val])
