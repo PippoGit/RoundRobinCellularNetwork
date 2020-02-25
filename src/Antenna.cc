@@ -173,7 +173,6 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
             {
                 numServedUsersPerTimeslot++;
                 currentUser->serveUser();
-
             }
 
             // If there is space, it means that i'm going to send that packet
@@ -201,8 +200,10 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
                 // if nobody wrote on this RB, i'll take it!
                 // if it is NOT available, it is because it was already allocated
                 // to currentUser in the previous iteration!
-                if(from->isAvailable())
+                if(from->isAvailable()) {
+                    currentUser->incrementNumberRBs();
                     from->allocResourceBlock(currentUserId, uCQI);
+                }
 
                 double fragmentSize = std::min(residualPacketSize, static_cast<double>(uCQI));
 
@@ -346,6 +347,7 @@ void Antenna::downlinkPropagation()
         {
             emit(it->throughput_s, it->getServedBytes());
             emit(it->CQI_s, it->getCQI());
+            // emitta qua usando emot(it->numberRBs_s, it->getNumberRBs());
         }
     }
 

@@ -12,6 +12,7 @@ UserInformation::UserInformation(int id)
     this->id = id;
     this->CQI = 0;
     this->numPendingPackets = 0;
+    this->numberRBs = 0;
 }
 
 void UserInformation::setTimer(PacketTimer* t)
@@ -19,10 +20,19 @@ void UserInformation::setTimer(PacketTimer* t)
     timer = t;
 }
 
+int UserInformatino::getNumberRBs() 
+{
+    return numberRBs;
+}
 
 int UserInformation::getId()
 {
     return id;
+}
+
+void UserInformation::setNumberRBs(int n)
+{
+    numberRBs = n;
 }
 
 void UserInformation::setCQI(int cqi)
@@ -60,6 +70,7 @@ void UserInformation::shouldBeServed()
     initNumPendingPackets();
     served = false;
     servedBytes = 0;
+    numberRBs = 0;
 }
 
 int UserInformation::CQIToBytes()
@@ -68,6 +79,11 @@ int UserInformation::CQIToBytes()
     return bytes[CQI-1];
 }
 
+
+void UserInformation::incrementNumberRBs() 
+{
+    numberRBs++;
+}
 
 void UserInformation::incrementServedBytes(int bytes)
 {
