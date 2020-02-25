@@ -13,7 +13,8 @@ private:
     omnetpp::cQueue FIFOQueue;
     int CQI;
     int numPendingPackets;
-
+    int numberRBs;
+    
     int  servedBytes;
     bool served;
 
@@ -51,6 +52,9 @@ public:
     virtual int getCQI();
     virtual void incrementServedBytes(int bytes);
     virtual int  getServedBytes();
+    virtual void incrementNumberRBs();
+    virtual int  getNumberRBs();
+    virtual void setNumberRBs(int n);
 
     virtual void setTimer(PacketTimer *t);
     PacketTimer* getTimer() { return timer; };
