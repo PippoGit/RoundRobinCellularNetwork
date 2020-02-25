@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 # CONSTANTS
 WARMUP_PERIOD  =   4   # not really used
 NUM_ITERATIONS = 100
-SIM_TIME       = 200  # not really used 
+SIM_TIME       =  30  # not really used 
 NUM_USERS      =  10
 
 SAMPLE_SIZE    = 1000 # not really used
@@ -25,14 +25,14 @@ MODE_DESCRIPTION = {
 }
 
 LAMBDA_DESCRIPTION = {
-    'l01' : "Lambda = 0.1",
-    'l09' : "Lambda = 0.9",
-    'l1'  : "Lambda = 1",
-    'l13' : "Lambda = 1.3",
-    'l14' : "Lambda = 1.4",
-    'l15' : "Lambda = 1.5",
-    'l2'  : "Lambda = 2.0",
-    'l5'  : "Lambda = 5.0"
+    'l01' : "λ = 0.1ms",
+    'l09' : "λ = 0.9ms",
+    'l1'  : "λ = 1.0ms",
+    'l13' : "λ = 1.3ms",
+    'l14' : "λ = 1.4ms",
+    'l15' : "λ = 1.5ms",
+    'l2'  : "λ = 2.0ms",
+    'l5'  : "λ = 5.0ms"
 }
 
 MODE_PATH = {
@@ -229,6 +229,10 @@ def vector_stats(data, group=False):
     return stats.groupby(['name']).mean().drop('run', axis=1) if group else stats
 
 
+
+def aggregate_users_signals(data, signal, users=range(0, NUM_USERS)):
+    return data[data.name.isin([signal + '-' + str(i) for i in users])].groupby('run').mean().describe(percentiles=[.25, .50, .75, .95])
+
 def scalar_stats(data, attr=None, users=range(0,NUM_USERS)):
     stats = pd.DataFrame()
     attributes = data.name.unique() if attr is None else attr
@@ -238,14 +242,14 @@ def scalar_stats(data, attr=None, users=range(0,NUM_USERS)):
         stats[attr] = data[data.name == attr].value.describe(percentiles=[.25, .50, .75, .95])
 
     # MEAN-STATS:
-    stats['meanResponseTime'] = data[data.name.isin(['responseTime-' + str(i) for i in users])].groupby('run').mean().describe(percentiles=[.25, .50, .75, .95])
-    stats['meanThroughput']   = data[data.name.isin(['tptUser-' + str(i) for i in users])].groupby('run').mean().describe(percentiles=[.25, .50, .75, .95])
-    stats['meanCQI']   = data[data.name.isin(['CQI-' + str(i) for i in users])].groupby('run').mean().describe(percentiles=[.25, .50, .75, .95])
+    stats['meanResponseTime'] = aggregate_users_signals(data, 'responseTime', users)
+    stats['meanThroughput']   = aggregate_users_signals(data, 'tptUser', users)
+    stats['meanCQI']          = aggregate_users_signals(data, 'CQI', users)
 
     # Transpose...
     stats = stats.T
 
-    # COMPUTE CI
+    # COMPUTE CI 
     stats['ci95_l'] = stats['mean'] - 1.96*(stats['std']/np.sqrt(stats['count']))
     stats['ci95_h'] = stats['mean'] + 1.96*(stats['std']/np.sqrt(stats['count']))
     stats['ci99_l'] = stats['mean'] - 2.58*(stats['std']/np.sqrt(stats['count']))
@@ -467,7 +471,6 @@ if __name__ == '__main__':
     main()
 
 
-
 def plot_winavg_vectors(data, attribute, start=0, duration=100, iterations=[0], win=100):
     sel = data[data.name == attribute]    
     
@@ -485,9 +488,9 @@ def plot_winavg_vectors(data, attribute, start=0, duration=100, iterations=[0], 
 
 def stats_to_csv():
     exp = {
-        'uni' : ['l09', 'l2', 'l5'],
-        'bin' : ['l14', 'l15', 'l2', 'l5'],
-        'bin_np' : ['l15', 'l2', 'l5']
+        'uni' : ['l09', 'l15', 'l2', 'l5'],
+        'bin_old' : ['l14', 'l15', 'l2', 'l5'],
+        'bin' : ['l15', 'l2', 'l5']
     }
 
     for m in exp.keys():
