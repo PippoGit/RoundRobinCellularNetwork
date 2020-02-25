@@ -381,11 +381,14 @@ def all_lorenz(mode, lambda_val, attribute, users=range(0, NUM_USERS), iteration
 ####################################################
 
 
-def ecdf_sca(data, attribute, value='value', show=True):
-    selected_ds = data[data.name == attribute]
+def ecdf_sca(data, attribute, aggregate=False, users=range(0, NUM_USERS), show=True):
+    if aggregate:
+        selected_ds = data[data.name.isin([attribute + '-' + str(i) for i in users])].groupby('run').mean()
+    else:
+        selected_ds = data[data.name == attribute]
 
-    plot_ecdf(selected_ds[value].to_numpy())
-    plt.title("ECDF for " + attribute)
+    plot_ecdf(selected_ds.value.to_numpy())
+    plt.title("ECDF for " + attribute + (" (aggregated mean)" if aggregate else ""))
     
     if show:
         plt.show()
