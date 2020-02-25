@@ -256,7 +256,7 @@ def users_bandwidth_sca(data, group=False):
     bandwidth['max_Mbps']  = (sel['max']  * 1000)/125000
     bandwidth['min_Mbps']  = (sel['min']  * 1000)/125000
     
-    bandwidth.index = bandwidth['user']
+    bandwidth.index = bandwidth['user'] 
     bandwidth = bandwidth.drop('user', axis=1)
     return bandwidth
 
