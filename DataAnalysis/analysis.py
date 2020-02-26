@@ -218,7 +218,6 @@ def aggregate_users_signals(data, signal, users=range(0, NUM_USERS)):
     # meanResponseTime => dato il mean response time di un utente per ogni run, calcolo la media dei
     # mean response time dell'utente su tutte le run. E poi faccio la media per tutti gli utenti per
     # ottenere il mean responsetime medio per tutti gli utenti.
-
     return data[data.name.isin([signal + '-' + str(i) for i in users])].groupby('run').mean().describe(percentiles=[.25, .50, .75, .95])
 
 def scalar_stats(data, attr=None, users=range(0,NUM_USERS)):
@@ -233,6 +232,7 @@ def scalar_stats(data, attr=None, users=range(0,NUM_USERS)):
     stats['meanResponseTime'] = aggregate_users_signals(data, 'responseTime', users)
     stats['meanThroughput']   = aggregate_users_signals(data, 'tptUser', users)
     stats['meanCQI']          = aggregate_users_signals(data, 'CQI', users)
+    stats['meanNumberRBs']    = aggregate_users_signals(data, 'numberRBs', users) 
 
     # Transpose...
     stats = stats.T
