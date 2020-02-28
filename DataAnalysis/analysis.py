@@ -454,8 +454,12 @@ def check_iid(samples, attribute, aggregate=False, save=False):
     pd.plotting.lag_plot(samples)
     plt.title("Lag-Plot for " + attribute + (" (mean) " if aggregate else ""))
     
-    plt.ylim(samples.min().value - samples.std().value, samples.max().value + samples.std().value)
-    plt.xlim(samples.min().value - samples.std().value, samples.max().value + samples.std().value)
+    if aggregate:
+        plt.ylim(samples.min().value - samples.std().value, samples.max().value + samples.std().value)
+        plt.xlim(samples.min().value - samples.std().value, samples.max().value + samples.std().value)
+    else:
+        plt.ylim(samples.min() - samples.std(), samples.max() + samples.std())
+        plt.xlim(samples.min() - samples.std(), samples.max() + samples.std())  
 
     if save:
         plt.savefig("iid_lagplot_" + attribute + ".pdf", bbox_inches="tight")
