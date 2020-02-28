@@ -571,7 +571,7 @@ def histo_users(mode, lambda_val, attribute, ci=95, users=range(0, NUM_USERS), s
     return
 
 
-def scatterplot_mean(mode, lambda_val, x_attr, y_attr, users=range(0, NUM_USERS), save=False, group=None, hue='user'):
+def scatterplot_mean(mode, lambda_val, x_attr, y_attr, users=range(0, NUM_USERS), save=False, group=None, hue='user', col=None):
     data = tidy_scalar(mode, lambda_val)
 
     if group is not None:
@@ -580,10 +580,11 @@ def scatterplot_mean(mode, lambda_val, x_attr, y_attr, users=range(0, NUM_USERS)
 
     # cutie scatterplot
     sns.scatterplot(x=x_attr, y=y_attr, data=data, hue=hue)
+    plt.title("Scatterplot " + x_attr + " - " + y_attr + " (" + MODE_DESCRIPTION[mode] + ", " + LAMBDA_DESCRIPTION[lambda_val]  + ")")
     plt.show()
 
     # kind of regression plot?
-    sns.lmplot(x=x_attr, y=y_attr, data=data)
+    sns.lmplot(x=x_attr, y=y_attr, data=data, col=col)
     plt.show()
 
     sns.lmplot(x=x_attr, y=y_attr, data=data, lowess=True)
@@ -607,12 +608,15 @@ def class_plot(mode, lambda_val, y_attr='responseTime'):
     data = tidy_scalar(mode, lambda_val)
 
     sns.catplot(x='class', y=y_attr, hue='user', data=data, order=['LOW', 'MID', 'HIGH'])
+    plt.title("Class plot for " + y_attr + " (" + MODE_DESCRIPTION[mode] + ", " + LAMBDA_DESCRIPTION[lambda_val]  + ")")
     plt.show()    
 
-    sns.catplot(x='class', y=y_attr, hue='user', data=data, order=['LOW', 'MID', 'HIGH'], kind='bar')
+    sns.catplot(x='class', y=y_attr, hue='user', data=data, order=['LOW', 'MID', 'HIGH'], kind='bar', capsize=0.05)
+    plt.title("Class Barplot for " + y_attr + " (" + MODE_DESCRIPTION[mode] + ", " + LAMBDA_DESCRIPTION[lambda_val]  + ")")
     plt.show()
 
     sns.catplot(x='class', y=y_attr, hue='user', data=data, order=['LOW', 'MID', 'HIGH'], kind='box')
+    plt.title("Class Boxplot for " + y_attr + " (" + MODE_DESCRIPTION[mode] + ", " + LAMBDA_DESCRIPTION[lambda_val]  + ")")
     plt.show()
 
     return
