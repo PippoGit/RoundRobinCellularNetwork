@@ -3,8 +3,16 @@ import pandas as pd
 import numpy  as np
 import csv
 
+# scipy whatever
+import scipy
+from scipy import stats
+import statsmodels.api as sm
+
 # plotty stuff
 import matplotlib.pyplot as plt
+import seaborn as sns
+sns.set(style="whitegrid")
+
 
 # CONSTANTS
 WARMUP_PERIOD  =   4   # not really used
@@ -561,3 +569,24 @@ def histo_users(mode, lambda_val, attribute, ci=95, users=range(0, NUM_USERS), s
     else:
         plt.show()
     return
+
+
+def qq_plot_mean(mode, lambda_val, x_attr, y_attr, users=range(0, NUM_USERS), save=False):
+    data = scalar_parse(mode, lambda_val)
+
+    sel = data[data.name.isin([x_attr + '-' + str(i) for i in users] + [y_attr + '-' + str(i) for i in users])].reset_index().drop('index', axis=1)
+    sel[['attr', 'user']] = sel.name.str.split('-', expand=True)
+    sel = sel.drop('name', axis=1)
+
+    data = pd.DataFrame()
+    data['user'] = 'user' + sel[sel.attr == x_attr].user.values
+    data[x_attr]  = sel[sel.attr == x_attr].value.values
+    data[y_attr]  = sel[sel.attr == y_attr].value.values
+
+    sns.relplot(x=x_attr, y=y_attr, hue='user', data=data)
+    plt.show()
+    return
+
+
+
+
