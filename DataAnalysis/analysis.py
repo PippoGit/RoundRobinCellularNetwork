@@ -571,22 +571,41 @@ def histo_users(mode, lambda_val, attribute, ci=95, users=range(0, NUM_USERS), s
     return
 
 
-def qq_plot_mean(mode, lambda_val, x_attr, y_attr, users=range(0, NUM_USERS), save=False):
-    data = scalar_parse(mode, lambda_val)
+def scatterplot_mean(mode, lambda_val, x_attr, y_attr, users=range(0, NUM_USERS), save=False, group=None, hue='user'):
+    data = tidy_scalar(mode, lambda_val)
 
-    sel = data[data.name.isin([x_attr + '-' + str(i) for i in users] + [y_attr + '-' + str(i) for i in users])].reset_index().drop('index', axis=1)
-    sel[['attr', 'user']] = sel.name.str.split('-', expand=True)
-    sel = sel.drop('name', axis=1)
+    if group is not None:
+        data = data.groupby(group).mean().reset_index()
+        hue = group
 
-    data = pd.DataFrame()
-    data['user'] = 'user' + sel[sel.attr == x_attr].user.values
-    data[x_attr]  = sel[sel.attr == x_attr].value.values
-    data[y_attr]  = sel[sel.attr == y_attr].value.values
-
-    sns.relplot(x=x_attr, y=y_attr, hue='user', data=data)
+    # cutie scatterplot
+    sns.scatterplot(x=x_attr, y=y_attr, data=data, hue=hue)
     plt.show()
+
+    # kind of regression plot?
+    sns.lmplot(x=x_attr, y=y_attr, data=data)
+    plt.show()
+
+    sns.lmplot(x=x_attr, y=y_attr, data=data, lowess=True)
+    plt.show()
+
+    sns.jointplot(x=x_attr, y=y_attr, data=data, kind="reg")
+    plt.show()
+
     return
 
 
 
+def tidy_scalar(mode, lambda_val):
+    tidy_data = pd.DataFrame()
+    
+    data = scalar_parse(mode, lambda_val)
+    sel = data[data.name.str.contains('-')].reset_index().drop('index', axis=1)
+    sel[['attr', 'user']] = sel.name.str.split('-', expand=True)
+    sel = sel.drop('name', axis=1)
 
+    tidy_data['user'] = 'user-' + sel[sel.attr == sel.attr.iloc[0]].user.values # any dynsignal will be fine, because all of them have 100 instances
+    tidy_data['run']  = sel[sel.attr == sel.attr.iloc[0]].run.values # same
+    for attr_name in sel.attr.unique():
+        tidy_data[attr_name] = sel[sel.attr == attr_name].value.values
+    return tidy_data
