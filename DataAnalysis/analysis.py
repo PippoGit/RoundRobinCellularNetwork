@@ -595,6 +595,29 @@ def scatterplot_mean(mode, lambda_val, x_attr, y_attr, users=range(0, NUM_USERS)
     return
 
 
+# does it make sense?
+def CQI_to_class(cqi):
+    if cqi < 3: return 'LOW'
+    if cqi < 7: return 'MID'
+    return             'HIGH'
+
+
+
+def class_plot(mode, lambda_val, y_attr='responseTime'):
+    data = tidy_scalar(mode, lambda_val)
+
+    sns.catplot(x='class', y=y_attr, hue='user', data=data, order=['LOW', 'MID', 'HIGH'])
+    plt.show()    
+
+    sns.catplot(x='class', y=y_attr, hue='user', data=data, order=['LOW', 'MID', 'HIGH'], kind='bar')
+    plt.show()
+
+    sns.catplot(x='class', y=y_attr, hue='user', data=data, order=['LOW', 'MID', 'HIGH'], kind='box')
+    plt.show()
+
+    return
+
+
 
 def tidy_scalar(mode, lambda_val):
     tidy_data = pd.DataFrame()
@@ -604,8 +627,10 @@ def tidy_scalar(mode, lambda_val):
     sel[['attr', 'user']] = sel.name.str.split('-', expand=True)
     sel = sel.drop('name', axis=1)
 
-    tidy_data['user'] = 'user-' + sel[sel.attr == sel.attr.iloc[0]].user.values # any dynsignal will be fine, because all of them have 100 instances
-    tidy_data['run']  = sel[sel.attr == sel.attr.iloc[0]].run.values # same
+    tidy_data['user']  = 'user-' + sel[sel.attr == sel.attr.iloc[0]].user.values # any dynsignal will be fine, because all of them have 100 instances
+    tidy_data['run']   = sel[sel.attr == sel.attr.iloc[0]].run.values # same
     for attr_name in sel.attr.unique():
         tidy_data[attr_name] = sel[sel.attr == attr_name].value.values
+
+    tidy_data['class'] = tidy_data['CQI'].apply(lambda x: CQI_to_class(x))
     return tidy_data
