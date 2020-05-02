@@ -563,7 +563,7 @@ def histo_users(mode, lambda_val, attribute, ci=95, users=range(0, NUM_USERS), s
         attr =  attribute + '-' + str(u)
         bar = stats['mean'][attr]
         error = np.array([bar - stats['ci' + str(ci) + '_l'][attr], stats['ci' + str(ci) + '_h'][attr] - bar]).reshape(2,1)
-        plt.bar('User '+ str(u), bar, yerr=error, align='center', alpha=0.5, ecolor='k', capsize=7)
+        plt.bar('User '+ str(u), bar, yerr=error, align='center', alpha=0.95, ecolor='k', capsize=7)
 
     # Show graphic
     plt.title(attribute + ": " + MODE_DESCRIPTION[mode] + " and " + LAMBDA_DESCRIPTION[lambda_val])
