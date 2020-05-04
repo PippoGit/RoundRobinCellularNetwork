@@ -65,6 +65,11 @@ CSV_PATH = {
     'vec' : "vec_res.csv"
 }
 
+CQI_CLASSES = [
+    'LOW',
+    'HIGH'
+]
+
 # Just to not fuck things up
 np.random.seed(SEED_SAMPLING)
 
@@ -602,24 +607,24 @@ def scatterplot_mean(mode, lambda_val, x_attr, y_attr, users=range(0, NUM_USERS)
 
 # does it make sense?
 def CQI_to_class(cqi):
-    if cqi < 3: return 'LOW'
-    if cqi < 7: return 'MID'
-    return             'HIGH'
+    if cqi < 4: return CQI_CLASSES[0]
+    # if cqi < 7: return 'MID'
+    return CQI_CLASSES[1]
 
 
 
 def class_plot(mode, lambda_val, y_attr='responseTime'):
     data = tidy_scalar(mode, lambda_val)
 
-    sns.catplot(x='class', y=y_attr, hue='user', data=data, order=['LOW', 'MID', 'HIGH'])
+    sns.catplot(x='class', y=y_attr, hue='user', data=data, order=CQI_CLASSES)
     plt.title("Class plot for " + y_attr + " (" + MODE_DESCRIPTION[mode] + ", " + LAMBDA_DESCRIPTION[lambda_val]  + ")")
     plt.show()    
 
-    sns.catplot(x='class', y=y_attr, hue='user', data=data, order=['LOW', 'MID', 'HIGH'], kind='bar', capsize=0.05)
+    sns.catplot(x='class', y=y_attr, hue='user', data=data, order=CQI_CLASSES, kind='bar', capsize=0.05)
     plt.title("Class Barplot for " + y_attr + " (" + MODE_DESCRIPTION[mode] + ", " + LAMBDA_DESCRIPTION[lambda_val]  + ")")
     plt.show()
 
-    sns.catplot(x='class', y=y_attr, hue='user', data=data, order=['LOW', 'MID', 'HIGH'], kind='box')
+    sns.catplot(x='class', y=y_attr, hue='user', data=data, order=CQI_CLASSES, kind='box')
     plt.title("Class Boxplot for " + y_attr + " (" + MODE_DESCRIPTION[mode] + ", " + LAMBDA_DESCRIPTION[lambda_val]  + ")")
     plt.show()
 
