@@ -29,6 +29,7 @@ public:
     omnetpp::simsignal_t throughput_s;
     omnetpp::simsignal_t responseTime_s;
     omnetpp::simsignal_t CQI_s;
+    omnetpp::simsignal_t numberRBs_s;
 
 public:
     UserInformation(int id);

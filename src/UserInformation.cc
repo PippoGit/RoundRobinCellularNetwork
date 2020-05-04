@@ -20,7 +20,7 @@ void UserInformation::setTimer(PacketTimer* t)
     timer = t;
 }
 
-int UserInformatino::getNumberRBs() 
+int UserInformation::getNumberRBs()
 {
     return numberRBs;
 }

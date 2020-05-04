@@ -43,7 +43,7 @@ void Antenna::initialize()
         u.throughput_s   = createDynamicSignal("tptUser", i, "tptUserTemplate");
         u.responseTime_s = createDynamicSignal("responseTime", i, "responseTimeUserTemplate");
         u.CQI_s          = createDynamicSignal("CQI", i, "CQIUserTemplate");
-        
+        u.numberRBs_s    = createDynamicSignal("numberRBs", i, "numberRBsUserTemplate");
         // set the timer
         PacketTimer *pt = new PacketTimer();
         pt->setKind(MSG_PKT_TIMER);
@@ -78,7 +78,8 @@ void Antenna::initUsersInformation()
     for(std::vector<UserInformation>::iterator it = users.begin(); it != users.end(); ++it)
     {
         //double p = (it->getId()==0||it->getId()==3||it->getId()==6||it->getId()==9)? successProbGroup1: (it->getId()==1||it->getId()==2||it->getId()==8)? successProbGroup2: successProbGroup3;
-        double p = (it->getId() % 3 == 0)? successProbGroup2: ((it->getId()-1) % 3 == 0)? successProbGroup3: successProbGroup1;
+        //(it->getId() % 3 == 0)? successProbGroup2:
+        double p =  ((it->getId()) % 2 == 0)? successProbGroup3: successProbGroup1;
         int cqi = (isBinomial)?binomial(BINOMIAL_N, p,RNG_CQI_BIN):intuniform(MIN_CQI, MAX_CQI, RNG_CQI_UNI);
         //int cqi = (isBinomial)?binomial(BINOMIAL_N, p):intuniform(MIN_CQI, MAX_CQI);
         EV << "User: " << it->getId() << " - p: " << p << " - cqi: "<<cqi<<endl;
@@ -335,6 +336,7 @@ void Antenna::downlinkPropagation()
 
     if (simTime() > getSimulation()->getWarmupPeriod()) {
         EV_DEBUG << "[ANTENNA] Emitting signals for global statistics " << endl;
+
         emit(throughput_s,    numSentBytesPerTimeslot);   //Tpt defined as bytes sent per timeslot
         emit(numServedUser_s, numServedUsersPerTimeslot); // Tpt defined as num of served users per timeslot
     }
@@ -345,9 +347,12 @@ void Antenna::downlinkPropagation()
     {
         if (simTime() > getSimulation()->getWarmupPeriod())
         {
-            emit(it->throughput_s, it->getServedBytes());
+            if(it->getServedBytes()>0)
+            {
+                emit(it->throughput_s, it->getServedBytes());
+            }
             emit(it->CQI_s, it->getCQI());
-            // emitta qua usando emot(it->numberRBs_s, it->getNumberRBs());
+            emit(it->numberRBs_s, it->getNumberRBs());
         }
     }
 
