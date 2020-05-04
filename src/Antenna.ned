@@ -22,7 +22,7 @@ simple Antenna
         @signal[NumServedUser](type=long);
     	@statistic[NumServedUser](source="NumServedUser"; record=mean,vector);       
        
-       	 @signal[numberRB](type=long);
+       	@signal[numberRB](type=long);
     	@statistic[numberRB](source="numberRB"; record=mean,vector);  
 
        @signal[tptUser*](type=long);
@@ -35,7 +35,11 @@ simple Antenna
        @statisticTemplate[CQIUserTemplate](record=mean,vector);   
        
        @signal[numberRBs*](type=long);
-       @statisticTemplate[numberRBsUserTemplate](record=mean,vector);                
+       @statisticTemplate[numberRBsUserTemplate](record=mean,vector);
+
+       @signal[servedUser*](type=long);
+       @statisticTemplate[servedUserTemplate](record=mean, vector);  
+
        
     gates:
  		// output out;   

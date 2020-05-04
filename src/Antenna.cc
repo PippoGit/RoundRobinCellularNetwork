@@ -44,6 +44,8 @@ void Antenna::initialize()
         u.responseTime_s = createDynamicSignal("responseTime", i, "responseTimeUserTemplate");
         u.CQI_s          = createDynamicSignal("CQI", i, "CQIUserTemplate");
         u.numberRBs_s    = createDynamicSignal("numberRBs", i, "numberRBsUserTemplate");
+        u.served_s       = createDynamicSignal("servedUser", i, "servedUserTemplate");
+
         // set the timer
         PacketTimer *pt = new PacketTimer();
         pt->setKind(MSG_PKT_TIMER);
@@ -53,11 +55,8 @@ void Antenna::initialize()
         users.push_back(u);
     }
 
-
     EV_DEBUG << "[ANTENNA-INITIALIZE] Initializing first iterator" << endl;
     currentUser = users.end()-1; // this will make the first call to roundrobin() to set currentUser to begin()
-
-
 
     // schedule first iteration of RR algorithm
     frame = nullptr;
@@ -253,7 +252,6 @@ void Antenna::createFrame()
         EV_DEBUG << "[CREATE_FRAME] Round Robin Starting Up..." <<endl;
         roundrobin();
 
-
         // Fill the frame with current user's queue and update currentRB index
         fillFrameWithCurrentUser(currentRB, vframe.end());
     } while(currentRB != vframe.end() && currentUser != lastUser );
@@ -347,12 +345,13 @@ void Antenna::downlinkPropagation()
     {
         if (simTime() > getSimulation()->getWarmupPeriod())
         {
-            if(it->getServedBytes()>0)
+            if(it->getServedBytes()>0) // is this ok?????????? BOH
             {
                 emit(it->throughput_s, it->getServedBytes());
             }
             emit(it->CQI_s, it->getCQI());
             emit(it->numberRBs_s, it->getNumberRBs());
+            emit(it->served_s, it->getNumServed());
         }
     }
 

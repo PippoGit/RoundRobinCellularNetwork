@@ -13,6 +13,12 @@ UserInformation::UserInformation(int id)
     this->CQI = 0;
     this->numPendingPackets = 0;
     this->numberRBs = 0;
+    this->numServed = 0;
+}
+
+long UserInformation::getNumServed() 
+{
+    return numServed;
 }
 
 void UserInformation::setTimer(PacketTimer* t)
@@ -100,6 +106,7 @@ int UserInformation::getServedBytes()
 void UserInformation::serveUser()
 {
     served = true;
+    numServed++;
 }
 
 
