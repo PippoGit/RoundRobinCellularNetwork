@@ -47,7 +47,7 @@ public:
     virtual void initNumPendingPackets();
     virtual int  getNumPendingPackets();
 
-    virtual long getNumServed() 
+    virtual long getNumServed();
 
     virtual void serveUser();
     virtual bool isServed();

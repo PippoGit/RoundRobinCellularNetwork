@@ -38,7 +38,7 @@ simple Antenna
        @statisticTemplate[numberRBsUserTemplate](record=mean,vector);
 
        @signal[servedUser*](type=long);
-       @statisticTemplate[servedUserTemplate](record=mean, vector);  
+       @statisticTemplate[servedUserTemplate](record=mean,vector);  
 
        
     gates:

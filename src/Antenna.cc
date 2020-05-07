@@ -79,7 +79,7 @@ void Antenna::initUsersInformation()
         //double p = (it->getId()==0||it->getId()==3||it->getId()==6||it->getId()==9)? successProbGroup1: (it->getId()==1||it->getId()==2||it->getId()==8)? successProbGroup2: successProbGroup3;
         //(it->getId() % 3 == 0)? successProbGroup2:
         double p =  ((it->getId()) % 2 == 0)? successProbGroup3: successProbGroup1;
-        int cqi = (isBinomial)?binomial(BINOMIAL_N, p,RNG_CQI_BIN):intuniform(MIN_CQI, MAX_CQI, RNG_CQI_UNI);
+        int cqi = (isBinomial)?binomial(BINOMIAL_N, p,RNG_CQI_BIN)+1:intuniform(MIN_CQI, MAX_CQI, RNG_CQI_UNI);
         //int cqi = (isBinomial)?binomial(BINOMIAL_N, p):intuniform(MIN_CQI, MAX_CQI);
         EV << "User: " << it->getId() << " - p: " << p << " - cqi: "<<cqi<<endl;
         it->setCQI(cqi);
@@ -345,13 +345,16 @@ void Antenna::downlinkPropagation()
     {
         if (simTime() > getSimulation()->getWarmupPeriod())
         {
+            EV_DEBUG << "[tptTest] Byte trasmitted from user"<< it->getId() <<": "<<it->getServedBytes()<< endl;
             if(it->getServedBytes()>0) // is this ok?????????? BOH
             {
                 emit(it->throughput_s, it->getServedBytes());
+                EV_DEBUG << "[tptTest] Emitted"<< endl;
+
             }
             emit(it->CQI_s, it->getCQI());
             emit(it->numberRBs_s, it->getNumberRBs());
-            emit(it->served_s, it->getNumServed());
+            // emit(it->served_s, it->getNumServed());
         }
     }
 
@@ -386,6 +389,10 @@ void Antenna::finish() {
     // drop(timer);
     //NUM_USERS = this->getParentModule()->par("nUsers");
     //if(NUM_USERS==0) return;
+    for(auto it=users.begin(); it!=users.end(); ++it)
+    {
+        emit(it->served_s, it->getNumServed());
+    }
     cancelAndDelete(timer);
     for(auto it=users.begin(); it!=users.end(); ++it)
         cancelAndDelete(it->getTimer());
