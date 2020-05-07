@@ -284,6 +284,7 @@ void Antenna::handlePacket(int userId)
     i.arrivalTime = simTime();
     i.served = false;
     i.recipient = userId;
+    i.size = packet->getServiceDemand();
 
     EV_DEBUG << "[UPLINK] Inserting packet with ID " << packet->getId() << " in the packetsInformation hashmap" << endl;
     packetsInformation.insert(std::pair<long, Antenna::packet_info_t>(packet->getId(), i));
