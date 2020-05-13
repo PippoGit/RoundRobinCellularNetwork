@@ -183,7 +183,7 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
 
             // WHEN A PACKET INSERTED IN FRAME, START-FRAME-TIME
             packetsInformation[p->getId()].frameTime = simTime();
-            packetsInformation[p->getId()].size      = packetSize;
+            //packetsInformation[p->getId()].size      = packetSize;
 
             // The packet will be put somewhere in the frame, so decrease the number
             // of bytes available in the frame (for this user)
