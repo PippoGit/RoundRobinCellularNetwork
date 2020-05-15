@@ -10,13 +10,13 @@ void User::initialize()
 }
 
 void User::sendCQI(){
-    simtime_t lambda = par("lambda");
-    bool isBinomial = par("isBinomial");
-    double successProbGroup1 = par("successProbGroup1");
-    double successProbGroup2 = par("successProbGroup2");
-    double successProbGroup3 = par("successProbGroup3");
+    simtime_t lambda = getParentModule()->par("lambda");
+    bool isBinomial = getParentModule()->par("isBinomial");
+    double successProbGroup1 = getParentModule()->par("successProbGroup1");
+    double successProbGroup2 = getParentModule()->par("successProbGroup2");
+    double successProbGroup3 = getParentModule()->par("successProbGroup3");
 
-    double p =  ((it->getId()) % 2 == 0)? successProbGroup3: successProbGroup1;
+    double p =  (userID % 2 == 0)? successProbGroup3: successProbGroup1;
     int cqi = (isBinomial)?binomial(BINOMIAL_N, p,RNG_CQI_BIN)+1:intuniform(MIN_CQI, MAX_CQI, RNG_CQI_UNI);
 
 
@@ -26,15 +26,22 @@ void User::sendCQI(){
 
     scheduleAt(simTime() + exponential(lambda, RNG_INTERARRIVAL),pt);
     PacketCQI *newCQI = new PacketCQI();
-    newCQI->setUserId(userID);
+    newCQI->setUserID(userID);
+    newCQI->setCqi(cqi);
     newCQI->setKind(MSG_CQI);
+
+    send(newCqi, "out");
+
+
 
 }
 
 void User::handleMessage(cMessage *msg)
 {
+    if (msg->getUserID()!=userID){
         Frame *f = check_and_cast<Frame*>(msg);
         handleFrame(f);
+    }
 }
 
 

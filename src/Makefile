@@ -32,17 +32,20 @@ O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 # Object files for local .cc, .msg and .sm files
 OBJS = \
     $O/Antenna.o \
+    $O/Generatore.o \
     $O/ResourceBlock.o \
     $O/User.o \
     $O/UserInformation.o \
     $O/Frame_m.o \
     $O/Packet_m.o \
+    $O/PacketCQI_m.o \
     $O/PacketTimer_m.o
 
 # Message files
 MSGFILES = \
     Frame.msg \
     Packet.msg \
+    PacketCQI.msg \
     PacketTimer.msg
 
 # SM files
