@@ -323,6 +323,12 @@ void Antenna::downlinkPropagation()
 }
 
 
+void Antenna::handleCQI()
+{
+
+}
+
+
 void Antenna::handleMessage(cMessage *msg)
 {
     EV_DEBUG << "[ANTENNA] New message to be handled!" << endl;
