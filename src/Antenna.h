@@ -63,7 +63,7 @@ class Antenna : public cSimpleModule
 
     virtual void handleMessage(cMessage *msg);
     virtual void handlePacket(Packet *packet);
-    virtual void handleCQINotification();
+    virtual void handleCQI(PacketCQI *notification);
 
     virtual void downlinkPropagation();
     virtual void createFrame();

@@ -323,9 +323,10 @@ void Antenna::downlinkPropagation()
 }
 
 
-void Antenna::handleCQI()
+void Antenna::handleCQI(PacketCQI *notification)
 {
-
+    users[notification->getUserId()]->setCQI(notification->getCQI());
+    delete notification;
 }
 
 
@@ -341,12 +342,12 @@ void Antenna::handleMessage(cMessage *msg)
         createFrame();
         EV_DEBUG << " [*** ANTENA RR ***] DONE!" << endl;
     }
-    else if(msg->getKind() == MSG_CQI_NOTIFICATION)
+    else if(msg->getKind() == MSG_CQI)
     {
         // aspetto info da Giada
-        Packet *p = check_and_cast<Packet*>(msg);
+        PacketCQI *p = check_and_cast<PacketCQI*>(msg);
         EV_DEBUG << " [ANTENA CQI] A new CQI Notification from user " << endl;
-        users[id]->setCQI(valore);
+        handleCQI(p);
     }
     else if(msg->getKind() == MSG_PKT)
     {
