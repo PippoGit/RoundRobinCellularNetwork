@@ -12,3 +12,4 @@ DataAnalysis/.vscode/*
 *.vec
 *.vci
 *.anf
+.settings/language.settings.xml
