@@ -29,5 +29,6 @@
 
 #define MSG_PKT_TIMER 0
 #define MSG_RR_TIMER  1
+#define MSG_PKT       2
 
 #endif

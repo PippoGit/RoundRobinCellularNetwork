@@ -60,12 +60,15 @@ class Antenna : public cSimpleModule
     virtual void finish();
 
     virtual void initialize();
+
     virtual void handleMessage(cMessage *msg);
-    virtual void handlePacket(int userId);
+    virtual void handlePacket(Packet *packet);
+    virtual void handleCQINotification();
+
     virtual void downlinkPropagation();
     virtual void createFrame();
 
-    virtual void   initUsersInformation();
+    virtual void   initRoundInformation();
     virtual void   roundrobin();
     virtual void   broadcastFrame(Frame *f);
     virtual void   fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &from, std::vector<ResourceBlock>::iterator to);

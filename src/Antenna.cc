@@ -20,7 +20,7 @@ simsignal_t Antenna::createDynamicSignal(std::string prefix, int userId, std::st
 
 void Antenna::initialize()
 {
-    //signals
+    //signals (Per il momento lascio i segnali...)
     responseTimeGlobal_s  = registerSignal("responseTimeGlobal");
     throughput_s          = registerSignal("throughput");
     numServedUser_s       = registerSignal("NumServedUser");
@@ -29,6 +29,7 @@ void Antenna::initialize()
 
     EV_DEBUG << "[ANTENNA-INITIALIZE] Initializing antenna..." << endl;
     NUM_USERS = this->getParentModule()->par("nUsers");
+
     //if(NUM_USERS==0) return;
     timer = new cMessage("roundrobin");
     timer->setKind(MSG_RR_TIMER);
@@ -45,13 +46,6 @@ void Antenna::initialize()
         u.CQI_s          = createDynamicSignal("CQI", i, "CQIUserTemplate");
         u.numberRBs_s    = createDynamicSignal("numberRBs", i, "numberRBsUserTemplate");
         u.served_s       = createDynamicSignal("servedUser", i, "servedUserTemplate");
-
-        // set the timer
-        PacketTimer *pt = new PacketTimer();
-        pt->setKind(MSG_PKT_TIMER);
-        pt->setUserId(i);
-        u.setTimer(pt);
-        scheduleAt(simTime() + /*(i+1)*0.001 */ exponential(lambda, RNG_INTERARRIVAL),pt);
         users.push_back(u);
     }
 
@@ -60,31 +54,14 @@ void Antenna::initialize()
 
     // schedule first iteration of RR algorithm
     frame = nullptr;
-    numSentBytesPerTimeslot   = 0;
-    numServedUsersPerTimeslot = 0;
+    initRoundInformation();
     scheduleAt(simTime(), timer);
 }
 
 
-void Antenna::initUsersInformation()
+void Antenna::initRoundInformation()
 {
     // THIS METHOD SHOULD RESET ALL THE INFORMATION THAT ARE VALID FOR A TIMESLOT
-    // THROUGHPUT INFORMATION AND CQIs
-    bool isBinomial = par("isBinomial");
-    double successProbGroup1 = par("successProbGroup1");
-    double successProbGroup2 = par("successProbGroup2");
-    double successProbGroup3 = par("successProbGroup3");
-    for(std::vector<UserInformation>::iterator it = users.begin(); it != users.end(); ++it)
-    {
-        //double p = (it->getId()==0||it->getId()==3||it->getId()==6||it->getId()==9)? successProbGroup1: (it->getId()==1||it->getId()==2||it->getId()==8)? successProbGroup2: successProbGroup3;
-        //(it->getId() % 3 == 0)? successProbGroup2:
-        double p =  ((it->getId()) % 2 == 0)? successProbGroup3: successProbGroup1;
-        int cqi = (isBinomial)?binomial(BINOMIAL_N, p,RNG_CQI_BIN)+1:intuniform(MIN_CQI, MAX_CQI, RNG_CQI_UNI);
-        //int cqi = (isBinomial)?binomial(BINOMIAL_N, p):intuniform(MIN_CQI, MAX_CQI);
-        EV << "User: " << it->getId() << " - p: " << p << " - cqi: "<<cqi<<endl;
-        it->setCQI(cqi);
-        it->shouldBeServed();
-    }
     numServedUsersPerTimeslot = 0;
     numSentBytesPerTimeslot   = 0;
 }
@@ -245,7 +222,7 @@ void Antenna::createFrame()
     EV_DEBUG << "[CREATE_FRAME] Updating CQI..." <<endl;
 
     // 1) Get updated CQIs
-    initUsersInformation();
+    initRoundInformation();
 
     do
     {
@@ -265,25 +242,14 @@ void Antenna::createFrame()
 }
 
 
-void Antenna::handlePacket(int userId)
+void Antenna::handlePacket(Packet *packet)
 {
-    EV_DEBUG << "[UPLINK] Create a new packet to be put into the queue of " << userId << endl;
-    Packet *packet = new Packet();
-
-    if (packet != nullptr)
-        EV_DEBUG << "[DEBUG_ISH?] the packet is generated at " << packet << endl;
-
-    EV_DEBUG << "[UPLINK] Adding some random service demand for the packet" << endl;
-    packet->setServiceDemand(intuniform(MIN_SERVICE_DEMAND, MAX_SERVICE_DEMAND, RNG_SERVICE_DEMAND));
-    EV_DEBUG << "[UPLINK] Setting the recipient for the packet (" << userId <<")" << endl;
-    packet->setReceiverID(userId);
-
     EV_DEBUG << "[UPLINK] Create a data structure for the new packet with ID " << packet->getId() << endl;
     // this is a new packet! so we are going to keep its info somewhere!
     Antenna::packet_info_t i;
     i.arrivalTime = simTime();
     i.served = false;
-    i.recipient = userId;
+    i.recipient = packet->getUserId();
     i.size = packet->getServiceDemand();
 
     EV_DEBUG << "[UPLINK] Inserting packet with ID " << packet->getId() << " in the packetsInformation hashmap" << endl;
@@ -297,14 +263,6 @@ void Antenna::handlePacket(int userId)
     EV_DEBUG << "[UPLINK] Inserting packet " << packet << endl;
     q->insert(packet);
     EV_DEBUG << "[UPLINK] INSERTED! "<< endl;
-
-
-    // SCHEDULE NEXT PACKET
-    EV_DEBUG << "[UPLINK] Scheduling next packet for User-" << userId << endl;
-    simtime_t lambda = par("lambda");
-    EV_DEBUG << " LAMBDA: " << lambda << " DOUBLE: " << lambda.dbl() << endl;
-    scheduleAt(simTime() + /*(userId+1)*0.001 */ exponential(lambda, RNG_INTERARRIVAL), users[userId].getTimer());
-    EV_DEBUG << "[UPLINK] Done!" << endl;
 }
 
 
@@ -377,11 +335,18 @@ void Antenna::handleMessage(cMessage *msg)
         createFrame();
         EV_DEBUG << " [*** ANTENA RR ***] DONE!" << endl;
     }
-    else if(msg->getKind() == MSG_PKT_TIMER)
+    else if(msg->getKind() == MSG_CQI_NOTIFICATION)
     {
-        PacketTimer *t = check_and_cast<PacketTimer*>(msg);
-        EV_DEBUG << "[ANTENNA PKT-TMR] A new packet should be generate: " << t->getUserId() << endl;
-        handlePacket(t->getUserId());
+        // aspetto info da Giada
+        Packet *p = check_and_cast<Packet*>(msg);
+        EV_DEBUG << " [ANTENA CQI] A new CQI Notification from user " << endl;
+        users[id]->setCQI(valore);
+    }
+    else if(msg->getKind() == MSG_PKT)
+    {
+        Packet *p = check_and_cast<Packet*>(msg);
+        EV_DEBUG << "[ANTENNA PKT] A new packet for user " << p->getReceiverID() << endl;
+        handlePacket(p);
     }
 }
 
