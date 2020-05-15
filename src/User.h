@@ -18,6 +18,7 @@ class User : public cSimpleModule
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
     virtual void handleFrame(Frame* f);
+    virtual void sendCQI();
 };
 
 #endif
