@@ -12,8 +12,8 @@ UserInformation::UserInformation(int id)
     this->id = id;
     this->CQI = 0;
     this->numPendingPackets = 0;
-    this->numberRBs = 0;
-    this->numServed = 0;
+    this->numberRBs = 0; // probabilmente da togliere
+    this->numServed = 0; // probabilmente da togliere
 }
 
 long UserInformation::getNumServed() 

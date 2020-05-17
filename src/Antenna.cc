@@ -129,10 +129,11 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
         //IF IT'S THE FIRST TIME YOU CONSIDER THE PACKET, UPDATE ITS START-SERVICE-TIME VARIABLE
         if(!packetsInformation[p->getId()].served)
         {
-            packetsInformation[p->getId()].servedTime = simTime();
             packetsInformation[p->getId()].served     = true;
-
             p->setServedTime(simTime());
+            
+            // probabilmente da togliere
+            packetsInformation[p->getId()].servedTime = simTime();
         }
 
         double packetSize          = p->getServiceDemand(),
@@ -158,13 +159,13 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
             // SO the packet will become "pending"
             pendingPackets.push_back(p->getId());
             numSentBytesPerTimeslot += packetSize;
-            currentUser->incrementNumPendingPackets();
+            currentUser->incrementNumPendingPackets(); 
 
             // WHEN A PACKET INSERTED IN FRAME, START-FRAME-TIME
-            packetsInformation[p->getId()].frameTime = simTime();
             p->setFrameTime(simTime());
 
-            //packetsInformation[p->getId()].size      = packetSize;
+            // probabilmente da togliere
+            packetsInformation[p->getId()].frameTime = simTime();
 
             // The packet will be put somewhere in the frame, so decrease the number
             // of bytes available in the frame (for this user)
@@ -204,6 +205,7 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
             }
             EV_DEBUG << "   FINAL INDEX:          " << (FRAME_SIZE) - (to - from) << endl;
             /////////////////////////////////////////////////////
+
             queue->remove(p);
             delete p; // also delete the packet!
         }
@@ -246,6 +248,7 @@ void Antenna::downlinkPropagation()
 {
     if(frame == nullptr) return; // first iteration...
 
+    // probabilmente da togliere
     // Update the info about the packet being in the frame
     for(long id : pendingPackets)
     {
@@ -253,7 +256,7 @@ void Antenna::downlinkPropagation()
         info.propagationTime = simTime();
 
         // emit responsetime...
-        // TEST !!!!!!
+        // probabilmente da togliere
         if (simTime() > getSimulation()->getWarmupPeriod()) {
             emit(users[info.recipient].responseTime_s, info.propagationTime - info.arrivalTime);
             users[info.recipient].incrementServedBytes(info.size);
@@ -263,6 +266,7 @@ void Antenna::downlinkPropagation()
 
         packetsInformation.erase(id); // remove the packet from the hash table
     }
+
     emit(numberRB_s, frame->getAllocatedRBs());
     broadcastFrame(frame);
     EV_DEBUG << "[DOWNLINK] Broadcast propagation of the frame" << endl;
@@ -274,6 +278,7 @@ void Antenna::downlinkPropagation()
     }
 
     // Emit statitics per user
+    // probabilmente da togliere
     EV_DEBUG << "[ANTENNA] Emitting signals for user's statistics " << endl;
     for(auto it=users.begin(); it!=users.end(); ++it)
     {
@@ -288,7 +293,6 @@ void Antenna::downlinkPropagation()
             }
             emit(it->CQI_s, it->getCQI());
             emit(it->numberRBs_s, it->getNumberRBs());
-            // emit(it->served_s, it->getNumServed());
         }
     }
     pendingPackets.clear(); // clear the pending packets data structure...
@@ -372,7 +376,7 @@ void Antenna::handleMessage(cMessage *msg)
 
 
 void Antenna::finish() {
-
+    // probabilmente da togliere
     // Emit final signals
     for(auto it=users.begin(); it!=users.end(); ++it)
     {

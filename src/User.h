@@ -15,6 +15,8 @@ class User : public cSimpleModule
     int userID;
     cMessage *pt;
 
+    double timeslot;
+
     // Stats
     long  numberRBs;
     long  numServed;

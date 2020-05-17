@@ -26,6 +26,7 @@ void User::initialize()
 {
     userID = NEXT_USER_ID++;
     pt = new cMessage("timer");
+    timeslot = getParentModule()->par("timeslot");
 
     // Init stats
     numberRBs   = 0;
@@ -48,7 +49,6 @@ void User::sendCQI(){
     double successProbGroup1 = getParentModule()->par("successProbGroup1");
     double successProbGroup2 = getParentModule()->par("successProbGroup2");
     double successProbGroup3 = getParentModule()->par("successProbGroup3");
-    double timeslot = getParentModule()->par("timeslot");
 
     double p =  (userID % 2 == 0) ? successProbGroup3: successProbGroup1;
     int cqi  = (isBinomial) ? binomial(BINOMIAL_N, p,RNG_CQI_BIN)+1 : intuniform(MIN_CQI, MAX_CQI, RNG_CQI_UNI);
@@ -68,7 +68,6 @@ void User::sendCQI(){
 void User::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage()){
-        simtime_t timeslot = getParentModule()->par("timeslot");
         sendCQI();
         scheduleAt(simTime() + timeslot, msg);
     }
@@ -93,33 +92,32 @@ void User::handleFrame(Frame* f)
         if(f->getRBFrame(i).getRecipient()==userID)
         {
             EV_DEBUG << "[USER] The frame is for me! yay " << "Num Time Served: " << numServed << endl;
-            if (simTime() > getSimulation()->getWarmupPeriod()) {
 
-                // per ogni frammento, se è di un pacchetto nuovo emitto le info, altirmenti scorri
-                for(auto frag:f->getRBFrame(i).getFragments()) {
-                    EV_DEBUG << "[USER] Last seen frag: " << lastSeen << endl;
+            // per ogni frammento, se e di un pacchetto nuovo emitto le info, altirmenti scorri
+            // un RB ptrebbe contenere frammenti provenienti da piÃ¹ pacchetti! 
+            for(auto frag : f->getRBFrame(i).getFragments()) {
+                EV_DEBUG << "[USER] Last seen frag: " << lastSeen << endl;
 
-                    if (lastSeen != frag.id) {
-                        EV_DEBUG << "[USER] Emitting info about packet with id " << frag.id << endl;
+                if (simTime() > getSimulation()->getWarmupPeriod() && lastSeen != frag.id) {
+                    EV_DEBUG << "[USER] Emitting info about packet with id " << frag.id << endl;
+                    lastSeen = frag.id;
 
-                        lastSeen = frag.id;
-                        // Global Stats
-                        numServed++;
-                        numberRBs++;
-                        servedBytes += frag.packetSize;
+                    // Global Stats
+                    numServed++;
+                    numberRBs++;
+                    servedBytes += frag.packetSize;
 
-                        // Round Stats
-                        servedBytesRound += frag.packetSize; // this is set to zero at every round
-                        numberRBsRound++;
-                        emit(responseTime_s, simTime() - frag.arrivalTime);
-                    }
+                    // Round Stats
+                    servedBytesRound += frag.packetSize; // this is set to zero at every round
+                    numberRBsRound++;
+                    emit(responseTime_s, simTime() - frag.arrivalTime);
                 }
             }
         }
     }
 
     // Emitto statistiche per questo round
-    emit(throughput_s, servedBytesRound);
+    emit(throughput_s, servedBytesRound/timeslot);
     emit(numberRBs_s, numberRBsRound);
 
     delete(f);

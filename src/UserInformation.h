@@ -20,10 +20,7 @@ private:
     bool served;
 
 public:
-    // too much stuff
-    // std::vector<ResourceBlock>::iterator lastRB;
-    // double remainingBytes;
-
+    // probabilmente da togliere
     omnetpp::simsignal_t throughput_s;
     omnetpp::simsignal_t responseTime_s;
     omnetpp::simsignal_t CQI_s;
