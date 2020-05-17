@@ -15,10 +15,11 @@ sns.set(style="whitegrid")
 
 
 # CONSTANTS
-WARMUP_PERIOD  =   4   # not really used
-NUM_ITERATIONS = 100
-SIM_TIME       =  30  # not really used 
-NUM_USERS      =  10
+WARMUP_PERIOD  =      4   # not really used
+NUM_ITERATIONS =    100
+SIM_TIME       =     30  # not really used 
+NUM_USERS      =     10
+TIMESLOT       =  0.001
 
 SAMPLE_SIZE    = 1000 # not really used
 SEED_SAMPLING  =   42 # not really used
@@ -265,9 +266,9 @@ def users_bandwidth_sca(data, group=False):
 
     bandwidth = pd.DataFrame()
     bandwidth['user'] = sel['index'].str.split('-', expand=True)[1].astype(int)
-    bandwidth['mean_Mbps'] = (sel['mean'] * 1000)/125000
-    bandwidth['max_Mbps']  = (sel['max']  * 1000)/125000
-    bandwidth['min_Mbps']  = (sel['min']  * 1000)/125000
+    bandwidth['mean_Mbps'] = (sel['mean'] / TIMESLOT)/125000
+    bandwidth['max_Mbps']  = (sel['max']  / TIMESLOT)/125000
+    bandwidth['min_Mbps']  = (sel['min']  / TIMESLOT)/125000
     
     bandwidth.index = bandwidth['user'] 
     bandwidth = bandwidth.drop('user', axis=1)
@@ -647,3 +648,30 @@ def tidy_scalar(mode, lambda_val):
 
     tidy_data['class'] = tidy_data['CQI'].apply(lambda x: CQI_to_class(x))
     return tidy_data
+
+
+def model_validation(lambda_val, cqis=["2", "13"], attribute="CQI", ci=95):
+    data = {}
+    for cqi in cqis:
+        data[cqi] = pd.read_csv(DATA_PATH + "modelv/cqi" + cqi + lambda_val + ".csv", 
+            usecols=['run', 'type', 'name', 'value'],
+            converters = {
+                'run'  : parse_run,   
+                'name' : parse_name_attr
+            }
+        )
+        
+        # remove useless rows (first 100-ish rows)
+        data[cqi] = data[cqi][data[cqi].type == 'scalar']
+        data[cqi].reset_index(inplace=True, drop=True)
+        data[cqi] = data[cqi][['run', 'name', 'value']].sort_values(['run', 'name'])
+
+        stats = scalar_stats(data[cqi], users=[0])
+        attr =  attribute + '-0'
+        bar = stats['mean'][attr]
+        error = np.array([bar - stats['ci' + str(ci) + '_l'][attr], stats['ci' + str(ci) + '_h'][attr] - bar]).reshape(2,1)
+        plt.bar('CQI ' + cqi, bar, yerr=error, align='center', alpha=0.95, ecolor='k', capsize=7)
+    
+    plt.title(attribute + " - " + LAMBDA_DESCRIPTION[lambda_val] + ", CI="+ str(ci))
+    plt.show()
+    return data
