@@ -9,6 +9,13 @@ network CellularNetwork
     parameters:
         int nUsers = default(10);
         double timeslot @unit(s) = default(0.5s);
+        
+	    double lambda @unit(s)=default(0.5s);
+		double successProbGroup1;
+		double successProbGroup2;
+		double successProbGroup3;   
+        
+        bool isBinomial=default(false); // binomial or uniform.
 
         submodules:
         antenna: Antenna {
