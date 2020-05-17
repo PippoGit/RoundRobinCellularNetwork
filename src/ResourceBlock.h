@@ -17,6 +17,9 @@ class ResourceBlock {
             long   id;
             int    packetSize;
             double fragmentSize;
+            omnetpp::simtime_t arrivalTime;     // inserted into the queue
+            omnetpp::simtime_t servedTime;      // removed from the queue
+            omnetpp::simtime_t frameTime;       // inserted into the frame
         };
 
     private:

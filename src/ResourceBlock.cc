@@ -20,11 +20,21 @@ ResourceBlock::ResourceBlock(int recipient)
 
 void ResourceBlock::appendFragment(Packet *p, double fragmentSize)
 {
+    // I know, this is not very efficient, but it works. So it's fine.
+    // For semplicity everytime we insert a new fragment we take all the info
+    // that we are going to need at the user and we copy them into the fragment
+    // so that when we receive stuff we can eval everything with no problem (i hope)
     fragment_t fragment = {
         .id = p->getId(),
         .packetSize = p->getServiceDemand(),
-        .fragmentSize = fragmentSize
+        .fragmentSize = fragmentSize,
+
+        // to evaluate stuff at the user
+        .arrivalTime = p->getArrivalTime(),     // inserted into the queue
+        .servedTime  = p->getServedTime(),      // removed from the queue
+        .frameTime   = p->getFrameTime()       // inserted into the frame
     };
+
     fragments.push_back(fragment);
     this->remainingBytes -= fragmentSize;
 }

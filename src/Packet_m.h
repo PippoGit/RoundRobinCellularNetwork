@@ -26,9 +26,14 @@
  *     //  int senderID;
  *     int receiverID;
  *     int serviceDemand;
- *     simtime_t arrivalTime;
+ * 
  *     simtime_t startServiceTime;
  *     simtime_t startFrameTime;
+ * 
+ *     // Test
+ *     simtime_t arrivalTime;     // inserted into the queue
+ *     simtime_t servedTime;      // removed from the queue
+ *     simtime_t frameTime;       // inserted into the frame    
  * }
  * </pre>
  */
@@ -37,9 +42,11 @@ class Packet : public ::omnetpp::cMessage
   protected:
     int receiverID;
     int serviceDemand;
-    ::omnetpp::simtime_t arrivalTime;
     ::omnetpp::simtime_t startServiceTime;
     ::omnetpp::simtime_t startFrameTime;
+    ::omnetpp::simtime_t arrivalTime;
+    ::omnetpp::simtime_t servedTime;
+    ::omnetpp::simtime_t frameTime;
 
   private:
     void copy(const Packet& other);
@@ -62,12 +69,16 @@ class Packet : public ::omnetpp::cMessage
     virtual void setReceiverID(int receiverID);
     virtual int getServiceDemand() const;
     virtual void setServiceDemand(int serviceDemand);
-    virtual ::omnetpp::simtime_t getArrivalTime() const;
-    virtual void setArrivalTime(::omnetpp::simtime_t arrivalTime);
     virtual ::omnetpp::simtime_t getStartServiceTime() const;
     virtual void setStartServiceTime(::omnetpp::simtime_t startServiceTime);
     virtual ::omnetpp::simtime_t getStartFrameTime() const;
     virtual void setStartFrameTime(::omnetpp::simtime_t startFrameTime);
+    virtual ::omnetpp::simtime_t getArrivalTime() const;
+    virtual void setArrivalTime(::omnetpp::simtime_t arrivalTime);
+    virtual ::omnetpp::simtime_t getServedTime() const;
+    virtual void setServedTime(::omnetpp::simtime_t servedTime);
+    virtual ::omnetpp::simtime_t getFrameTime() const;
+    virtual void setFrameTime(::omnetpp::simtime_t frameTime);
 };
 
 inline void doParsimPacking(omnetpp::cCommBuffer *b, const Packet& obj) {obj.parsimPack(b);}

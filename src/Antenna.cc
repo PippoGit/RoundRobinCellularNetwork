@@ -131,6 +131,8 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
         {
             packetsInformation[p->getId()].servedTime = simTime();
             packetsInformation[p->getId()].served     = true;
+
+            p->setServedTime(simTime());
         }
 
         double packetSize          = p->getServiceDemand(),
@@ -160,6 +162,8 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
 
             // WHEN A PACKET INSERTED IN FRAME, START-FRAME-TIME
             packetsInformation[p->getId()].frameTime = simTime();
+            p->setFrameTime(simTime());
+
             //packetsInformation[p->getId()].size      = packetSize;
 
             // The packet will be put somewhere in the frame, so decrease the number
@@ -265,7 +269,6 @@ void Antenna::downlinkPropagation()
 
     if (simTime() > getSimulation()->getWarmupPeriod()) {
         EV_DEBUG << "[ANTENNA] Emitting signals for global statistics " << endl;
-
         emit(throughput_s,    numSentBytesPerTimeslot);   //Tpt defined as bytes sent per timeslot
         emit(numServedUser_s, numServedUsersPerTimeslot); // Tpt defined as num of served users per timeslot
     }
@@ -296,6 +299,8 @@ void Antenna::handlePacket(Packet *packet)
 {
     EV_DEBUG << "[ANTENNA PKT] A new packet for user " << packet->getReceiverID() << endl;
     int userId = packet->getReceiverID();
+
+    packet->setArrivalTime(simTime());
 
     // this is a new packet! so we are going to keep its info somewhere!
     EV_DEBUG << "[UPLINK] Create a data structure for the new packet with ID " << packet->getId() << endl;
