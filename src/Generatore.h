@@ -23,7 +23,7 @@ class Generatore : public cSimpleModule
 
   protected:
     virtual void initialize();
-    virtual void generatePacket());
+    virtual void generatePacket();
     virtual void handleMessage(cMessage *msg);
 };
 
