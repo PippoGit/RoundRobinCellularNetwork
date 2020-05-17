@@ -10,8 +10,8 @@ network CellularNetwork
         int nUsers = default(10);
         double timeslot @unit(s) = default(0.5s);
         
-	    double lambda @unit(s)=default(0.5s);
-		double successProbGroup1;
+	    double lambda @unit(s)=default(0.01s);
+	    double successProbGroup1;
 		double successProbGroup2;
 		double successProbGroup3;   
         
