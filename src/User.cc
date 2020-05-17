@@ -86,7 +86,7 @@ void User::handleFrame(Frame* f)
     {
         if(f->getRBFrame(i).getRecipient()==userID)
         {
-            EV_DEBUG << "[USER] The frame is for me! yay " << "Num Time Served: " << numServed << endl;
+            EV_DEBUG << "[USER] The frame is for me! yay " << endl;
 
             // per ogni frammento, se e di un pacchetto nuovo emitto le info, altirmenti scorri
             // un RB ptrebbe contenere frammenti provenienti da più pacchetti! 
