@@ -40,5 +40,5 @@ void Generatore::handleMessage(cMessage *msg)
 }
 void Generatore::finish()
 {
- 	Delete(pt);
+ 	delete(pt);
 }
