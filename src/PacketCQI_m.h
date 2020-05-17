@@ -24,16 +24,16 @@
  * message PacketCQI
  * {
  *     //  int senderID;
- *     int userID;
- *     int cqi;
+ *     int userId;
+ *     int CQI;
  * }
  * </pre>
  */
 class PacketCQI : public ::omnetpp::cMessage
 {
   protected:
-    int userID;
-    int cqi;
+    int userId;
+    int CQI;
 
   private:
     void copy(const PacketCQI& other);
@@ -52,10 +52,10 @@ class PacketCQI : public ::omnetpp::cMessage
     virtual void parsimUnpack(omnetpp::cCommBuffer *b) override;
 
     // field getter/setter methods
-    virtual int getUserID() const;
-    virtual void setUserID(int userID);
-    virtual int getCqi() const;
-    virtual void setCqi(int cqi);
+    virtual int getUserId() const;
+    virtual void setUserId(int userId);
+    virtual int getCQI() const;
+    virtual void setCQI(int CQI);
 };
 
 inline void doParsimPacking(omnetpp::cCommBuffer *b, const PacketCQI& obj) {obj.parsimPack(b);}

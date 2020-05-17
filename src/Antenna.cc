@@ -235,34 +235,6 @@ void Antenna::createFrame()
 
     // 3) send the frame to all the users DURING NEXT TIMESLOT!
     this->frame = vectorToFrame(vframe);
-
-    // Schedule next iteration
-    simtime_t timeslot_dt = getParentModule()->par("timeslot");
-    scheduleAt(simTime() + timeslot_dt, timer);
-}
-
-
-void Antenna::handlePacket(Packet *packet)
-{
-    EV_DEBUG << "[UPLINK] Create a data structure for the new packet with ID " << packet->getId() << endl;
-    // this is a new packet! so we are going to keep its info somewhere!
-    Antenna::packet_info_t i;
-    i.arrivalTime = simTime();
-    i.served = false;
-    i.recipient = packet->getUserId();
-    i.size = packet->getServiceDemand();
-
-    EV_DEBUG << "[UPLINK] Inserting packet with ID " << packet->getId() << " in the packetsInformation hashmap" << endl;
-    packetsInformation.insert(std::pair<long, Antenna::packet_info_t>(packet->getId(), i));
-
-    EV_DEBUG << "[UPLINK] Inserting packet with ID " << packet->getId() << " in the Queue for the user " << userId << endl;
-    EV_DEBUG << "[UPLINK] Getting the queue... " << endl;
-    cQueue *q = users[userId].getQueue();
-    EV_DEBUG << "[UPLINK] Queue: " << q << endl;
-
-    EV_DEBUG << "[UPLINK] Inserting packet " << packet << endl;
-    q->insert(packet);
-    EV_DEBUG << "[UPLINK] INSERTED! "<< endl;
 }
 
 
@@ -316,71 +288,99 @@ void Antenna::downlinkPropagation()
             // emit(it->served_s, it->getNumServed());
         }
     }
-
-
-
     pendingPackets.clear(); // clear the pending packets data structure...
+}
+
+
+void Antenna::handlePacket(Packet *packet)
+{
+    EV_DEBUG << "[ANTENNA PKT] A new packet for user " << packet->getReceiverID() << endl;
+    int userId = packet->getReceiverID();
+
+    // this is a new packet! so we are going to keep its info somewhere!
+    EV_DEBUG << "[UPLINK] Create a data structure for the new packet with ID " << packet->getId() << endl;
+    Antenna::packet_info_t i;
+    i.arrivalTime = simTime();
+    i.served = false;
+    i.recipient = userId;
+    i.size = packet->getServiceDemand();
+
+    EV_DEBUG << "[UPLINK] Inserting packet with ID " << packet->getId() << " in the packetsInformation hashmap" << endl;
+    packetsInformation.insert(std::pair<long, Antenna::packet_info_t>(packet->getId(), i));
+
+    EV_DEBUG << "[UPLINK] Inserting packet with ID " << packet->getId() << " in the Queue for the user " << userId << endl;
+    EV_DEBUG << "[UPLINK] Getting the queue... " << endl;
+    cQueue *q = users[userId].getQueue();
+    EV_DEBUG << "[UPLINK] Queue: " << q << endl;
+
+    EV_DEBUG << "[UPLINK] Inserting packet " << packet << endl;
+    q->insert(packet);
+    EV_DEBUG << "[UPLINK] INSERTED! "<< endl;
 }
 
 
 void Antenna::handleCQI(PacketCQI *notification)
 {
-    std::vector<UserInformation>::iterator u = users.at(notification->getUserId());
+    EV_DEBUG << " [ANTENA CQI] A new CQI Notification from user " << notification->getUserId() << endl;
+    std::vector<UserInformation>::iterator u = users.begin() + notification->getUserId();
     u->setCQI(notification->getCQI());
     u->shouldBeServed();
     delete notification;
 }
 
 
+void Antenna::handleTimer(cMessage *msg)
+{
+    EV_DEBUG << " [ANTENA RR] Start propagation of the previous frame..." << endl;
+    downlinkPropagation();
+
+    EV_DEBUG << " [*** ANTENA RR ***] Create new frame..." << endl;
+    createFrame();
+    EV_DEBUG << " [*** ANTENA RR ***] DONE!" << endl;
+
+    // Schedule next iteration
+    simtime_t timeslot_dt = getParentModule()->par("timeslot");
+    scheduleAt(simTime() + timeslot_dt, timer);
+}
+
 void Antenna::handleMessage(cMessage *msg)
 {
     EV_DEBUG << "[ANTENNA] New message to be handled!" << endl;
+    switch(msg->getKind())
+    {
+        case MSG_RR_TIMER:
+            handleTimer(msg);
+            break;
 
-    if(msg->getKind() == MSG_RR_TIMER)
-    {
-        EV_DEBUG << " [ANTENA RR] Start propagation of the previous frame..." << endl;
-        downlinkPropagation();
-        EV_DEBUG << " [*** ANTENA RR ***] Create new frame..." << endl;
-        createFrame();
-        EV_DEBUG << " [*** ANTENA RR ***] DONE!" << endl;
-    }
-    else if(msg->getKind() == MSG_CQI)
-    {
-        // aspetto info da Giada
-        PacketCQI *p = check_and_cast<PacketCQI*>(msg);
-        EV_DEBUG << " [ANTENA CQI] A new CQI Notification from user " << endl;
-        handleCQI(p);
-    }
-    else if(msg->getKind() == MSG_PKT)
-    {
-        Packet *p = check_and_cast<Packet*>(msg);
-        EV_DEBUG << "[ANTENNA PKT] A new packet for user " << p->getReceiverID() << endl;
-        handlePacket(p);
+        case MSG_CQI:
+            handleCQI(check_and_cast<PacketCQI*>(msg));
+            break;
+
+        case MSG_PKT:
+            handlePacket(check_and_cast<Packet*>(msg));
+            break;
+
+        default:
+            throw "This should never happen.";
     }
 }
 
 
 void Antenna::finish() {
-    // drop(timer);
-    //NUM_USERS = this->getParentModule()->par("nUsers");
-    //if(NUM_USERS==0) return;
+
+    // Emit final signals
     for(auto it=users.begin(); it!=users.end(); ++it)
     {
         emit(it->served_s, it->getNumServed());
     }
-    cancelAndDelete(timer);
-    for(auto it=users.begin(); it!=users.end(); ++it)
-        cancelAndDelete(it->getTimer());
 
+    // Delete stuff...
+    cancelAndDelete(timer);
     cancelAndDelete(frame);
 }
 
 Antenna::~Antenna()
 {
-    // delete []_s;
 
-    // delete timer;
-    // for(auto it=users.begin(); it!=users.end(); ++it)
-        // delete it->getTimer();
 }
 

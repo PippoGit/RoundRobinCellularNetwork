@@ -21,10 +21,6 @@ long UserInformation::getNumServed()
     return numServed;
 }
 
-void UserInformation::setTimer(PacketTimer* t)
-{
-    timer = t;
-}
 
 int UserInformation::getNumberRBs()
 {
@@ -113,20 +109,6 @@ void UserInformation::serveUser()
 bool UserInformation::isServed()
 {
     return served;
-}
-
-
-void UserInformation::generateCQI(omnetpp::cRNG*RNG, bool isBinomial)
-{
-    if(isBinomial)
-    {
-        CQI = omnetpp::binomial(RNG, MIN_CQI, MAX_CQI);
-    }
-    else
-    {
-        CQI = omnetpp::intuniform(RNG, MIN_CQI, MAX_CQI);
-    }
-    // remainingBytes = CQIToBytes();
 }
 
 

@@ -8,11 +8,8 @@ void User::initialize()
 {
     userID = NEXT_USER_ID++;
 
-    pt = new PacketTimer();
-    pt->setKind(MSG_PKT_TIMER);
-    pt->setUserId(userID);
-
-    sendCQI();
+    pt = new cMessage("timer");
+    scheduleAt(simTime(), pt);
 }
 
 void User::sendCQI(){
@@ -22,28 +19,28 @@ void User::sendCQI(){
     double successProbGroup2 = getParentModule()->par("successProbGroup2");
     double successProbGroup3 = getParentModule()->par("successProbGroup3");
     double timeslot = getParentModule()->par("timeslot");
-    double p =  (userID % 2 == 0)? successProbGroup3: successProbGroup1;
-    int cqi = (isBinomial)?binomial(BINOMIAL_N, p,RNG_CQI_BIN)+1:intuniform(MIN_CQI, MAX_CQI, RNG_CQI_UNI);
+
+    double p =  (userID % 2 == 0) ? successProbGroup3: successProbGroup1;
+    int cqi  = (isBinomial) ? binomial(BINOMIAL_N, p,RNG_CQI_BIN)+1 : intuniform(MIN_CQI, MAX_CQI, RNG_CQI_UNI);
 
     PacketCQI *newCQI = new PacketCQI();
-    newCQI->setUserID(userID);
-    newCQI->setCqi(cqi);
+    newCQI->setUserId(userID);
+    newCQI->setCQI(cqi);
     newCQI->setKind(MSG_CQI);
 
-    send(newCqi, "out");
-
-    scheduleAt(simTime() + timeslot,pt);
-
-
-
+    send(newCQI, "out");
 }
+
 
 void User::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage()){
+        simtime_t timeslot = getParentModule()->par("timeslot");
         sendCQI();
+        scheduleAt(simTime() + timeslot, msg);
     }
-    else{
+    else
+    {
         Frame *f = check_and_cast<Frame*>(msg);
         handleFrame(f);
     }
@@ -71,4 +68,9 @@ void User::handleFrame(Frame* f)
     delete(f);
 }
 
+
+void User::finish()
+{
+    cancelAndDelete(pt);
+}
 

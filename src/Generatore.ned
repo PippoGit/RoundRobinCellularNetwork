@@ -9,7 +9,5 @@ simple Generatore
        
     gates:
  		// output out;   
- 		input in;
- 		output outMSG;        
-    
+ 		output out;            
 }

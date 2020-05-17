@@ -1,15 +1,17 @@
 ../out/clang-debug/src/User.o: User.cc User.h \
-  D:/omnetpp-5.5.1/include\omnetpp.h Packet_m.h constants.h Frame_m.h \
-  ResourceBlock.h
+  C:/Users/Filippo/Desktop/PerformanceEvaluation/omnetpp-5.5.1/include\omnetpp.h \
+  constants.h Frame_m.h ResourceBlock.h Packet_m.h PacketCQI_m.h
 
 User.h:
 
-D:/omnetpp-5.5.1/include\omnetpp.h:
-
-Packet_m.h:
+C:/Users/Filippo/Desktop/PerformanceEvaluation/omnetpp-5.5.1/include\omnetpp.h:
 
 constants.h:
 
 Frame_m.h:
 
 ResourceBlock.h:
+
+Packet_m.h:
+
+PacketCQI_m.h:

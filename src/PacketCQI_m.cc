@@ -181,8 +181,8 @@ Register_Class(PacketCQI)
 
 PacketCQI::PacketCQI(const char *name, short kind) : ::omnetpp::cMessage(name,kind)
 {
-    this->userID = 0;
-    this->cqi = 0;
+    this->userId = 0;
+    this->CQI = 0;
 }
 
 PacketCQI::PacketCQI(const PacketCQI& other) : ::omnetpp::cMessage(other)
@@ -204,42 +204,42 @@ PacketCQI& PacketCQI::operator=(const PacketCQI& other)
 
 void PacketCQI::copy(const PacketCQI& other)
 {
-    this->userID = other.userID;
-    this->cqi = other.cqi;
+    this->userId = other.userId;
+    this->CQI = other.CQI;
 }
 
 void PacketCQI::parsimPack(omnetpp::cCommBuffer *b) const
 {
     ::omnetpp::cMessage::parsimPack(b);
-    doParsimPacking(b,this->userID);
-    doParsimPacking(b,this->cqi);
+    doParsimPacking(b,this->userId);
+    doParsimPacking(b,this->CQI);
 }
 
 void PacketCQI::parsimUnpack(omnetpp::cCommBuffer *b)
 {
     ::omnetpp::cMessage::parsimUnpack(b);
-    doParsimUnpacking(b,this->userID);
-    doParsimUnpacking(b,this->cqi);
+    doParsimUnpacking(b,this->userId);
+    doParsimUnpacking(b,this->CQI);
 }
 
-int PacketCQI::getUserID() const
+int PacketCQI::getUserId() const
 {
-    return this->userID;
+    return this->userId;
 }
 
-void PacketCQI::setUserID(int userID)
+void PacketCQI::setUserId(int userId)
 {
-    this->userID = userID;
+    this->userId = userId;
 }
 
-int PacketCQI::getCqi() const
+int PacketCQI::getCQI() const
 {
-    return this->cqi;
+    return this->CQI;
 }
 
-void PacketCQI::setCqi(int cqi)
+void PacketCQI::setCQI(int CQI)
 {
-    this->cqi = cqi;
+    this->CQI = CQI;
 }
 
 class PacketCQIDescriptor : public omnetpp::cClassDescriptor
@@ -334,8 +334,8 @@ const char *PacketCQIDescriptor::getFieldName(int field) const
         field -= basedesc->getFieldCount();
     }
     static const char *fieldNames[] = {
-        "userID",
-        "cqi",
+        "userId",
+        "CQI",
     };
     return (field>=0 && field<2) ? fieldNames[field] : nullptr;
 }
@@ -344,8 +344,8 @@ int PacketCQIDescriptor::findField(const char *fieldName) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount() : 0;
-    if (fieldName[0]=='u' && strcmp(fieldName, "userID")==0) return base+0;
-    if (fieldName[0]=='c' && strcmp(fieldName, "cqi")==0) return base+1;
+    if (fieldName[0]=='u' && strcmp(fieldName, "userId")==0) return base+0;
+    if (fieldName[0]=='C' && strcmp(fieldName, "CQI")==0) return base+1;
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
@@ -428,8 +428,8 @@ std::string PacketCQIDescriptor::getFieldValueAsString(void *object, int field, 
     }
     PacketCQI *pp = (PacketCQI *)object; (void)pp;
     switch (field) {
-        case 0: return long2string(pp->getUserID());
-        case 1: return long2string(pp->getCqi());
+        case 0: return long2string(pp->getUserId());
+        case 1: return long2string(pp->getCQI());
         default: return "";
     }
 }
@@ -444,8 +444,8 @@ bool PacketCQIDescriptor::setFieldValueAsString(void *object, int field, int i, 
     }
     PacketCQI *pp = (PacketCQI *)object; (void)pp;
     switch (field) {
-        case 0: pp->setUserID(string2long(value)); return true;
-        case 1: pp->setCqi(string2long(value)); return true;
+        case 0: pp->setUserId(string2long(value)); return true;
+        case 1: pp->setCQI(string2long(value)); return true;
         default: return false;
     }
 }

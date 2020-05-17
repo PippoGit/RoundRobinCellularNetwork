@@ -4,9 +4,11 @@
 #include <omnetpp.h>
 #include "UserInformation.h"
 #include "ResourceBlock.h"
+
 #include "Packet_m.h"
 #include "Frame_m.h"
-#include "PacketTimer_m.h"
+#include "PacketCQI_m.h"
+
 #include "constants.h"
 
 using namespace omnetpp;
@@ -61,6 +63,7 @@ class Antenna : public cSimpleModule
 
     virtual void initialize();
 
+    virtual void handleTimer(cMessage *msg);
     virtual void handleMessage(cMessage *msg);
     virtual void handlePacket(Packet *packet);
     virtual void handleCQI(PacketCQI *notification);

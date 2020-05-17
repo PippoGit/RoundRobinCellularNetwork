@@ -1,3 +1,0 @@
-message PacketTimer {
-    int userId;
-}

@@ -1,6 +1,6 @@
 
 message PacketCQI {
    //  int senderID;
-    int userID;
-    int cqi;
+    int userId;
+    int CQI;
 }

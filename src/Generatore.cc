@@ -7,38 +7,38 @@ int Generatore::NEXT_USER_ID; // qua boh vedremo
 
 void Generatore::initialize()
 {
-    // TODO - Generated method body
-    outMSG_s = gate("outMSG");
     userId = NEXT_USER_ID++;
-    pt = new PacketTimer();
-    pt->setKind(MSG_PKT_TIMER);
-    pt->setUserId(userId);
+    pt = new cMessage("timer");
     generatePacket();
 }
 
+
 void Generatore::generatePacket()
 {
+
     EV_DEBUG << "[UPLINK] Create a new packet for user: " << userId << endl;
     Packet *packet = new Packet();
 
     EV_DEBUG << "[UPLINK] Adding some random service demand for the packet" << endl;
     packet->setServiceDemand(intuniform(MIN_SERVICE_DEMAND, MAX_SERVICE_DEMAND, RNG_SERVICE_DEMAND));
     packet->setKind(MSG_PKT);
+
     EV_DEBUG << "[UPLINK] Setting the recipient for the packet (" << userId <<")" << endl;
     packet->setReceiverID(userId);
-    send(packet,outMSG_s);
-    simtime_t lambda = getParentModule()->par("lambda");
-    double timeslot = getParentModule()->par("timeslot");
-    scheduleAt(simTime() + (userId+1)*0.001 + exponential(lambda, RNG_INTERARRIVAL), pt);
 
-
+    send(packet, "out");
 }
+
+
 void Generatore::handleMessage(cMessage *msg)
 {
+    simtime_t lambda = getParentModule()->par("lambda");
     generatePacket();
-
+    scheduleAt(simTime() + (userId+1)*0.001 + exponential(lambda, RNG_INTERARRIVAL), msg);
 }
+
+
 void Generatore::finish()
 {
- 	delete(pt);
+ 	cancelAndDelete(pt);
 }

@@ -38,15 +38,13 @@ OBJS = \
     $O/UserInformation.o \
     $O/Frame_m.o \
     $O/Packet_m.o \
-    $O/PacketCQI_m.o \
-    $O/PacketTimer_m.o
+    $O/PacketCQI_m.o
 
 # Message files
 MSGFILES = \
     Frame.msg \
     Packet.msg \
-    PacketCQI.msg \
-    PacketTimer.msg
+    PacketCQI.msg
 
 # SM files
 SMFILES =

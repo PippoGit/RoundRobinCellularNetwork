@@ -3,11 +3,8 @@ package roundrobincellularnetwork;
 simple Antenna
 {
     parameters:
-	double lambda   @unit(s)=default(0.5s); // i think this is useless as well
-
-	   	
+        	   	
     	//signals
-
         @signal[throughput](type=long);
     	@statistic[throughput](source="throughput"; record=mean,vector);  
     	  
@@ -39,5 +36,7 @@ simple Antenna
     gates:
  		// output out;   
  		input in[];
+ 		input pkt_in[];
+ 		
  		output out[];    
 }
