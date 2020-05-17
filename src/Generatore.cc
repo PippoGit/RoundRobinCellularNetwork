@@ -31,8 +31,9 @@ void Generatore::generatePacket()
     EV_DEBUG << "[UPLINK] Setting the recipient for the packet (" << userId <<")" << endl;
     packet->setReceiverID(userId);
     send(packet,outMSG_s);
+    simtime_t lambda = getParentModule()->par("lambda");
     double timeslot = getParentModule()->par("timeslot");
-    scheduleAt(simTime() + timeslot,pt); // forse senza timeslot
+    scheduleAt(simTime() + (userId+1)*0.001 + exponential(lambda, RNG_INTERARRIVAL), pt);
 
 }
 void Generatore::handleMessage(cMessage *msg)
