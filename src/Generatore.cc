@@ -18,6 +18,7 @@ void Generatore::initialize()
 
 void Generatore::generatePacket()
 {
+    int userId = pt->getUserId()();
     EV_DEBUG << "[UPLINK] Create a new packet for user: " << userId << endl;
     Packet *packet = new Packet();
 
