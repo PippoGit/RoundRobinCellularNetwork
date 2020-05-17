@@ -7,6 +7,7 @@ int User::NEXT_USER_ID;
 void User::initialize()
 {
     userID = NEXT_USER_ID++;
+    sendCQI();
 }
 
 void User::sendCQI(){
@@ -41,6 +42,9 @@ void User::handleMessage(cMessage *msg)
     if (msg->getUserID()!=userID){
         Frame *f = check_and_cast<Frame*>(msg);
         handleFrame(f);
+    }
+    else{
+        sendCQI();
     }
 }
 
