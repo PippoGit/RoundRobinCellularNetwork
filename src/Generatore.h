@@ -17,10 +17,14 @@ class Generatore : public cSimpleModule
 {
   private:
     cGate *outMSG_s;
+    static int NEXT_USER_ID;
+    int userId;
+    PacketTimer *pt;
 
   protected:
     virtual void initialize();
-    virtual void generatePacket(int userId);
+    virtual void generatePacket());
+    virtual void handleMessage(cMessage *msg);
 };
 
 #endif
