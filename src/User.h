@@ -17,10 +17,6 @@ class User : public cSimpleModule
 
     double timeslot;
 
-    // Stats
-    long  numberRBs;
-    long  numServed;
-    long  servedBytes;
 
     //Signals
     simsignal_t throughput_s;

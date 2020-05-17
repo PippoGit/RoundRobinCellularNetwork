@@ -4,7 +4,7 @@ Define_Module(User);
 
 int User::NEXT_USER_ID;
 
-
+// i know that this function is dumb, but it's the best way to avoid modifying the python script (mybad)
 simsignal_t User::createDynamicSignal(std::string prefix, std::string templateName)
 {
     simsignal_t signal;
@@ -27,11 +27,6 @@ void User::initialize()
     userID = NEXT_USER_ID++;
     pt = new cMessage("timer");
     timeslot = getParentModule()->par("timeslot");
-
-    // Init stats
-    numberRBs   = 0;
-    numServed   = 0;
-    servedBytes = 0;
 
     // Init signals
     throughput_s   = createDynamicSignal("TESTtptUser", "tptUserTemplate");
@@ -95,17 +90,16 @@ void User::handleFrame(Frame* f)
 
             // per ogni frammento, se e di un pacchetto nuovo emitto le info, altirmenti scorri
             // un RB ptrebbe contenere frammenti provenienti da più pacchetti! 
-            for(auto frag : f->getRBFrame(i).getFragments()) {
+            for(auto frag : f->getRBFrame(i).getFragments()) 
+            {
                 EV_DEBUG << "[USER] Last seen frag: " << lastSeen << endl;
 
                 if (simTime() > getSimulation()->getWarmupPeriod() && lastSeen != frag.id) {
                     EV_DEBUG << "[USER] Emitting info about packet with id " << frag.id << endl;
                     lastSeen = frag.id;
 
-                    // Global Stats
-                    numServed++;
-                    numberRBs++;
-                    servedBytes += frag.packetSize;
+                    // Global Stats  
+                    emit(served_s, 1);
 
                     // Round Stats
                     servedBytesRound += frag.packetSize; // this is set to zero at every round
@@ -126,9 +120,6 @@ void User::handleFrame(Frame* f)
 
 void User::finish()
 {
-    // Emit globali
-    emit(served_s, numServed);
-
     cancelAndDelete(pt);
 }
 
