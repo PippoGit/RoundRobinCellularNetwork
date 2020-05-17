@@ -3,7 +3,7 @@
 
 Define_Module(Generatore);
 
-int User::NEXT_USER_ID;
+int Generatore::NEXT_USER_ID; // qua boh vedremo
 
 void Generatore::initialize()
 {
