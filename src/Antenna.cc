@@ -36,7 +36,7 @@ void Antenna::initialize()
 
     EV_DEBUG << "[ANTENNA-INITIALIZE] Building UserInformation data structure" << endl;
     users.reserve(NUM_USERS);
-    simtime_t lambda = par("lambda");
+    // simtime_t lambda = par("lambda");
 
     for(int i=0; i < NUM_USERS; i++)
     {
@@ -237,7 +237,7 @@ void Antenna::createFrame()
     this->frame = vectorToFrame(vframe);
 
     // Schedule next iteration
-    simtime_t timeslot_dt = par("timeslot");
+    simtime_t timeslot_dt = getParentModule()->par("timeslot");
     scheduleAt(simTime() + timeslot_dt, timer);
 }
 
