@@ -25,6 +25,7 @@ class Generatore : public cSimpleModule
     virtual void initialize();
     virtual void generatePacket();
     virtual void handleMessage(cMessage *msg);
+    virtual void finish();
 };
 
 #endif

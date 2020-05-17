@@ -21,9 +21,6 @@ void Generatore::generatePacket()
     EV_DEBUG << "[UPLINK] Create a new packet for user: " << userId << endl;
     Packet *packet = new Packet();
 
-    if (packet != nullptr)
-        EV_DEBUG << "the packet is generated:" << packet << endl;
-
     EV_DEBUG << "[UPLINK] Adding some random service demand for the packet" << endl;
     packet->setServiceDemand(intuniform(MIN_SERVICE_DEMAND, MAX_SERVICE_DEMAND, RNG_SERVICE_DEMAND));
     packet->setKind(MSG_PKT);
@@ -34,9 +31,14 @@ void Generatore::generatePacket()
     double timeslot = getParentModule()->par("timeslot");
     scheduleAt(simTime() + (userId+1)*0.001 + exponential(lambda, RNG_INTERARRIVAL), pt);
 
+
 }
 void Generatore::handleMessage(cMessage *msg)
 {
     generatePacket();
 
+}
+void Generatore::finish()
+{
+ 	Delete(pt);
 }
