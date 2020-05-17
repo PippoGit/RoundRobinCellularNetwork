@@ -7,6 +7,11 @@ int User::NEXT_USER_ID;
 void User::initialize()
 {
     userID = NEXT_USER_ID++;
+
+    pt = new PacketTimer();
+    pt->setKind(MSG_PKT_TIMER);
+    pt->setUserId(userID);
+
     sendCQI();
 }
 
@@ -16,16 +21,10 @@ void User::sendCQI(){
     double successProbGroup1 = getParentModule()->par("successProbGroup1");
     double successProbGroup2 = getParentModule()->par("successProbGroup2");
     double successProbGroup3 = getParentModule()->par("successProbGroup3");
-
+    double timeslot = getParentModule()->par("timeslot");
     double p =  (userID % 2 == 0)? successProbGroup3: successProbGroup1;
     int cqi = (isBinomial)?binomial(BINOMIAL_N, p,RNG_CQI_BIN)+1:intuniform(MIN_CQI, MAX_CQI, RNG_CQI_UNI);
 
-
-    PacketTimer *pt = new PacketTimer();
-    pt->setKind(MSG_PKT_TIMER);
-    pt->setUserId(userID);
-
-    scheduleAt(simTime() + exponential(lambda, RNG_INTERARRIVAL),pt);
     PacketCQI *newCQI = new PacketCQI();
     newCQI->setUserID(userID);
     newCQI->setCqi(cqi);
@@ -33,18 +32,20 @@ void User::sendCQI(){
 
     send(newCqi, "out");
 
+    scheduleAt(simTime() + timeslot,pt);
+
 
 
 }
 
 void User::handleMessage(cMessage *msg)
 {
-    if (msg->getUserID()!=userID){
-        Frame *f = check_and_cast<Frame*>(msg);
-        handleFrame(f);
+    if (msg->isSelfMessage()){
+        sendCQI();
     }
     else{
-        sendCQI();
+        Frame *f = check_and_cast<Frame*>(msg);
+        handleFrame(f);
     }
 }
 

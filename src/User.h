@@ -13,6 +13,7 @@ class User : public cSimpleModule
   private:
     static int NEXT_USER_ID;
     int userID;
+    PacketTimer *pt;
 
   protected:
     virtual void initialize();
