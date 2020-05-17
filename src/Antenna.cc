@@ -325,7 +325,9 @@ void Antenna::downlinkPropagation()
 
 void Antenna::handleCQI(PacketCQI *notification)
 {
-    users[notification->getUserId()]->setCQI(notification->getCQI());
+    std::vector<UserInformation>::iterator u = users.at(notification->getUserId());
+    u->setCQI(notification->getCQI());
+    u->shouldBeServed();
     delete notification;
 }
 
