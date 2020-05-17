@@ -32,7 +32,7 @@ void Generatore::generatePacket()
     packet->setReceiverID(userId);
     send(packet,outMSG_s);
     double timeslot = getParentModule()->par("timeslot");
-    scheduleAt(simTime() + timeslot,pt);
+    scheduleAt(simTime() + timeslot,pt); // forse senza timeslot
 
 }
 void Generatore::handleMessage(cMessage *msg)
