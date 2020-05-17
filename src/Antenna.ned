@@ -3,12 +3,7 @@ package roundrobincellularnetwork;
 simple Antenna
 {
     parameters:
-        double timeslot @unit(s) = default(0.5s);
-    	bool isBinomial=default(false); // binomial or uniform.
-	    double lambda @unit(s)=default(0.5s);
-		double successProbGroup1;
-		double successProbGroup2;
-		double successProbGroup3;
+	double lambda   @unit(s)=default(0.5s); // i think this is useless as well
 
 	   	
     	//signals
