@@ -11,12 +11,6 @@ using namespace omnetpp;
 class User : public cSimpleModule
 {
   private:
-    static int NEXT_USER_ID;
-    int userID;
-    cMessage *pt;
-
-    double timeslot;
-
     struct rb_inspection_result_t {
         int  last_seen;
         long served_bytes;
@@ -24,6 +18,12 @@ class User : public cSimpleModule
 
         rb_inspection_result_t():last_seen(-1), served_bytes(0), number_rbs(0) {}
     };
+
+    static int NEXT_USER_ID;
+    int userID;
+    cMessage *pt;
+
+    double timeslot;
 
     //Signals
     simsignal_t throughput_s;
