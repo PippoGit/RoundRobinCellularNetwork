@@ -72,43 +72,44 @@ void User::handleMessage(cMessage *msg)
     }
 }
 
-void User::inspectResourceBlock(const ResourceBlock &rb, rb_inspection_result_t &res)
-{
-    if(rb.getRecipient() != userID) return; // not my cup of tea
 
-    EV_DEBUG << "[USER] There is a RB for me. Last seen pkt: " << res.last_seen << endl;
-
-    for(auto frag : rb.getFragments())
-    {
-        if (res.last_seen != frag.id) {
-            EV_DEBUG << "[USER] Recording info about packet with id " << frag.id << endl;
-
-            // Update Stats
-            res.last_seen = frag.id;
-            res.served_bytes += frag.packetSize;
-            res.number_rbs++;
-            emit(responseTime_s, simTime() - frag.arrivalTime);
-        }
-    }
-}
 
 void User::handleFrame(Frame* f)
 {
-    EV_DEBUG << "[USER] I have received a frame" << endl;
-    rb_inspection_result_t res;
+    EV_DEBUG << "[USER] I have received a frame... Here is the content:" << endl;
+    long servedBytesRound = 0;
+    long numberRBsRound   = 0;
+    int lastSeen = -1;
 
-    for(int i=0; i<FRAME_SIZE && simTime() > getSimulation()->getWarmupPeriod(); i++)
+    for(int i=0; i<FRAME_SIZE; i++)
     {
-        ResourceBlock rb = f->getRBFrame(i);
-        inspectResourceBlock(rb, res);
+        if(f->getRBFrame(i).getRecipient()==userID)
+        {
+            EV_DEBUG << "[USER] The frame is for me! yay " << endl;
+
+            // per ogni frammento, se e di un pacchetto nuovo emitto le info, altirmenti scorri
+            // un RB ptrebbe contenere frammenti provenienti da più pacchetti! 
+            for(auto frag : f->getRBFrame(i).getFragments()) 
+            {
+                EV_DEBUG << "[USER] Last seen frag: " << lastSeen << endl;
+
+                if (simTime() > getSimulation()->getWarmupPeriod() && lastSeen != frag.id) {
+                    EV_DEBUG << "[USER] Emitting info about packet with id " << frag.id << endl;
+                    lastSeen = frag.id;
+
+                    // Round Stats
+                    servedBytesRound += frag.packetSize; // this is set to zero at every round
+                    numberRBsRound++;
+                    emit(responseTime_s, simTime() - frag.arrivalTime);
+                }
+            }
+        }
     }
 
     // Emitto statistiche per questo round
-    emit(served_s, (int) !(res.last_seen < 0));
-    emit(throughput_s, (double) res.served_bytes/timeslot);
-    emit(numberRBs_s, res.number_rbs);
-
-    // delete del frame ora che � stato consumato
+    emit(served_s, (int) !(lastSeen < 0)); // se non sono stato servito emitto 0 perchè lastSeen varrebbe -1. altrimenti emitto 1 che vuol dire somma 1 al contatore
+    emit(throughput_s, (double) servedBytesRound/timeslot);
+    emit(numberRBs_s, numberRBsRound);
     delete(f);
 }
 
