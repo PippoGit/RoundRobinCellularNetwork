@@ -151,7 +151,7 @@ def parse_ndarray(s):
 
 
 def parse_name_attr(s):
-    return s.split(':')[0] if s else None
+    return s.split(':')[1] + ':' + s.split(':')[0] if s else None
 
 
 def parse_run(s):
@@ -556,7 +556,7 @@ def unibin_ci_plot(lambda_val, attr, bin_mode='bin', ci=95, save=False):
 
 def plot_to_img(mode, lambdas):
     for l in lambdas:
-        all_lorenz(mode, l, 'responseTime', save=True)
+        all_lorenz(mode, l, 'mean:rspTimeUser', save=True)
     return
 
 
@@ -614,7 +614,7 @@ def CQI_to_class(cqi):
 
 
 
-def class_plot(mode, lambda_val, y_attr='responseTime'):
+def class_plot(mode, lambda_val, y_attr='mean:rspTimeUser'):
     data = tidy_scalar(mode, lambda_val)
 
     sns.catplot(x='class', y=y_attr, hue='user', data=data, order=CQI_CLASSES)
@@ -646,7 +646,7 @@ def tidy_scalar(mode, lambda_val):
     for attr_name in sel.attr.unique():
         tidy_data[attr_name] = sel[sel.attr == attr_name].value.values
 
-    tidy_data['class'] = tidy_data['CQI'].apply(lambda x: CQI_to_class(x))
+    tidy_data['class'] = tidy_data['mean:CQIUser'].apply(lambda x: CQI_to_class(x))
     return tidy_data
 
 
