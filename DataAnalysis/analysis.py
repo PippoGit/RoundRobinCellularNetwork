@@ -650,7 +650,7 @@ def tidy_scalar(mode, lambda_val):
     return tidy_data
 
 
-def model_validation(lambda_val, cqis=["2", "13"], attribute="CQI", ci=95):
+def model_validation(lambda_val, cqis=["2", "13"], attribute="mean:CQIUser", ci=95):
     data = {}
     for cqi in cqis:
         data[cqi] = pd.read_csv(DATA_PATH + "modelv/cqi" + cqi + lambda_val + ".csv", 
