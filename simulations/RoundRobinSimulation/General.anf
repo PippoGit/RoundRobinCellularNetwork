@@ -3,6 +3,8 @@
   <inputs>
     <inputs name="/RoundRobinCellularNetwork/simulations/RoundRobinSimulation/results/General-1.5ms-*.vec"/>
     <inputs name="/RoundRobinCellularNetwork/simulations/RoundRobinSimulation/results/General-1.5ms-*.sca"/>
+    <inputs name="/RoundRobinCellularNetwork/simulations/RoundRobinSimulation/results/General-0.5ms-#0.sca"/>
+    <inputs name="/RoundRobinCellularNetwork/simulations/RoundRobinSimulation/results/General-0.01ms-#0.sca"/>
   </inputs>
   <datasets/>
   <chartSheets/>
