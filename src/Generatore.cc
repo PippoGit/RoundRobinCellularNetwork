@@ -9,7 +9,9 @@ void Generatore::initialize()
 {
     userId = NEXT_USER_ID++;
     pt = new cMessage("timer");
-    generatePacket();
+    double spikeDisp = par("spike_displacement");
+
+    scheduleAt(simTime() + (userId+1)*spikeDisp, pt);
 }
 
 
@@ -34,7 +36,7 @@ void Generatore::handleMessage(cMessage *msg)
 {
     simtime_t lambda = getParentModule()->par("lambda");
     generatePacket();
-    scheduleAt(simTime() + (userId+1)*0.001 + exponential(lambda, RNG_INTERARRIVAL), msg);
+    scheduleAt(simTime() + exponential(lambda, RNG_INTERARRIVAL), msg);
 }
 
 
