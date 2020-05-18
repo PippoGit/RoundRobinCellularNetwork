@@ -76,14 +76,15 @@ void User::inspectResourceBlock(const ResourceBlock &rb, rb_inspection_result_t 
 {
     if(rb.getRecipient() != userID) return; // not my cup of tea
 
+    EV_DEBUG << "[USER] There is a RB for me. Last seen pkt: " << res.last_seen << endl;
+
     for(auto frag : rb.getFragments())
     {
-        EV_DEBUG << "[USER] Last seen frag: " << res.last_seen << endl;
         if (simTime() > getSimulation()->getWarmupPeriod() && res.last_seen != frag.id) {
-            EV_DEBUG << "[USER] Emitting info about packet with id " << frag.id << endl;
-            res.last_seen = frag.id;
+            EV_DEBUG << "[USER] Recording info about packet with id " << frag.id << endl;
 
-            // Round Stats
+            // Update Stats
+            res.last_seen = frag.id;
             res.served_bytes += frag.packetSize;
             res.number_rbs++;
             emit(responseTime_s, simTime() - frag.arrivalTime);
@@ -103,7 +104,7 @@ void User::handleFrame(Frame* f)
     }
 
     // Emitto statistiche per questo round
-    emit(served_s, (int) !(res.last_seen < 0)); // se non sono stato servito emitto 0 perchè lastSeen varrebbe -1. altrimenti emitto 1 che vuol dire somma 1 al contatore
+    emit(served_s, (int) !(res.last_seen < 0));
     emit(throughput_s, (double) res.served_bytes/timeslot);
     emit(numberRBs_s, res.number_rbs);
 
