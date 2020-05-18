@@ -97,16 +97,19 @@ void User::handleFrame(Frame* f)
     EV_DEBUG << "[USER] I have received a frame" << endl;
     rb_inspection_result_t res;
 
-    for(int i=0; i<FRAME_SIZE && simTime() > getSimulation()->getWarmupPeriod(); i++)
+    if(simTime() > getSimulation()->getWarmupPeriod())
     {
-        ResourceBlock rb = f->getRBFrame(i);
-        inspectResourceBlock(rb, res);
-    }
+        for(int i=0; i<FRAME_SIZE; i++)
+        {
+            ResourceBlock rb = f->getRBFrame(i);
+            inspectResourceBlock(rb, res);
+        }
 
-    // Emitto statistiche per questo round
-    emit(served_s, (int) !(res.last_seen < 0));
-    emit(throughput_s, (double) res.served_bytes/timeslot);
-    emit(numberRBs_s, res.number_rbs);
+        // Emitto statistiche per questo round
+        emit(served_s, (int) !(res.last_seen < 0));
+        emit(throughput_s, (double) res.served_bytes/timeslot);
+        emit(numberRBs_s, res.number_rbs);
+    }
 
     // delete del frame ora che è stato consumato
     delete(f);
