@@ -7,7 +7,7 @@ simple User
 
         // Experimenting with signals
         @signal[tptUser*](type=double);
-        @statisticTemplate[tptUserTemplate](record=mean,sum);
+        @statisticTemplate[tptUserTemplate](record=mean,sum,vector);
 
         @signal[rspTimeUser*](type=simtime_t);
         @statisticTemplate[responseTimeUserTemplate](record=mean,vector);
