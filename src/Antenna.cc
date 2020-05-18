@@ -285,12 +285,12 @@ void Antenna::downlinkPropagation()
         if (simTime() > getSimulation()->getWarmupPeriod())
         {
             EV_DEBUG << "[tptTest] Byte trasmitted from user"<< it->getId() <<": "<<it->getServedBytes()<< endl;
-            if(it->getServedBytes()>0) // is this ok?????????? BOH
-            {
+            // if(it->getServedBytes()>0) // is this ok?????????? BOH
+            // {
                 emit(it->throughput_s, it->getServedBytes());
-                EV_DEBUG << "[tptTest] Emitted"<< endl;
+                // EV_DEBUG << "[tptTest] Emitted"<< endl;
 
-            }
+            // }
             emit(it->CQI_s, it->getCQI());
             emit(it->numberRBs_s, it->getNumberRBs());
         }
