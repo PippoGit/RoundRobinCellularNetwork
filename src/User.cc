@@ -29,11 +29,11 @@ void User::initialize()
     timeslot = getParentModule()->par("timeslot");
 
     // Init signals
-    throughput_s   = createDynamicSignal("TESTtptUser", "tptUserTemplate");
-    responseTime_s = createDynamicSignal("TESTrspTimeUser", "responseTimeUserTemplate");
-    CQI_s          = createDynamicSignal("TESTCQIUser", "CQIUserTemplate");
-    numberRBs_s    = createDynamicSignal("TESTNumRBUser", "numberRBsUserTemplate");
-    served_s       = createDynamicSignal("TESTservedUser", "servedUserTemplate");
+    throughput_s   = createDynamicSignal("tptUser", "tptUserTemplate");
+    responseTime_s = createDynamicSignal("rspTimeUser", "responseTimeUserTemplate");
+    CQI_s          = createDynamicSignal("CQIUser", "CQIUserTemplate");
+    numberRBs_s    = createDynamicSignal("NumRBUser", "numberRBsUserTemplate");
+    served_s       = createDynamicSignal("servedUser", "servedUserTemplate");
 
     scheduleAt(simTime(), pt);
 }

@@ -13,19 +13,10 @@ private:
 
     int CQI;
     int numPendingPackets;
-    int numberRBs;
-    long numServed;
     
     int  servedBytes;
     bool served;
 
-public:
-    // probabilmente da togliere
-    omnetpp::simsignal_t throughput_s;
-    omnetpp::simsignal_t responseTime_s;
-    omnetpp::simsignal_t CQI_s;
-    omnetpp::simsignal_t numberRBs_s;
-    omnetpp::simsignal_t served_s;
 
 public:
     UserInformation(int id);
@@ -35,7 +26,6 @@ public:
     virtual int              CQIToBytes();
     virtual omnetpp::cQueue* getQueue();
 
-    virtual long getNumServed();
     virtual void setCQI(int cqi);
     virtual int  getCQI();
 
@@ -48,12 +38,8 @@ public:
     virtual void initNumPendingPackets();
     virtual int  getNumPendingPackets();
 
-
     virtual void incrementServedBytes(int bytes);
     virtual int  getServedBytes();
-    virtual void incrementNumberRBs();
-    virtual int  getNumberRBs();
-    virtual void setNumberRBs(int n);
 };
 
 #endif /* USERINFORMATION_H_ */

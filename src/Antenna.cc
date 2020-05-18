@@ -2,26 +2,10 @@
 
 Define_Module(Antenna);
 
-simsignal_t Antenna::createDynamicSignal(std::string prefix, int userId, std::string templateName)
-{
-    simsignal_t signal;
-    std::string signal_name;
-    std::stringstream sstream;
-
-    sstream << prefix << "-" << userId;
-    signal_name = sstream.str();
-    
-    signal = registerSignal(signal_name.c_str());
-
-    cProperty *statisticTemplate = getProperties()->get("statisticTemplate", templateName.c_str());
-    getEnvir()->addResultRecorders(this, signal, signal_name.c_str(), statisticTemplate);
-    return signal;
-}
 
 void Antenna::initialize()
 {
     //signals (Per il momento lascio i segnali...)
-    responseTimeGlobal_s  = registerSignal("responseTimeGlobal");
     throughput_s          = registerSignal("throughput");
     numServedUser_s       = registerSignal("NumServedUser");
     numberRB_s            = registerSignal("numberRB");
@@ -41,11 +25,6 @@ void Antenna::initialize()
     for(int i=0; i < NUM_USERS; i++)
     {
         UserInformation u(i);
-        u.throughput_s   = createDynamicSignal("tptUser", i, "tptUserTemplate");
-        u.responseTime_s = createDynamicSignal("responseTime", i, "responseTimeUserTemplate");
-        u.CQI_s          = createDynamicSignal("CQI", i, "CQIUserTemplate");
-        u.numberRBs_s    = createDynamicSignal("numberRBs", i, "numberRBsUserTemplate");
-        u.served_s       = createDynamicSignal("servedUser", i, "servedUserTemplate");
         users.push_back(u);
     }
 
@@ -131,9 +110,6 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
         {
             packetsInformation[p->getId()].served     = true;
             p->setServedTime(simTime());
-            
-            // probabilmente da togliere
-            packetsInformation[p->getId()].servedTime = simTime();
         }
 
         double packetSize          = p->getServiceDemand(),
@@ -164,9 +140,6 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
             // WHEN A PACKET INSERTED IN FRAME, START-FRAME-TIME
             p->setFrameTime(simTime());
 
-            // probabilmente da togliere
-            packetsInformation[p->getId()].frameTime = simTime();
-
             // The packet will be put somewhere in the frame, so decrease the number
             // of bytes available in the frame (for this user)
             totalRemainingBytes -= packetSize;
@@ -183,7 +156,6 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
                 // if it is NOT available, it is because it was already allocated
                 // to currentUser in the previous iteration!
                 if(from->isAvailable()) {
-                    currentUser->incrementNumberRBs();
                     from->allocResourceBlock(currentUserId, uCQI);
                 }
 
@@ -225,9 +197,6 @@ void Antenna::createFrame()
     std::vector<ResourceBlock> vframe(FRAME_SIZE);
     std::vector<ResourceBlock>::iterator currentRB = vframe.begin();
 
-    EV_DEBUG << "[CREATE_FRAME] Updating CQI..." <<endl;
-
-    // 1) Get updated CQIs
     initRoundInformation();
 
     do
@@ -248,27 +217,10 @@ void Antenna::downlinkPropagation()
 {
     if(frame == nullptr) return; // first iteration...
 
-    // probabilmente da togliere
-    // Update the info about the packet being in the frame
-    for(long id : pendingPackets)
-    {
-        Antenna::packet_info_t info = packetsInformation.at(id);
-        info.propagationTime = simTime();
-
-        // emit responsetime...
-        // probabilmente da togliere
-        if (simTime() > getSimulation()->getWarmupPeriod()) {
-            emit(users[info.recipient].responseTime_s, info.propagationTime - info.arrivalTime);
-            users[info.recipient].incrementServedBytes(info.size);
-            emit(responseTimeGlobal_s,  info.propagationTime - info.arrivalTime);
-        }
-        ////////
-
-        packetsInformation.erase(id); // remove the packet from the hash table
-    }
 
     emit(numberRB_s, frame->getAllocatedRBs());
     broadcastFrame(frame);
+
     EV_DEBUG << "[DOWNLINK] Broadcast propagation of the frame" << endl;
 
     if (simTime() > getSimulation()->getWarmupPeriod()) {
@@ -276,26 +228,6 @@ void Antenna::downlinkPropagation()
         emit(throughput_s,    numSentBytesPerTimeslot);   //Tpt defined as bytes sent per timeslot
         emit(numServedUser_s, numServedUsersPerTimeslot); // Tpt defined as num of served users per timeslot
     }
-
-    // Emit statitics per user
-    // probabilmente da togliere
-    EV_DEBUG << "[ANTENNA] Emitting signals for user's statistics " << endl;
-    for(auto it=users.begin(); it!=users.end(); ++it)
-    {
-        if (simTime() > getSimulation()->getWarmupPeriod())
-        {
-            EV_DEBUG << "[tptTest] Byte trasmitted from user"<< it->getId() <<": "<<it->getServedBytes()<< endl;
-            // if(it->getServedBytes()>0) // is this ok?????????? BOH
-            // {
-                emit(it->throughput_s, it->getServedBytes());
-                // EV_DEBUG << "[tptTest] Emitted"<< endl;
-
-            // }
-            emit(it->CQI_s, it->getCQI());
-            emit(it->numberRBs_s, it->getNumberRBs());
-        }
-    }
-    pendingPackets.clear(); // clear the pending packets data structure...
 }
 
 
@@ -309,7 +241,6 @@ void Antenna::handlePacket(Packet *packet)
     // this is a new packet! so we are going to keep its info somewhere!
     EV_DEBUG << "[UPLINK] Create a data structure for the new packet with ID " << packet->getId() << endl;
     Antenna::packet_info_t i;
-    i.arrivalTime = simTime();
     i.served = false;
     i.recipient = userId;
     i.size = packet->getServiceDemand();
@@ -376,20 +307,7 @@ void Antenna::handleMessage(cMessage *msg)
 
 
 void Antenna::finish() {
-    // probabilmente da togliere
-    // Emit final signals
-    for(auto it=users.begin(); it!=users.end(); ++it)
-    {
-        emit(it->served_s, it->getNumServed());
-    }
-
     // Delete stuff...
     cancelAndDelete(timer);
     cancelAndDelete(frame);
 }
-
-Antenna::~Antenna()
-{
-
-}
-

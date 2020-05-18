@@ -2,26 +2,26 @@ package roundrobincellularnetwork;
 
 simple User
 {
-	parameters:
-    double lambda @unit(s)=default(0.5s);
-      
-    // Experimenting with signals
-    @signal[TESTtptUser*](type=double);
-    @statisticTemplate[tptUserTemplate](record=mean, sum);  
+    parameters:
+        double lambda @unit(s) = default(0.5s);
 
-    @signal[TESTrspTimeUser*](type=simtime_t);
-    @statisticTemplate[responseTimeUserTemplate](record=mean, vector); 
-    
-    @signal[TESTCQIUser*](type=long);
-    @statisticTemplate[CQIUserTemplate](record=mean, sum);   
-    
-    @signal[TESTNumRBUser*](type=long);
-    @statisticTemplate[numberRBsUserTemplate](record=mean, sum);
+        // Experimenting with signals
+        @signal[tptUser*](type=double);
+        @statisticTemplate[tptUserTemplate](record=mean,sum);
 
-    @signal[TESTservedUser*](type=long);
-    @statisticTemplate[servedUserTemplate](record=sum);  
-       		
-	gates:
-    input in;
-    output out;
+        @signal[rspTimeUser*](type=simtime_t);
+        @statisticTemplate[responseTimeUserTemplate](record=mean,vector);
+
+        @signal[CQIUser*](type=long);
+        @statisticTemplate[CQIUserTemplate](record=mean,sum);
+
+        @signal[NumRBUser*](type=long);
+        @statisticTemplate[numberRBsUserTemplate](record=mean,sum);
+
+        @signal[servedUser*](type=long);
+        @statisticTemplate[servedUserTemplate](record=sum);
+
+    gates:
+        input in;
+        output out;
 }

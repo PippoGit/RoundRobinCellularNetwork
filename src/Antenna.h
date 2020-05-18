@@ -19,15 +19,9 @@ class Antenna : public cSimpleModule
 
     struct packet_info_t
     {
-        int       recipient;
-        bool      served;
-
-        // probabilmente da togliere
-        simtime_t arrivalTime;     // inserted into the queue
-        simtime_t servedTime;      // removed from the queue
-        simtime_t frameTime;       // inserted into the frame
-        simtime_t propagationTime; // left the antenna
-        int       size;
+        int  recipient;
+        bool served;
+        int  size;
     };
 
   private:
@@ -47,19 +41,12 @@ class Antenna : public cSimpleModule
     long numSentBytesPerTimeslot;
 
 
-    // Signal
-    simsignal_t responseTimeGlobal_s;
+    // Global Stats Signal
     simsignal_t numServedUser_s;
-
-    // probabilmente da togliere
     simsignal_t throughput_s;
     simsignal_t numberRB_s;
 
-    // probabilmente da togliere
-    virtual simsignal_t createDynamicSignal(std::string prefix, int userId, std::string templateName);
-
   protected:
-    virtual ~Antenna();
     virtual void finish();
 
     virtual void initialize();
