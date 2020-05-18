@@ -108,7 +108,7 @@ void User::handleFrame(Frame* f)
     }
 
     // Emitto statistiche per questo round
-    emit(served_s, (int) (lastSeen < 0)); // se non sono stato servito emitto 0 perchè lastSeen varrebbe -1. altrimenti emitto 1 che vuol dire somma 1 al contatore
+    emit(served_s, (int) !(lastSeen < 0)); // se non sono stato servito emitto 0 perchè lastSeen varrebbe -1. altrimenti emitto 1 che vuol dire somma 1 al contatore
     emit(throughput_s, servedBytesRound/timeslot);
     emit(numberRBs_s, numberRBsRound);
     delete(f);
