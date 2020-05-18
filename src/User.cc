@@ -80,7 +80,7 @@ void User::inspectResourceBlock(const ResourceBlock &rb, rb_inspection_result_t 
 
     for(auto frag : rb.getFragments())
     {
-        if (simTime() > getSimulation()->getWarmupPeriod() && res.last_seen != frag.id) {
+        if (res.last_seen != frag.id) {
             EV_DEBUG << "[USER] Recording info about packet with id " << frag.id << endl;
 
             // Update Stats
@@ -94,10 +94,10 @@ void User::inspectResourceBlock(const ResourceBlock &rb, rb_inspection_result_t 
 
 void User::handleFrame(Frame* f)
 {
-    EV_DEBUG << "[USER] I have received a frame... Here is the content:" << endl;
+    EV_DEBUG << "[USER] I have received a frame" << endl;
     rb_inspection_result_t res;
 
-    for(int i=0; i<FRAME_SIZE; i++)
+    for(int i=0; i<FRAME_SIZE && simTime() > getSimulation()->getWarmupPeriod(); i++)
     {
         ResourceBlock rb = f->getRBFrame(i);
         inspectResourceBlock(rb, res);
