@@ -39,10 +39,9 @@ void User::initialize()
 }
 
 void User::sendCQI(){
-    simtime_t lambda = getParentModule()->par("lambda");
     bool isBinomial = getParentModule()->par("isBinomial");
     double successProbGroup1 = getParentModule()->par("successProbGroup1");
-    double successProbGroup2 = getParentModule()->par("successProbGroup2");
+    // double successProbGroup2 = getParentModule()->par("successProbGroup2");
     double successProbGroup3 = getParentModule()->par("successProbGroup3");
 
     double p =  (userID % 2 == 0) ? successProbGroup3: successProbGroup1;
@@ -82,7 +81,7 @@ void User::handleFrame(Frame* f)
     long numberRBsRound   = 0;
     int lastSeen = -1;
 
-    for(int i =0; i<FRAME_SIZE; i++)
+    for(int i=0; i<FRAME_SIZE; i++)
     {
         if(f->getRBFrame(i).getRecipient()==userID)
         {
@@ -109,7 +108,7 @@ void User::handleFrame(Frame* f)
 
     // Emitto statistiche per questo round
     emit(served_s, (int) !(lastSeen < 0)); // se non sono stato servito emitto 0 perchè lastSeen varrebbe -1. altrimenti emitto 1 che vuol dire somma 1 al contatore
-    emit(throughput_s, servedBytesRound/timeslot);
+    emit(throughput_s, (double) servedBytesRound/timeslot);
     emit(numberRBs_s, numberRBsRound);
     delete(f);
 }

@@ -6,7 +6,7 @@ simple User
     double lambda @unit(s)=default(0.5s);
       
     // Experimenting with signals
-    @signal[TESTtptUser*](type=long);
+    @signal[TESTtptUser*](type=double);
     @statisticTemplate[tptUserTemplate](record=mean, sum);  
 
     @signal[TESTrspTimeUser*](type=simtime_t);
