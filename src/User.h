@@ -11,12 +11,19 @@ using namespace omnetpp;
 class User : public cSimpleModule
 {
   private:
+    struct rb_inspection_result_t {
+        int  last_seen;
+        long served_bytes;
+        long number_rbs;
+
+        rb_inspection_result_t():last_seen(-1), served_bytes(0), number_rbs(0) {}
+    };
+
     static int NEXT_USER_ID;
     int userID;
     cMessage *pt;
 
     double timeslot;
-
 
     //Signals
     simsignal_t throughput_s;
@@ -25,7 +32,9 @@ class User : public cSimpleModule
     simsignal_t numberRBs_s;
     simsignal_t served_s;
 
+    // private methods
     virtual simsignal_t createDynamicSignal(std::string prefix, std::string templateName);
+    virtual void        inspectResourceBlock(const ResourceBlock &rb, rb_inspection_result_t &res);
 
   protected:
     virtual void initialize();
