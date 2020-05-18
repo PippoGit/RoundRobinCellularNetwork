@@ -19,7 +19,7 @@ simple User
     @statisticTemplate[numberRBsUserTemplate](record=mean, sum);
 
     @signal[TESTservedUser*](type=long);
-    @statisticTemplate[servedUserTemplate](record=count);  
+    @statisticTemplate[servedUserTemplate](record=sum);  
        		
 	gates:
     input in;

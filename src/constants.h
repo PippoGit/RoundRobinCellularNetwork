@@ -12,11 +12,13 @@
 //#define RNG_RECIPIENT 2
 //#define RNG_INTERARRIVAL 3
 
+// USERS RNG
 #define RNG_CQI_UNI 0
-#define RNG_SERVICE_DEMAND 1
-#define RNG_CQI_BIN 2
-#define RNG_INTERARRIVAL 3
+#define RNG_CQI_BIN 1
 
+// GENERATOR RNG
+#define RNG_SERVICE_DEMAND 0
+#define RNG_INTERARRIVAL 1
 
 
 #define MIN_CQI 1
