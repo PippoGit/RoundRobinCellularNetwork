@@ -111,6 +111,8 @@ void User::handleFrame(Frame* f)
         emit(served_s, (int) !(res.last_seen < 0));
         emit(throughput_s, (double) res.served_bytes/timeslot);
         emit(numberRBs_s, res.number_rbs);
+        emit(numberPkts_s, res.number_pkts);
+
     }
 
     // delete del frame ora che � stato consumato
