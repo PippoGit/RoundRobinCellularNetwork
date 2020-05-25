@@ -32,7 +32,8 @@ void User::initialize()
     throughput_s   = createDynamicSignal("tptUser", "tptUserTemplate");
     responseTime_s = createDynamicSignal("rspTimeUser", "responseTimeUserTemplate");
     CQI_s          = createDynamicSignal("CQIUser", "CQIUserTemplate");
-    numberRBs_s    = createDynamicSignal("NumRBUser", "numberRBsUserTemplate");
+    numberRBs_s    = createDynamicSignal("numRBsUser", "numberRBsUserTemplate");
+    numberPkts_s   = createDynamicSignal("numPktsUser", "numberPktsUserTemplate");
     served_s       = createDynamicSignal("servedUser", "servedUserTemplate");
 
     scheduleAt(simTime(), pt);
@@ -77,6 +78,7 @@ void User::inspectResourceBlock(const ResourceBlock &rb, rb_inspection_result_t 
     if(rb.getRecipient() != userID) return; // not my cup of tea
 
     EV_DEBUG << "[USER] There is a RB for me. Last seen pkt: " << res.last_seen << endl;
+    res.number_rbs++;
 
     for(auto frag : rb.getFragments())
     {
@@ -86,7 +88,7 @@ void User::inspectResourceBlock(const ResourceBlock &rb, rb_inspection_result_t 
             // Update Stats
             res.last_seen = frag.id;
             res.served_bytes += frag.packetSize;
-            res.number_rbs++;
+            res.number_pkts++;
             emit(responseTime_s, simTime() - frag.arrivalTime);
         }
     }
@@ -111,7 +113,7 @@ void User::handleFrame(Frame* f)
         emit(numberRBs_s, res.number_rbs);
     }
 
-    // delete del frame ora che è stato consumato
+    // delete del frame ora che ï¿½ stato consumato
     delete(f);
 }
 

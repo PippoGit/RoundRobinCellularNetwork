@@ -15,8 +15,11 @@ simple User
         @signal[CQIUser*](type=long);
         @statisticTemplate[CQIUserTemplate](record=mean,sum);
 
-        @signal[NumRBUser*](type=long);
+        @signal[numRBsUser*](type=long);
         @statisticTemplate[numberRBsUserTemplate](record=mean,sum);
+
+        @signal[numPktsUser*](type=long);
+        @statisticTemplate[numberPktsUserTemplate](record=mean,sum);
 
         @signal[servedUser*](type=long);
         @statisticTemplate[servedUserTemplate](record=sum);

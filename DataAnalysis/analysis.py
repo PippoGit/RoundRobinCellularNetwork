@@ -243,10 +243,10 @@ def scalar_stats(data, attr=None, users=range(0,NUM_USERS)):
         stats[attr] = data[data.name == attr].value.describe(percentiles=[.25, .50, .75, .95])
 
     # Aggregate dynamic stats (one signal per user):
-    stats['meanResponseTime'] = aggregate_users_signals(data, 'responseTime', users)
-    stats['meanThroughput']   = aggregate_users_signals(data, 'tptUser', users)
-    stats['meanCQI']          = aggregate_users_signals(data, 'CQI', users)
-    stats['meanNumberRBs']    = aggregate_users_signals(data, 'numberRBs', users) 
+    stats['meanResponseTime'] = aggregate_users_signals(data, 'mean:rspTimeUser', users)
+    stats['meanThroughput']   = aggregate_users_signals(data, 'mean:tptUser', users)
+    stats['meanCQI']          = aggregate_users_signals(data, 'mean:CQIUser', users)
+    stats['meanNumberRBs']    = aggregate_users_signals(data, 'mean:numRBUser', users) 
 
     # Transpose...
     stats = stats.T
@@ -674,4 +674,15 @@ def model_validation(lambda_val, cqis=["2", "13"], attribute="mean:CQIUser", ci=
     
     plt.title(attribute + " - " + LAMBDA_DESCRIPTION[lambda_val] + ", CI="+ str(ci))
     plt.show()
+    return data
+
+
+def load_data_test():
+    data = pd.read_csv(DATA_PATH + "modelv/cqi10l5.csv", 
+        usecols=['run', 'type', 'name', 'value'],
+        converters = {
+            'run'  : parse_run,   
+            'name' : parse_name_attr
+        }
+    )
     return data

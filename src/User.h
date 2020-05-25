@@ -21,8 +21,9 @@ class User : public cSimpleModule
         int  last_seen;
         long served_bytes;
         long number_rbs;
+        long number_pkts;
 
-        rb_inspection_result_t():last_seen(-1), served_bytes(0), number_rbs(0) {}
+        rb_inspection_result_t():last_seen(-1), served_bytes(0), number_rbs(0), number_pkts(0) {}
     };
 
     //Signals
@@ -30,6 +31,7 @@ class User : public cSimpleModule
     simsignal_t responseTime_s;
     simsignal_t CQI_s;
     simsignal_t numberRBs_s;
+    simsignal_t numberPkts_s;
     simsignal_t served_s;
 
     // private methods
