@@ -7,8 +7,9 @@ void Antenna::initialize()
 {
     //signals (Per il momento lascio i segnali...)
     throughput_s          = registerSignal("throughput");
-    numServedUser_s       = registerSignal("NumServedUser");
+    numServedUser_s       = registerSignal("numServedUser");
     numberRB_s            = registerSignal("numberRB");
+    numberPkt_s           = registerSignal("numberPkt");
 
 
     EV_DEBUG << "[ANTENNA-INITIALIZE] Initializing antenna..." << endl;
@@ -43,6 +44,7 @@ void Antenna::initRoundInformation()
     // THIS METHOD SHOULD RESET ALL THE INFORMATION THAT ARE VALID FOR A TIMESLOT
     numServedUsersPerTimeslot = 0;
     numSentBytesPerTimeslot   = 0;
+    numPacketsPerTimeslot     = 0;
 }
 
 
@@ -135,7 +137,10 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
             // SO the packet will become "pending"
             pendingPackets.push_back(p->getId());
             numSentBytesPerTimeslot += packetSize;
+            numPacketsPerTimeslot++;
+
             currentUser->incrementNumPendingPackets(); 
+
 
             // WHEN A PACKET INSERTED IN FRAME, START-FRAME-TIME
             p->setFrameTime(simTime());
@@ -217,17 +222,17 @@ void Antenna::downlinkPropagation()
 {
     if(frame == nullptr) return; // first iteration...
 
-
-    emit(numberRB_s, frame->getAllocatedRBs());
-    broadcastFrame(frame);
-
     EV_DEBUG << "[DOWNLINK] Broadcast propagation of the frame" << endl;
 
     if (simTime() > getSimulation()->getWarmupPeriod()) {
         EV_DEBUG << "[ANTENNA] Emitting signals for global statistics " << endl;
         emit(throughput_s,    numSentBytesPerTimeslot);   //Tpt defined as bytes sent per timeslot
         emit(numServedUser_s, numServedUsersPerTimeslot); // Tpt defined as num of served users per timeslot
+        emit(numberRB_s, frame->getAllocatedRBs());
+        emit(numberPkt_s, numPacketsPerTimeslot);
     }
+    
+    broadcastFrame(frame);
 }
 
 

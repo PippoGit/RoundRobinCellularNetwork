@@ -39,12 +39,14 @@ class Antenna : public cSimpleModule
 
     int  numServedUsersPerTimeslot;
     long numSentBytesPerTimeslot;
+    long numPacketsPerTimeslot;
 
 
     // Global Stats Signal
     simsignal_t numServedUser_s;
     simsignal_t throughput_s;
     simsignal_t numberRB_s;
+    simsignal_t numberPkt_s;
 
   protected:
     virtual void finish();
