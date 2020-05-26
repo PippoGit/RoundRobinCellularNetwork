@@ -27,9 +27,10 @@ public:
     virtual int getId();
     virtual int              CQIToBytes();
     virtual omnetpp::cQueue* getQueue();
-
+    virtual omnetpp::simsignal_t getNqSignal();
     virtual void setCQI(int cqi);
     virtual int  getCQI();
+
 
     virtual void serveUser();
     virtual bool isServed();

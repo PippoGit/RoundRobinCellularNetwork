@@ -13,7 +13,10 @@ UserInformation::UserInformation(int id)
     this->CQI = 0;
     this->numPendingPackets = 0;
 }
-
+omnetpp::simsignal_t UserInformation::getNqSignal()
+{
+    return nq_s;
+}
 int UserInformation::getId()
 {
     return id;

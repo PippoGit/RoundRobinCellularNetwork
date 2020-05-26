@@ -252,7 +252,7 @@ void Antenna::downlinkPropagation()
     // emit signals about users' queues
     for(auto u:users)
     {
-        emit(u->nq_s, u->getQueue()->size());
+        emit(u.getNqSignal(), u.getQueue()->getLength());
     }
 
     broadcastFrame(frame);
