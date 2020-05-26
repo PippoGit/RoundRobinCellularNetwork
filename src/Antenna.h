@@ -66,6 +66,8 @@ class Antenna : public cSimpleModule
     virtual void   broadcastFrame(Frame *f);
     virtual void   fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &from, std::vector<ResourceBlock>::iterator to);
     virtual Frame* vectorToFrame(std::vector<ResourceBlock> &v);
+
+    virtual simsignal_t createDynamicSignal(std::string prefix, std::string templateName, int userID);
 };
 
 #endif

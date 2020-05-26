@@ -17,6 +17,8 @@ private:
     int  servedBytes;
     bool served;
 
+    omnetpp::simsignal_t nq_s;
+
 
 public:
     UserInformation(int id);
@@ -40,6 +42,8 @@ public:
 
     virtual void incrementServedBytes(int bytes);
     virtual int  getServedBytes();
+
+    virtual void setNqSignal(omnetpp::simsignal_t nq_s);
 };
 
 #endif /* USERINFORMATION_H_ */

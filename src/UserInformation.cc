@@ -93,9 +93,13 @@ omnetpp::cQueue* UserInformation::getQueue()
 }
 
 
+void UserInformation::setNqSignal(omnetpp::simsignal_t nq_s)
+{
+    this->nq_s = nq_s;
+}
+
 UserInformation::~UserInformation()
 {
     // idk if this is ok (i kinda forgot most of the shit about c++)
     //delete this->FIFOQueue;
 }
-

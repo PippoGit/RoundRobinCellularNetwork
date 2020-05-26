@@ -12,11 +12,14 @@ simple Antenna
     	@statistic[numServedUser](source="numServedUser"; record=mean, sum, vector);       
        
        	@signal[numberRB](type=long);
-    	@statistic[numberRB](source="numberRB"; record=mean, sum,vector);  
+    	@statistic[numberRB](source="numberRB"; record=mean, sum, vector);  
 
        	@signal[numberPkt](type=long);
-    	@statistic[numberPkt](source="numberPkt"; record=mean, sum,vector);  
+    	@statistic[numberPkt](source="numberPkt"; record=mean, sum, vector);  
        
+        @signal[numQ*](type=long);
+        @statisticTemplate[numQTemplate](record=mean, sum, vector);
+
     gates:
  		// output out;   
  		input in[];

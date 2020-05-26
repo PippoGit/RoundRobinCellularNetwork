@@ -2,6 +2,21 @@
 
 Define_Module(Antenna);
 
+simsignal_t Antenna::createDynamicSignal(std::string prefix, std::string templateName, int userID)
+{
+    simsignal_t signal;
+    std::string signal_name;
+    std::stringstream sstream;
+
+    sstream << prefix << "User-" << userID;
+    signal_name = sstream.str();
+
+    signal = registerSignal(signal_name.c_str());
+
+    cProperty *statisticTemplate = getProperties()->get("statisticTemplate", templateName.c_str());
+    getEnvir()->addResultRecorders(this, signal, signal_name.c_str(), statisticTemplate);
+    return signal;
+}
 
 void Antenna::initialize()
 {
@@ -26,6 +41,8 @@ void Antenna::initialize()
     for(int i=0; i < NUM_USERS; i++)
     {
         UserInformation u(i);
+        u.setNqSignal(createDynamicSignal("numQ", "numQTemplate", i));
+
         users.push_back(u);
     }
 
@@ -232,6 +249,12 @@ void Antenna::downlinkPropagation()
         emit(numberPkt_s, numPacketsPerTimeslot);
     }
     
+    // emit signals about users' queues
+    for(auto u:users)
+    {
+        emit(u->nq_s, u->getQueue()->size());
+    }
+
     broadcastFrame(frame);
 }
 
