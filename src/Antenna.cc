@@ -171,6 +171,8 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
             EV_DEBUG << "[CREATE_FRAME RR] Inserting " << packetSize << "Bytes at " << (FRAME_SIZE) - (to - from) << endl;
             EV_DEBUG << "    REQUIRED RBs:   " << residualRequiredRBs << endl;
             EV_DEBUG << "    REMAINING RBs:  " << (to - from) << endl;
+            EV_DEBUG << "    REMAINING Bytes in RBs:  " << totalRemainingBytes + packetSize << endl;
+
 
             while(residualPacketSize > 0)
             {
@@ -206,6 +208,9 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
         else break;
     }
 
+    // at the end (we run out of RBs or queue of currentUser is empty)
+    // if current from is still available, so it will be
+    // used by next user
     // If the last RB was not filled (AND the frame is not full)
     if(!(from == to || from->isAvailable()))
         ++from; // the next user should start at from+1
@@ -220,7 +225,7 @@ void Antenna::createFrame()
     std::vector<ResourceBlock>::iterator currentRB = vframe.begin();
 
     initRoundInformation();
-
+    EV_DEBUG << " [ROUND ROBIN] The last user might be " << lastUser->getId() << endl;
     do
     {
         EV_DEBUG << "[CREATE_FRAME] Round Robin Starting Up..." <<endl;
@@ -229,6 +234,8 @@ void Antenna::createFrame()
         // Fill the frame with current user's queue and update currentRB index
         fillFrameWithCurrentUser(currentRB, vframe.end());
     } while(currentRB != vframe.end() && currentUser != lastUser );
+
+    EV_DEBUG << " [ROUND ROBIN] The last user was " << currentUser->getId() << endl;
 
     // 3) send the frame to all the users DURING NEXT TIMESLOT!
     this->frame = vectorToFrame(vframe);
@@ -240,6 +247,13 @@ void Antenna::downlinkPropagation()
     if(frame == nullptr) return; // first iteration...
 
     EV_DEBUG << "[DOWNLINK] Broadcast propagation of the frame" << endl;
+
+    EV_DEBUG << " *** DEBUG RR *** " << endl;
+    EV_DEBUG << " STATS ABOUT USER 0" << endl;
+    EV_DEBUG << " Dimensione coda: " << users[0].getQueue()->getLength() << endl;
+    EV_DEBUG << " Bytes per timeslot: " << numSentBytesPerTimeslot << endl;
+    EV_DEBUG << " Paccheti per timeslot: " << numPacketsPerTimeslot << endl;
+    EV_DEBUG << " *** DEBUG RR *** " << endl;
 
     if (simTime() > getSimulation()->getWarmupPeriod()) {
         EV_DEBUG << "[ANTENNA] Emitting signals for global statistics " << endl;
@@ -253,6 +267,7 @@ void Antenna::downlinkPropagation()
     for(auto u:users)
     {
         emit(u.getNqSignal(), u.getQueue()->getLength());
+        EV_DEBUG << "PROVA:    " << u.getQueue()->getLength() << endl;
     }
 
     broadcastFrame(frame);
