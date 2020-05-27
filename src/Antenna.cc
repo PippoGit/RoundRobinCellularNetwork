@@ -261,13 +261,13 @@ void Antenna::downlinkPropagation()
         emit(numServedUser_s, numServedUsersPerTimeslot); // Tpt defined as num of served users per timeslot
         emit(numberRB_s, frame->getAllocatedRBs());
         emit(numberPkt_s, numPacketsPerTimeslot);
-    }
-    
-    // emit signals about users' queues
-    for(auto u:users)
-    {
-        emit(u.getNqSignal(), u.getQueue()->getLength());
-        EV_DEBUG << "PROVA:    " << u.getQueue()->getLength() << endl;
+        
+        // emit signals about users' queues
+        for(auto u:users)
+        {
+            emit(u.getNqSignal(), u.getQueue()->getLength());
+            EV_DEBUG << "PROVA:    " << u.getQueue()->getLength() << endl;
+        }
     }
 
     broadcastFrame(frame);
