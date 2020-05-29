@@ -407,7 +407,7 @@ def multi_ecdf_sca(mode, lambdas, attribute, users=range(0, NUM_USERS), save=Fal
             ecdf_h = ECDF(ci95_hi)
 
             plt.step(ecdf.x, ecdf.y, label=LAMBDA_DESCRIPTION[l])
-            plt.fill_betweenx(ecdf.y, ecdf_l.x, ecdf_h.x, alpha=0.2)
+            plt.fill_betweenx(ecdf.y, ecdf_l.x, ecdf_h.x, alpha=0.2, step='post')
 
         else:
             selected_ds = data[data.name == attribute]
@@ -426,39 +426,8 @@ def multi_ecdf_sca(mode, lambdas, attribute, users=range(0, NUM_USERS), save=Fal
     return 
 
 
-def ecdf_sca(data, attribute, aggregate=False, users=range(0, NUM_USERS), save=False):
-    
-    if aggregate:
-        stats = data[data.name.isin([attribute + '-' + str(i) for i in users])].groupby('run').agg(['mean', 'count', 'std'])
-        
-        ci95_hi = []
-        ci95_lo = []
-
-        for i in stats.index:
-            m, c, s = stats.loc[i]
-            ci95_hi.append(m + 1.96*s/np.sqrt(c))
-            ci95_lo.append(m - 1.96*s/np.sqrt(c))
-
-        ecdf   = ECDF(stats.value['mean'])
-        ecdf_l = ECDF(ci95_lo)
-        ecdf_h = ECDF(ci95_hi)
-
-        plt.step(ecdf.x, ecdf.y)
-        plt.fill_betweenx(ecdf.y, ecdf_l.x, ecdf_h.x, alpha=0.2)
-
-
-    else:
-        selected_ds = data[data.name == attribute]
-        ecdf = ECDF(selected_ds.value.to_numpy())
-        plt.step(ecdf.x, ecdf.y)
-
-
-    plt.title("ECDF for " + attribute + (" (aggregated mean)" if aggregate else ""))
-    if save:
-        plt.savefig("ecdf_" + attribute + ".pdf", bbox_inches="tight")
-        plt.clf()
-    else:
-        plt.show()
+def ecdf_sca(mode, lambda_val, attribute, aggregate=False, users=range(0, NUM_USERS), save=False):
+    multi_ecdf_sca(mode, lambdas=[lambda_val], attribute=attribute, users=users,save=save,aggregate=aggregate)
     return
 
 
@@ -760,7 +729,7 @@ def main():
         tidy = tidy_scalar('uni', l)
         
         print("Scalar Stats: ")
-        print(scalar_stats(data))
+        print(scalar_stats(data).to_string())
         
         print("Checking IID for aggregated mean responseTime")
         check_iid_sca(data, 'mean:rspTimeUser', aggregate=True)
