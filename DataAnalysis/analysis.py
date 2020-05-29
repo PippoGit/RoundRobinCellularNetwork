@@ -2,11 +2,14 @@
 import pandas as pd
 import numpy  as np
 import csv
+import math
 
 # scipy whatever
 import scipy
 from scipy import stats
 import statsmodels.api as sm
+
+from statsmodels.distributions.empirical_distribution import ECDF
 
 # plotty stuff
 import matplotlib.pyplot as plt
@@ -35,6 +38,7 @@ MODE_DESCRIPTION = {
 
 LAMBDA_DESCRIPTION = {
     'l01' : "λ = 0.1ms",
+    'l02' : "λ = 0.2ms",
     'l09' : "λ = 0.9ms",
     'l1'  : "λ = 1.0ms",
     'l13' : "λ = 1.3ms",
@@ -52,6 +56,7 @@ MODE_PATH = {
 
 LAMBDA_PATH = {
     'l01' : "lambda01/",
+    'l02' : "lambda02/",
     'l09' : "lambda09/",
     'l1'  : "lambda1/",
     'l13' : "lambda13/",
@@ -243,10 +248,10 @@ def scalar_stats(data, attr=None, users=range(0,NUM_USERS)):
         stats[attr] = data[data.name == attr].value.describe(percentiles=[.25, .50, .75, .95])
 
     # Aggregate dynamic stats (one signal per user):
-    stats['meanResponseTime'] = aggregate_users_signals(data, 'mean:rspTimeUser', users)
-    stats['meanThroughput']   = aggregate_users_signals(data, 'mean:tptUser', users)
-    stats['meanCQI']          = aggregate_users_signals(data, 'mean:CQIUser', users)
-    stats['meanNumberRBs']    = aggregate_users_signals(data, 'mean:numRBUser', users) 
+    stats['aggrResponseTime'] = aggregate_users_signals(data, 'mean:rspTimeUser', users)
+    stats['aggrThroughput']   = aggregate_users_signals(data, 'mean:tptUser', users)
+    stats['aggrCQI']          = aggregate_users_signals(data, 'mean:CQIUser', users)
+    stats['aggrNumRBs']       = aggregate_users_signals(data, 'mean:numRBsUser', users) 
 
     # Transpose...
     stats = stats.T
@@ -383,15 +388,72 @@ def all_lorenz(mode, lambda_val, attribute, users=range(0, NUM_USERS), iteration
 ####################################################
 
 
+def multi_ecdf_sca(mode, lambdas, attribute, users=range(0, NUM_USERS), save=False, aggregate=False):
+    for l in lambdas:
+        data = scalar_parse(mode, l)
+    
+        if aggregate:
+            stats = data[data.name.isin([attribute + '-' + str(i) for i in users])].groupby('run').agg(['mean', 'count', 'std'])
+            ci95_hi = []
+            ci95_lo = []
+
+            for i in stats.index:
+                m, c, s = stats.loc[i]
+                ci95_hi.append(m + 1.96*s/np.sqrt(c))
+                ci95_lo.append(m - 1.96*s/np.sqrt(c))
+
+            ecdf   = ECDF(stats.value['mean'])
+            ecdf_l = ECDF(ci95_lo)
+            ecdf_h = ECDF(ci95_hi)
+
+            plt.step(ecdf.x, ecdf.y, label=LAMBDA_DESCRIPTION[l])
+            plt.fill_betweenx(ecdf.y, ecdf_l.x, ecdf_h.x, alpha=0.2)
+
+        else:
+            selected_ds = data[data.name == attribute]
+            ecdf = ECDF(selected_ds.value.to_numpy())
+            plt.step(ecdf.x, ecdf.y, label=LAMBDA_DESCRIPTION[l])
+
+    title = "ECDF for " + attribute + (" with " + str(len(users)) + " users with CI-95" if aggregate else "")
+    plt.title(title)
+    plt.legend()
+    
+    if save:
+        plt.savefig("ecdf_" + attribute + ".pdf", bbox_inches="tight")
+        plt.clf()
+    else:
+        plt.show()
+    return 
+
+
 def ecdf_sca(data, attribute, aggregate=False, users=range(0, NUM_USERS), save=False):
+    
     if aggregate:
-        selected_ds = data[data.name.isin([attribute + '-' + str(i) for i in users])].groupby('run').mean()
+        stats = data[data.name.isin([attribute + '-' + str(i) for i in users])].groupby('run').agg(['mean', 'count', 'std'])
+        
+        ci95_hi = []
+        ci95_lo = []
+
+        for i in stats.index:
+            m, c, s = stats.loc[i]
+            ci95_hi.append(m + 1.96*s/np.sqrt(c))
+            ci95_lo.append(m - 1.96*s/np.sqrt(c))
+
+        ecdf   = ECDF(stats.value['mean'])
+        ecdf_l = ECDF(ci95_lo)
+        ecdf_h = ECDF(ci95_hi)
+
+        plt.step(ecdf.x, ecdf.y)
+        plt.fill_betweenx(ecdf.y, ecdf_l.x, ecdf_h.x, alpha=0.2)
+
+
     else:
         selected_ds = data[data.name == attribute]
+        ecdf = ECDF(selected_ds.value.to_numpy())
+        plt.step(ecdf.x, ecdf.y)
 
-    plot_ecdf(selected_ds.value.to_numpy())
+
     plt.title("ECDF for " + attribute + (" (aggregated mean)" if aggregate else ""))
-    
     if save:
         plt.savefig("ecdf_" + attribute + ".pdf", bbox_inches="tight")
         plt.clf()
@@ -400,7 +462,7 @@ def ecdf_sca(data, attribute, aggregate=False, users=range(0, NUM_USERS), save=F
     return
 
 
-def plot_ecdf(data):
+def plot_ecdf(data, lambda_val=None):
     # sort the values
     sorted_data = np.sort(data)
     
@@ -409,7 +471,8 @@ def plot_ecdf(data):
     F_x = [(sorted_data[sorted_data <= x].size)/n for x in sorted_data]
 
     # plot the plot
-    plt.step(sorted_data, F_x)
+    # sns.lineplot(x=sorted_data, y=F_x, label=lambda_val)
+    plt.step(sorted_data, F_x, label=lambda_val)
     return
 
 
@@ -491,12 +554,7 @@ def check_iid(samples, attribute, aggregate=False, save=False):
 ####################################################
 ####################################################
 
-def main():
-    print("\n\nPerformance Evaluation - Python Data Analysis\n")
-    return 
 
-if __name__ == '__main__':
-    main()
 
 
 def plot_winavg_vectors(data, attribute, start=0, duration=100, iterations=[0], win=100):
@@ -686,3 +744,40 @@ def load_data_test():
         }
     )
     return data
+
+
+def main():
+    lambdas = ['l02', 'l1', 'l15']
+
+
+    print("\n\nPerformance Evaluation - Python Data Analysis\n")
+    print("*" * 30, "\n")
+
+    print("Testing UNIFORM" )
+    for l in lambdas:
+        print("LAMBDA VALUE: " + LAMBDA_DESCRIPTION[l])
+        data = scalar_parse('uni', l)
+        tidy = tidy_scalar('uni', l)
+        
+        print("Scalar Stats: ")
+        print(scalar_stats(data))
+        
+        print("Checking IID for aggregated mean responseTime")
+        check_iid_sca(data, 'mean:rspTimeUser', aggregate=True)
+
+        print("Checking IID for aggregated mean throughput")
+        check_iid_sca(data, 'mean:tptUser', aggregate=True)
+
+
+
+        input("Press enter to continue...")
+        
+
+    
+
+
+
+    return 
+
+if __name__ == '__main__':
+    main()
