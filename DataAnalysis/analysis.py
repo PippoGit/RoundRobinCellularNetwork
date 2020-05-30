@@ -14,7 +14,7 @@ from statsmodels.distributions.empirical_distribution import ECDF, _conf_set
 # plotty stuff
 import matplotlib.pyplot as plt
 import seaborn as sns
-sns.set(style="whitegrid")
+sns.set(style="darkgrid")
 
 
 # CONSTANTS
@@ -37,15 +37,16 @@ MODE_DESCRIPTION = {
 }
 
 LAMBDA_DESCRIPTION = {
-    'l01' : "λ = 0.1ms",
-    'l02' : "λ = 0.2ms",
-    'l09' : "λ = 0.9ms",
-    'l1'  : "λ = 1.0ms",
-    'l13' : "λ = 1.3ms",
-    'l14' : "λ = 1.4ms",
-    'l15' : "λ = 1.5ms",
-    'l2'  : "λ = 2.0ms",
-    'l5'  : "λ = 5.0ms"
+    'l01' : "1/λ = 0.1ms",
+    'l02' : "1/λ = 0.2ms",
+    'l07' : "1/λ = 0.7ms",
+    'l09' : "1/λ = 0.9ms",
+    'l1'  : "1/λ = 1.0ms",
+    'l13' : "1/λ = 1.3ms",
+    'l14' : "1/λ = 1.4ms",
+    'l15' : "1/λ = 1.5ms",
+    'l2'  : "1/λ = 2.0ms",
+    'l5'  : "1/λ = 5.0ms"
 }
 
 MODE_PATH = {
@@ -57,6 +58,7 @@ MODE_PATH = {
 LAMBDA_PATH = {
     'l01' : "lambda01/",
     'l02' : "lambda02/",
+    'l07' : "lambda07/",
     'l09' : "lambda09/",
     'l1'  : "lambda1/",
     'l13' : "lambda13/",
@@ -388,26 +390,40 @@ def all_lorenz(mode, lambda_val, attribute, users=range(0, NUM_USERS), iteration
 ####################################################
 
 
-def multi_ecdf_sca(mode, lambdas, attribute, users=range(0, NUM_USERS), save=False, aggregate=False):
+def multi_ecdf_sca(mode, lambdas, attribute, users=range(0, NUM_USERS), save=False, aggregate=False, only_mean=False):
     for l in lambdas:
         data = scalar_parse(mode, l)
     
         if aggregate:
-            stats = data[data.name.isin([attribute + '-' + str(i) for i in users])].groupby('run').agg(['mean', 'count', 'std'])
-            x = stats.value['mean'].to_numpy()
+            x = pd.DataFrame()
+            for u in users:
+                stats = data[data.name == attribute + '-' + str(u)]
+                x[str(u)] = stats.value.to_numpy()
+                
+                if only_mean is False:
+                    ecdf = ECDF(x[str(u)])
+                    sns.lineplot(x=ecdf.x, y=ecdf.y, drawstyle='steps-post', alpha=0.9)
+            
+            upper = x.max(axis=1)
+            lower = x.min(axis=1)
+            mean  = x.mean(axis=1)
+
+            ecdf   = ECDF(mean.to_numpy())
+            ecdf_l = ECDF(lower.to_numpy())
+            ecdf_u = ECDF(upper.to_numpy())
+
+            sns.lineplot(x=ecdf.x, y=ecdf.y,label="Mean " + LAMBDA_DESCRIPTION[l], drawstyle='steps-post')
+            # sns.lineplot(x=ecdf_l.x, y=ecdf_l.y, drawstyle='steps-post', c='r')
+            # sns.lineplot(x=ecdf_u.x, y=ecdf_u.y, drawstyle='steps-post', c='r')
 
         else:
             selected_ds = data[data.name == attribute]
             x = selected_ds.value.to_numpy()           
+            ecdf = ECDF(x)
+            lower, upper = _conf_set(ecdf.y)
+            plt.step(ecdf.x, ecdf.y, label=LAMBDA_DESCRIPTION[l], where='post')
 
-        ecdf = ECDF(x)
-
-        lower, upper = _conf_set(ecdf.y)
-        
-        plt.step(ecdf.x, ecdf.y, label=LAMBDA_DESCRIPTION[l], where='post')
-        plt.fill_between(ecdf.x, lower, upper, alpha=0.2, step='post')
-
-    title = "ECDF for " + attribute + (" with " + str(len(users)) + " users with CI-95" if aggregate else "")
+    title = "ECDF (" + MODE_DESCRIPTION[mode] + ") for " + attribute + (" with " + str(len(users)) + " users" if aggregate else "")
     plt.title(title)
     plt.legend()
     
@@ -559,10 +575,10 @@ def unibin_ci_plot(lambda_val, attr, bin_mode='bin', ci=95, save=False):
     bar2 = stats2['mean'][attr]
     
     error = np.array([bar1 - stats1['ci' + str(ci) + '_l'][attr], stats1['ci' + str(ci) + '_h'][attr] - bar1]).reshape(2,1)
-    plt.bar(MODE_DESCRIPTION['uni'], bar1, yerr=error, align='center', alpha=0.5, ecolor='black', capsize=7)
+    plt.bar(MODE_DESCRIPTION['uni'], bar1, yerr=error, align='center', ecolor='black', capsize=7)
     
     error = np.array([bar2 - stats2['ci' + str(ci) + '_l'][attr], stats2['ci' + str(ci) + '_h'][attr] - bar2]).reshape(2,1)
-    plt.bar(MODE_DESCRIPTION[bin_mode], bar2, yerr=error, align='center', alpha=0.5, ecolor='black', capsize=7)
+    plt.bar(MODE_DESCRIPTION[bin_mode], bar2, yerr=error, align='center', ecolor='black', capsize=7)
     
     # Show graphic
     plt.title("Comparison for " + attr + " and " + LAMBDA_DESCRIPTION[lambda_val])
