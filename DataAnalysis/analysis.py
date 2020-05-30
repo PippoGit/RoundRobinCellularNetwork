@@ -390,40 +390,41 @@ def all_lorenz(mode, lambda_val, attribute, users=range(0, NUM_USERS), iteration
 ####################################################
 
 
-def multi_ecdf_sca(mode, lambdas, attribute, users=range(0, NUM_USERS), save=False, aggregate=False, only_mean=False):
+def multi_ecdf_sca(mode, lambdas, attribute, users=range(0, NUM_USERS), save=False, show='single', hide_users=False, hide_mean=False):
     for l in lambdas:
         data = scalar_parse(mode, l)
     
-        if aggregate:
+        if show is 'aggregate':
             x = pd.DataFrame()
             for u in users:
                 stats = data[data.name == attribute + '-' + str(u)]
                 x[str(u)] = stats.value.to_numpy()
                 
-                if only_mean is False:
+                if hide_users is False:
                     ecdf = ECDF(x[str(u)])
-                    sns.lineplot(x=ecdf.x, y=ecdf.y, drawstyle='steps-post', alpha=0.9)
+                    sns.lineplot(x=ecdf.x, y=ecdf.y, drawstyle='steps-post', c='gray', alpha=0.7)
             
-            upper = x.max(axis=1)
-            lower = x.min(axis=1)
-            mean  = x.mean(axis=1)
+            if hide_mean is False:
+                mean  = x.mean(axis=1)
+                ecdf  = ECDF(mean.to_numpy())
+                sns.lineplot(x=ecdf.x, y=ecdf.y,label="AVG User " + LAMBDA_DESCRIPTION[l], drawstyle='steps-post')
+        
+        elif show is 'class':
+            x0 = data[data.name == attribute + '-0']
+            x1 = data[data.name == attribute + '-1']
 
-            ecdf   = ECDF(mean.to_numpy())
-            ecdf_l = ECDF(lower.to_numpy())
-            ecdf_u = ECDF(upper.to_numpy())
-
-            sns.lineplot(x=ecdf.x, y=ecdf.y,label="Mean " + LAMBDA_DESCRIPTION[l], drawstyle='steps-post')
-            # sns.lineplot(x=ecdf_l.x, y=ecdf_l.y, drawstyle='steps-post', c='r')
-            # sns.lineplot(x=ecdf_u.x, y=ecdf_u.y, drawstyle='steps-post', c='r')
+            ecdf0 = ECDF(x0.value)
+            ecdf1 = ECDF(x1.value)
+            sns.lineplot(x=ecdf0.x, y=ecdf0.y,label="Good User " + LAMBDA_DESCRIPTION[l], drawstyle='steps-post')
+            sns.lineplot(x=ecdf1.x, y=ecdf1.y,label="Bad User " + LAMBDA_DESCRIPTION[l], drawstyle='steps-post')
 
         else:
             selected_ds = data[data.name == attribute]
             x = selected_ds.value.to_numpy()           
             ecdf = ECDF(x)
-            lower, upper = _conf_set(ecdf.y)
             plt.step(ecdf.x, ecdf.y, label=LAMBDA_DESCRIPTION[l], where='post')
 
-    title = "ECDF (" + MODE_DESCRIPTION[mode] + ") for " + attribute + (" with " + str(len(users)) + " users" if aggregate else "")
+    title = "ECDF (" + MODE_DESCRIPTION[mode] + ") for " + attribute + (" with " + str(len(users)) + " users" if show is 'aggregate' else "")
     plt.title(title)
     plt.legend()
     
@@ -435,8 +436,8 @@ def multi_ecdf_sca(mode, lambdas, attribute, users=range(0, NUM_USERS), save=Fal
     return 
 
 
-def ecdf_sca(mode, lambda_val, attribute, aggregate=False, users=range(0, NUM_USERS), save=False):
-    multi_ecdf_sca(mode, lambdas=[lambda_val], attribute=attribute, users=users,save=save,aggregate=aggregate)
+def ecdf_sca(mode, lambda_val, attribute, show='single', users=range(0, NUM_USERS), save=False):
+    multi_ecdf_sca(mode, lambdas=[lambda_val], attribute=attribute, show=show, users=users,save=save)
     return
 
 
@@ -722,6 +723,32 @@ def load_data_test():
         }
     )
     return data
+
+
+
+def catplot(cat, y):
+    data = multi_tidy_scalar()
+    sns.catplot(x=cat, y=y, jitter=False, data=data)
+    plt.show()
+    return
+
+
+def correlation(x, y):
+    data = multi_tidy_scalar()
+    sns.scatterplot(x, y, data=data, hue='lambda', style='cqi_mode')
+    plt.show()
+    return
+
+
+def multi_tidy_scalar(lambdas={'uni': ['l02', 'l07', 'l1', 'l15'], 'bin': ['l07', 'l1', 'l15']}):
+    x = pd.DataFrame()
+    for k in lambdas.keys():
+        for l in lambdas[k]:
+            y = tidy_scalar(k, l)
+            y['lambda'] = l
+            y['cqi_mode'] = k
+            x = x.append(y, ignore_index=True)
+    return x
 
 
 def main():
