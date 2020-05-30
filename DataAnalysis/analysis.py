@@ -9,7 +9,7 @@ import scipy
 from scipy import stats
 import statsmodels.api as sm
 
-from statsmodels.distributions.empirical_distribution import ECDF
+from statsmodels.distributions.empirical_distribution import ECDF, _conf_set
 
 # plotty stuff
 import matplotlib.pyplot as plt
@@ -394,25 +394,18 @@ def multi_ecdf_sca(mode, lambdas, attribute, users=range(0, NUM_USERS), save=Fal
     
         if aggregate:
             stats = data[data.name.isin([attribute + '-' + str(i) for i in users])].groupby('run').agg(['mean', 'count', 'std'])
-            ci95_hi = []
-            ci95_lo = []
-
-            for i in stats.index:
-                m, c, s = stats.loc[i]
-                ci95_hi.append(m + 1.96*s/np.sqrt(c))
-                ci95_lo.append(m - 1.96*s/np.sqrt(c))
-
-            ecdf   = ECDF(stats.value['mean'])
-            ecdf_l = ECDF(ci95_lo)
-            ecdf_h = ECDF(ci95_hi)
-
-            plt.step(ecdf.x, ecdf.y, label=LAMBDA_DESCRIPTION[l])
-            plt.fill_betweenx(ecdf.y, ecdf_l.x, ecdf_h.x, alpha=0.2, step='post')
+            x = stats.value['mean'].to_numpy()
 
         else:
             selected_ds = data[data.name == attribute]
-            ecdf = ECDF(selected_ds.value.to_numpy())
-            plt.step(ecdf.x, ecdf.y, label=LAMBDA_DESCRIPTION[l])
+            x = selected_ds.value.to_numpy()           
+
+        ecdf = ECDF(x)
+
+        lower, upper = _conf_set(ecdf.y)
+        
+        plt.step(ecdf.x, ecdf.y, label=LAMBDA_DESCRIPTION[l], where='post')
+        plt.fill_between(ecdf.x, lower, upper, alpha=0.2, step='post')
 
     title = "ECDF for " + attribute + (" with " + str(len(users)) + " users with CI-95" if aggregate else "")
     plt.title(title)
