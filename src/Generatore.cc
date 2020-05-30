@@ -9,9 +9,10 @@ void Generatore::initialize()
 {
     userId = NEXT_USER_ID++;
     pt = new cMessage("timer");
-    double spikeDisp = par("spike_displacement");
+    //double spikeDisp = par("spike_displacement");
+    simtime_t lambda = getParentModule()->par("lambda");
 
-    scheduleAt(simTime() + (userId+1)*spikeDisp, pt);
+    scheduleAt(simTime() + exponential(lambda, RNG_INTERARRIVAL), pt);//scheduleAt(simTime() + (userId+1)*spikeDisp, pt);
 }
 
 
