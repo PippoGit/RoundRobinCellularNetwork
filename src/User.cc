@@ -33,7 +33,7 @@ void User::initialize()
     responseTime_s    = createDynamicSignal("rspTimeUser", "responseTimeUserTemplate");
     waitingTime_s     = createDynamicSignal("waitingTimeUser", "waitingTimeUserTemplate");
     serviceTime_s     = createDynamicSignal("serviceTimeUser", "serviceTimeUserTemplate");
-    turnWaitingTime_s = createDynamicSignal("turnWaitingTime", "turnWaitingTimeUserTemplate");
+    turnWaitingTime_s = createDynamicSignal("turnWaitingTimeUser", "turnWaitingTimeUserTemplate");
     CQI_s             = createDynamicSignal("CQIUser", "CQIUserTemplate");
     numberRBs_s       = createDynamicSignal("numRBsUser", "numberRBsUserTemplate");
     numberPkts_s      = createDynamicSignal("numPktsUser", "numberPktsUserTemplate");
