@@ -31,6 +31,8 @@ class User : public cSimpleModule
     simsignal_t responseTime_s;
     simsignal_t waitingTime_s;
     simsignal_t serviceTime_s;
+    simsignal_t turnWaitingTime_s;
+
     simsignal_t CQI_s;
     simsignal_t numberRBs_s;
     simsignal_t numberPkts_s;

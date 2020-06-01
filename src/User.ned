@@ -12,6 +12,9 @@ simple User
         @signal[rspTimeUser*](type=simtime_t);
         @statisticTemplate[responseTimeUserTemplate](record=mean,vector);
 
+        @signal[turnWaitingTimeUser*](type=simtime_t);
+        @statisticTemplate[turnWaitingTimeUserTemplate](record=mean, vector);
+
         @signal[waitingTimeUser*](type=simtime_t);
         @statisticTemplate[waitingTimeUserTemplate](record=mean, vector);
 

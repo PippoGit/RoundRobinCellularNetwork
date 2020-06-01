@@ -29,14 +29,15 @@ void User::initialize()
     timeslot = getParentModule()->par("timeslot");
 
     // Init signals
-    throughput_s   = createDynamicSignal("tptUser", "tptUserTemplate");
-    responseTime_s = createDynamicSignal("rspTimeUser", "responseTimeUserTemplate");
-    waitingTime_s  = createDynamicSignal("waitingTimeUser", "waitingTimeUserTemplate");
-    serviceTime_s  = createDynamicSignal("serviceTimeUser", "serviceTimeUserTemplate");
-    CQI_s          = createDynamicSignal("CQIUser", "CQIUserTemplate");
-    numberRBs_s    = createDynamicSignal("numRBsUser", "numberRBsUserTemplate");
-    numberPkts_s   = createDynamicSignal("numPktsUser", "numberPktsUserTemplate");
-    served_s       = createDynamicSignal("servedUser", "servedUserTemplate");
+    throughput_s      = createDynamicSignal("tptUser", "tptUserTemplate");
+    responseTime_s    = createDynamicSignal("rspTimeUser", "responseTimeUserTemplate");
+    waitingTime_s     = createDynamicSignal("waitingTimeUser", "waitingTimeUserTemplate");
+    serviceTime_s     = createDynamicSignal("serviceTimeUser", "serviceTimeUserTemplate");
+    turnWaitingTime_s = createDynamicSignal("turnWaitingTime", "turnWaitingTimeTemplate");
+    CQI_s             = createDynamicSignal("CQIUser", "CQIUserTemplate");
+    numberRBs_s       = createDynamicSignal("numRBsUser", "numberRBsUserTemplate");
+    numberPkts_s      = createDynamicSignal("numPktsUser", "numberPktsUserTemplate");
+    served_s          = createDynamicSignal("servedUser", "servedUserTemplate");
 
     scheduleAt(simTime(), pt);
 }
@@ -92,9 +93,10 @@ void User::inspectResourceBlock(const ResourceBlock &rb, rb_inspection_result_t 
             res.last_seen = frag.id;
             res.served_bytes += frag.packetSize;
             res.number_pkts++;
-            
+
             emit(responseTime_s, simTime() - frag.arrivalTime);
             emit(waitingTime_s, frag.servedTime - frag.arrivalTime);
+            emit(turnWaitingTime_s, frag.frameTime - frag.servedTime);
             emit(serviceTime_s, simTime() - frag.servedTime);
         }
     }
