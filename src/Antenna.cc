@@ -350,7 +350,20 @@ void Antenna::handleMessage(cMessage *msg)
 }
 
 
+void Antenna::flushQueues()
+{
+    for(auto u:users)
+    {
+        cQueue *q = u.getQueue();
+        while(!q->isEmpty()) {
+            Packet *p = (Packet *) q->pop();
+            delete p;
+        }
+    }
+}
+
 void Antenna::finish() {
+    flushQueues();
     // Delete stuff...
     cancelAndDelete(timer);
     cancelAndDelete(frame);

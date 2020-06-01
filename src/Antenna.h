@@ -52,6 +52,7 @@ class Antenna : public cSimpleModule
     virtual void finish();
 
     virtual void initialize();
+    virtual void flushQueues();
 
     virtual void handleTimer(cMessage *msg);
     virtual void handleMessage(cMessage *msg);
