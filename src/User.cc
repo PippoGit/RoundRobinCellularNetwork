@@ -31,6 +31,8 @@ void User::initialize()
     // Init signals
     throughput_s   = createDynamicSignal("tptUser", "tptUserTemplate");
     responseTime_s = createDynamicSignal("rspTimeUser", "responseTimeUserTemplate");
+    waitingTime_s  = createDynamicSignal("waitingTimeUser", "waitingTimeUserTemplate");
+    serviceTime_s  = createDynamicSignal("serviceTimeUser", "serviceTimeUserTemplate");
     CQI_s          = createDynamicSignal("CQIUser", "CQIUserTemplate");
     numberRBs_s    = createDynamicSignal("numRBsUser", "numberRBsUserTemplate");
     numberPkts_s   = createDynamicSignal("numPktsUser", "numberPktsUserTemplate");
@@ -82,14 +84,18 @@ void User::inspectResourceBlock(const ResourceBlock &rb, rb_inspection_result_t 
 
     for(auto frag : rb.getFragments())
     {
-        if (res.last_seen != frag.id) {
+        if (res.last_seen != frag.id) 
+        {
             EV_DEBUG << "[USER] Recording info about packet with id " << frag.id << endl;
 
             // Update Stats
             res.last_seen = frag.id;
             res.served_bytes += frag.packetSize;
             res.number_pkts++;
+            
             emit(responseTime_s, simTime() - frag.arrivalTime);
+            emit(waitingTime_s, frag.servedTime - frag.arrivalTime);
+            emit(serviceTime_s, simTime() - frag.servedTime);
         }
     }
 }

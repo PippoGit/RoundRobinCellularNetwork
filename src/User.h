@@ -29,6 +29,8 @@ class User : public cSimpleModule
     //Signals
     simsignal_t throughput_s;
     simsignal_t responseTime_s;
+    simsignal_t waitingTime_s;
+    simsignal_t serviceTime_s;
     simsignal_t CQI_s;
     simsignal_t numberRBs_s;
     simsignal_t numberPkts_s;

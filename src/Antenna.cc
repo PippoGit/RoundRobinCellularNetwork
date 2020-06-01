@@ -344,6 +344,7 @@ void Antenna::handleMessage(cMessage *msg)
             break;
 
         default:
+            EV_FATAL << "ERROR: UNKNOWN MSG KIND" << endl;
             throw "This should never happen.";
     }
 }
