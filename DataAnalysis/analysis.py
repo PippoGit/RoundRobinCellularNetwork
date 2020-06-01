@@ -18,9 +18,9 @@ sns.set(style="darkgrid")
 
 
 # CONSTANTS
-WARMUP_PERIOD  =      4   # not really used
+WARMUP_PERIOD  =      3
 NUM_ITERATIONS =    100
-SIM_TIME       =     30  # not really used 
+SIM_TIME       =     60  
 NUM_USERS      =     10
 TIMESLOT       =  0.001
 
@@ -108,7 +108,6 @@ def filter_data(data, attribute, start=0):
     return sel
 
 
-
 def plot_mean_vectors(data, attribute, start=0, duration=SIM_TIME, iterations=[0]):
     sel = data[data.name == attribute]    
     
@@ -124,6 +123,23 @@ def plot_mean_vectors(data, attribute, start=0, duration=SIM_TIME, iterations=[0
     return
 
 
+def scatterplot_vector(data, attribute, start=WARMUP_PERIOD, duration=SIM_TIME, iterations=range(0, NUM_ITERATIONS), users=range(0, NUM_USERS)):
+    sel = data[data.name.str.startswith(attribute + '-')]
+
+    for u in users:
+        usr = sel[sel.name == attribute + "-" + str(u)]
+        for i in iterations:
+            tmp = usr[(usr.run == i)]
+            for row in tmp.itertuples():
+                sns.scatterplot(row.time, row.value, label=str(u))
+    
+    # plot the data
+    plt.xlim(start, duration)
+    plt.show()    
+    return
+
+
+
 def plot_mean_vectors_user(data, prefix, start=0, duration=SIM_TIME, iterations=[0], users=range(0, NUM_USERS)):
     sel = data[data.name.str.startswith(prefix + '-')]
 
@@ -132,10 +148,11 @@ def plot_mean_vectors_user(data, prefix, start=0, duration=SIM_TIME, iterations=
         for i in iterations:
             tmp = usr[(usr.run == i)]
             for row in tmp.itertuples():
-                plt.plot(row.time, running_avg(row.value))
+                plt.plot(row.time, running_avg(row.value), label=str(u))
 
     # plot the data
     plt.xlim(start, duration)
+    plt.legend()
     plt.show()
     return
 
@@ -167,7 +184,10 @@ def parse_run(s):
 
 def vector_parse(cqi, pkt_lambda):
     path_csv = DATA_PATH + MODE_PATH[cqi] + LAMBDA_PATH[pkt_lambda] + CSV_PATH['vec']
-    
+    return vector_parse_csv(path_csv)
+
+
+def vector_parse_csv(path_csv):   
     # vec files are huge, try to reduce their size ASAP!!
     data = pd.read_csv(path_csv, 
         delimiter=",", quoting=csv.QUOTE_NONNUMERIC, encoding='utf-8',
@@ -189,9 +209,14 @@ def vector_parse(cqi, pkt_lambda):
     return data[['run', 'name', 'time', 'value']].sort_values(['run', 'name'])
 
 
+
 # Parse CSV file
 def scalar_parse(cqi, pkt_lambda):
     path_csv = DATA_PATH + MODE_PATH[cqi] + LAMBDA_PATH[pkt_lambda] + CSV_PATH['sca']
+    return scalar_parse_csv(path_csv)
+
+
+def scalar_parse_csv(path_csv):
     data = pd.read_csv(path_csv, 
         usecols=['run', 'type', 'name', 'value'],
         converters = {
@@ -205,7 +230,6 @@ def scalar_parse(cqi, pkt_lambda):
     data.reset_index(inplace=True, drop=True)
     
     # data['user'] = data.name.apply(lambda x: x.split['-'][1] if '-' in x else 'global')
-    
     return data[['run', 'name', 'value']].sort_values(['run', 'name'])
 
 
@@ -749,6 +773,20 @@ def multi_tidy_scalar(lambdas={'uni': ['l02', 'l07', 'l1', 'l15'], 'bin': ['l07'
             y['cqi_mode'] = k
             x = x.append(y, ignore_index=True)
     return x
+
+
+
+def test_ecdf_vect(data, attribute):
+    stats = data[data.name == attribute]
+    a = np.array([])
+
+    for row in stats.itertuples():
+        a = np.append(a, row.value)
+    
+    ecdf = ECDF(a)
+    sns.lineplot(x=ecdf.x, y=ecdf.y, drawstyle='steps-post')
+    plt.show()
+    return
 
 
 def main():
