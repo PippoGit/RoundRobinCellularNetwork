@@ -7,28 +7,28 @@ simple User
 
         // Experimenting with signals
         @signal[tptUser*](type=double);
-        @statisticTemplate[tptUserTemplate](record=mean,sum,vector);
+        @statisticTemplate[tptUserTemplate](record=stats, vector);
 
         @signal[rspTimeUser*](type=simtime_t);
-        @statisticTemplate[responseTimeUserTemplate](record=mean,vector);
+        @statisticTemplate[responseTimeUserTemplate](record=stats,vector);
 
         @signal[turnWaitingTimeUser*](type=simtime_t);
-        @statisticTemplate[turnWaitingTimeUserTemplate](record=mean, vector);
+        @statisticTemplate[turnWaitingTimeUserTemplate](record=stats, vector);
 
         @signal[waitingTimeUser*](type=simtime_t);
-        @statisticTemplate[waitingTimeUserTemplate](record=mean, vector);
+        @statisticTemplate[waitingTimeUserTemplate](record=stats, vector);
 
         @signal[serviceTimeUser*](type=simtime_t);
-        @statisticTemplate[serviceTimeUserTemplate](record=mean, vector);
+        @statisticTemplate[serviceTimeUserTemplate](record=stats, vector);
 
         @signal[CQIUser*](type=long);
-        @statisticTemplate[CQIUserTemplate](record=mean,sum);
+        @statisticTemplate[CQIUserTemplate](record=stats);
 
         @signal[numRBsUser*](type=long);
-        @statisticTemplate[numberRBsUserTemplate](record=mean,sum);
+        @statisticTemplate[numberRBsUserTemplate](record=stats);
 
         @signal[numPktsUser*](type=long);
-        @statisticTemplate[numberPktsUserTemplate](record=mean,sum);
+        @statisticTemplate[numberPktsUserTemplate](record=stats);
 
         @signal[servedUser*](type=long);
         @statisticTemplate[servedUserTemplate](record=sum);
