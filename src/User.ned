@@ -7,19 +7,19 @@ simple User
 
         // Experimenting with signals
         @signal[tptUser*](type=double);
-        @statisticTemplate[tptUserTemplate](record=stats, vector);
+        @statisticTemplate[tptUserTemplate](record=stats,histogram, vector);
 
         @signal[rspTimeUser*](type=simtime_t);
-        @statisticTemplate[responseTimeUserTemplate](record=stats,vector);
+        @statisticTemplate[responseTimeUserTemplate](record=stats,histogram,vector);
 
         @signal[turnWaitingTimeUser*](type=simtime_t);
-        @statisticTemplate[turnWaitingTimeUserTemplate](record=stats, vector);
+        @statisticTemplate[turnWaitingTimeUserTemplate](record=stats,histogram, vector);
 
         @signal[waitingTimeUser*](type=simtime_t);
-        @statisticTemplate[waitingTimeUserTemplate](record=stats, vector);
+        @statisticTemplate[waitingTimeUserTemplate](record=stats,histogram, vector);
 
         @signal[serviceTimeUser*](type=simtime_t);
-        @statisticTemplate[serviceTimeUserTemplate](record=stats, vector);
+        @statisticTemplate[serviceTimeUserTemplate](record=stats,histogram, vector);
 
         @signal[CQIUser*](type=long);
         @statisticTemplate[CQIUserTemplate](record=stats);

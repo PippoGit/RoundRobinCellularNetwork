@@ -6,19 +6,19 @@ simple Antenna
         	   	
     	//signals
         @signal[throughput](type=long);
-    	@statistic[throughput](source="throughput"; record=stats, vector);  
+    	@statistic[throughput](source="throughput"; record=sum, stats, vector);  
        
         @signal[numServedUser](type=long);
-    	@statistic[numServedUser](source="numServedUser"; record=stats, vector);       
+    	@statistic[numServedUser](source="numServedUser"; record=sum, stats, vector);       
        
        	@signal[numberRB](type=long);
-    	@statistic[numberRB](source="numberRB"; record=stats, vector);  
+    	@statistic[numberRB](source="numberRB"; record=sum, stats, vector);  
 
        	@signal[numberPkt](type=long);
-    	@statistic[numberPkt](source="numberPkt"; record=stats, vector);  
+    	@statistic[numberPkt](source="numberPkt"; record=sum, stats, vector);  
        
         @signal[numQ*](type=long);
-        @statisticTemplate[numQTemplate](record=stats, vector);
+        @statisticTemplate[numQTemplate](record=sum, stats, vector);
 
     gates:
  		// output out;   
