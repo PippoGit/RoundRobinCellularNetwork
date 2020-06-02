@@ -27,7 +27,7 @@
 #define MIN_SERVICE_DEMAND 1
 #define MAX_SERVICE_DEMAND 75
 
-#define MIN_USERS 1
+#define MIN_USERS 1 // not really used
 
 #define MSG_PKT_TIMER 0
 #define MSG_RR_TIMER  1
