@@ -86,6 +86,10 @@ np.random.seed(SEED_SAMPLING)
 #                       UTIL                       #
 ####################################################
 
+def data_path(cqi, pkt_lambda, kind='sca'):
+    return DATA_PATH + MODE_PATH[cqi] + LAMBDA_PATH[pkt_lambda] + CSV_PATH[kind]
+
+
 def running_avg(x):
     return np.cumsum(x) / np.arange(1, x.size + 1)
 
@@ -178,6 +182,10 @@ def parse_name_attr(s):
     return s.split(':')[1] + ':' + s.split(':')[0] if s else None
 
 
+def parse_name_attr_stats(s):
+    return s.split(':')[0] if s else None
+
+
 def parse_run(s):
     return int(s.split('-')[1]) if s else None
  
@@ -211,29 +219,35 @@ def vector_parse_csv(path_csv):
 
 
 # Parse CSV file
-def scalar_parse(cqi, pkt_lambda):
+def scalar_parse(cqi, pkt_lambda, stats=True):
     path_csv = DATA_PATH + MODE_PATH[cqi] + LAMBDA_PATH[pkt_lambda] + CSV_PATH['sca']
-    return scalar_parse_csv(path_csv)
+    return scalar_parse_csv(path_csv, stats=stats)
 
 
-def scalar_parse_csv(path_csv):
+def scalar_parse_csv(path_csv, stats=True):
+    cols = ['run', 'name', 'value'] + (['count', 'mean', 'stddev', 'max', 'min'] if stats else [])
     data = pd.read_csv(path_csv, 
-        usecols=['run', 'type', 'name', 'value'],
+        usecols=cols + ['type'],
         converters = {
             'run'  : parse_run,   
-            'name' : parse_name_attr
+            'name' : parse_name_attr_stats if stats else parse_name_attr
         }
     )
     
     # remove useless rows (first 100-ish rows)
-    data = data[data.type == 'scalar']
+    data = data[data.type.isin(['scalar', 'statistic'])]
     data.reset_index(inplace=True, drop=True)
     
+    data_cln = data[data.value.isna()]    
+    data_sum_sig = data[data.value.notna()]
+    data_sum_sig.name = 'sum:' + data_sum_sig['name'].astype(str)
+    result = pd.concat([data_cln, data_sum_sig])
+
     # data['user'] = data.name.apply(lambda x: x.split['-'][1] if '-' in x else 'global')
-    return data[['run', 'name', 'value']].sort_values(['run', 'name'])
+    return result[cols].sort_values(['run', 'name']).reset_index().drop(columns=['index'])
 
 
-def describe_attribute_sca(data, name, value='value'):
+def describe_attribute_sca(data, name, value='mean'):
     # print brief summary of attribute name (with percentiles and stuff)
     print(data[data.name == name][value].describe(percentiles=[.25, .50, .75, .95]))
     return
@@ -258,26 +272,26 @@ def vector_stats(data, group=False):
     return stats.groupby(['name']).mean().drop('run', axis=1) if group else stats
 
 
-
-def aggregate_users_signals(data, signal, users=range(0, NUM_USERS)):
+# TODO: FORSE VA RIFATTA, o si ignorano quegli aggregated stuff
+def aggregate_users_signals(data, signal, users=range(0, NUM_USERS), value='mean'):
     # meanResponseTime => dato il mean response time di un utente per ogni run, calcolo la media dei
     # mean response time dell'utente su tutte le run. E poi faccio la media per tutti gli utenti per
     # ottenere il mean responsetime medio per tutti gli utenti.
     return data[data.name.isin([signal + '-' + str(i) for i in users])].groupby('run').mean().describe(percentiles=[.25, .50, .75, .95])
 
-def scalar_stats(data, attr=None, users=range(0,NUM_USERS)):
+def scalar_stats(data, attr=None, users=range(0,NUM_USERS), value='mean'):
     stats = pd.DataFrame()
     attributes = data.name.unique() if attr is None else attr
 
     # STATS FOR EACH SIGNAL
     for attr in attributes: 
-        stats[attr] = data[data.name == attr].value.describe(percentiles=[.25, .50, .75, .95])
+        stats[attr] = data[data.name == attr][value].describe(percentiles=[.25, .50, .75, .95])
 
     # Aggregate dynamic stats (one signal per user):
-    stats['aggrResponseTime'] = aggregate_users_signals(data, 'mean:rspTimeUser', users)
-    stats['aggrThroughput']   = aggregate_users_signals(data, 'mean:tptUser', users)
-    stats['aggrCQI']          = aggregate_users_signals(data, 'mean:CQIUser', users)
-    stats['aggrNumRBs']       = aggregate_users_signals(data, 'mean:numRBsUser', users) 
+    # stats['aggrResponseTime'] = aggregate_users_signals(data, 'rspTimeUser', value=value, users=users)
+    # stats['aggrThroughput']   = aggregate_users_signals(data, 'tptUser', value=value, users=users)
+    # stats['aggrCQI']          = aggregate_users_signals(data, 'CQIUser', value=value, users=users)
+    # stats['aggrNumRBs']       = aggregate_users_signals(data, 'numRBsUser', value=value, users=users) 
 
     # Transpose...
     stats = stats.T
@@ -325,7 +339,7 @@ def gini(data, precision=3):
     return round((fair_area - area) / fair_area, precision)
 
 
-def lorenz_curve_sca(data, attribute, users=range(0, NUM_USERS), iterations=range(0, NUM_ITERATIONS)):
+def lorenz_curve_sca(data, attribute, users=range(0, NUM_USERS), iterations=range(0, NUM_ITERATIONS), value='mean'):
     # val = pd.DataFrame()
     sel = data[data.name.str.startswith(attribute + '-')]
     sel['user'] = sel.name.str.split('-', expand=True)[1].astype(int)
@@ -333,13 +347,13 @@ def lorenz_curve_sca(data, attribute, users=range(0, NUM_USERS), iterations=rang
 
     for r in iterations:
         tmp = sel[sel.run == r]
-        sorted_data['run-' + str(r)] = np.sort(tmp.value.values)
+        sorted_data['run-' + str(r)] = np.sort(tmp[value].values)
     
 
     # return sorted_data
     plot_lorenz_curve(sorted_data.mean(axis=1))
     plt.plot([0, 1], [0, 1], 'k', alpha=0.85)
-    plt.title("Lorenz Curve for " + attribute + " -  Gini: " + str(gini(sorted_data.mean(axis=1))))
+    plt.title("Lorenz Curve for " + value + " " + attribute + " -  Gini: " + str(gini(sorted_data.mean(axis=1))))
     plt.show()
     return
 
@@ -377,7 +391,7 @@ def plot_lorenz_curve(data, color=None, alpha=1):
     return
 
 
-def all_lorenz(mode, lambda_val, attribute, users=range(0, NUM_USERS), iterations=range(0, NUM_ITERATIONS), save=False):
+def all_lorenz(mode, lambda_val, attribute, users=range(0, NUM_USERS), iterations=range(0, NUM_ITERATIONS), save=False, value='mean'):
     data = scalar_parse(mode, lambda_val)
 
     # Plot the mean lorenz
@@ -387,14 +401,14 @@ def all_lorenz(mode, lambda_val, attribute, users=range(0, NUM_USERS), iteration
 
     for r in iterations:
         tmp = sel[sel.run == r]
-        sorted_data['run-' + str(r)] = np.sort(tmp.value.values)
+        sorted_data['run-' + str(r)] = np.sort(tmp[value].values)
         plot_lorenz_curve(sorted_data['run-' + str(r)], color='grey', alpha=0.25)
 
     # return sorted_data
     plot_lorenz_curve(sorted_data.mean(axis=1))
 
     plt.plot([0, 1], [0, 1], 'k', alpha=0.85)
-    plt.title(attribute + ": " + MODE_DESCRIPTION[mode] + ' and ' + LAMBDA_DESCRIPTION[lambda_val] + ' - Mean Gini: ' + str(gini(sorted_data.mean(axis=1))))
+    plt.title(value + " " + attribute + ": " + MODE_DESCRIPTION[mode] + ' and ' + LAMBDA_DESCRIPTION[lambda_val] + ' - Mean Gini: ' + str(gini(sorted_data.mean(axis=1))))
     
     if save:
         plt.savefig("lorenz_responseTime_" + mode + "_" + lambda_val + ".pdf")
@@ -414,7 +428,7 @@ def all_lorenz(mode, lambda_val, attribute, users=range(0, NUM_USERS), iteration
 ####################################################
 
 
-def multi_ecdf_sca(mode, lambdas, attribute, users=range(0, NUM_USERS), save=False, show='single', hide_users=False, hide_mean=False):
+def multi_ecdf_sca(mode, lambdas, attribute, users=range(0, NUM_USERS), save=False, show='single', hide_users=False, hide_mean=False, value='mean'):
     for l in lambdas:
         data = scalar_parse(mode, l)
     
@@ -422,7 +436,7 @@ def multi_ecdf_sca(mode, lambdas, attribute, users=range(0, NUM_USERS), save=Fal
             x = pd.DataFrame()
             for u in users:
                 stats = data[data.name == attribute + '-' + str(u)]
-                x[str(u)] = stats.value.to_numpy()
+                x[str(u)] = stats[value].to_numpy()
                 
                 if hide_users is False:
                     ecdf = ECDF(x[str(u)])
@@ -437,18 +451,18 @@ def multi_ecdf_sca(mode, lambdas, attribute, users=range(0, NUM_USERS), save=Fal
             x0 = data[data.name == attribute + '-0']
             x1 = data[data.name == attribute + '-1']
 
-            ecdf0 = ECDF(x0.value)
-            ecdf1 = ECDF(x1.value)
+            ecdf0 = ECDF(x0[value])
+            ecdf1 = ECDF(x1[value])
             sns.lineplot(x=ecdf0.x, y=ecdf0.y,label="Good User " + LAMBDA_DESCRIPTION[l], drawstyle='steps-post')
             sns.lineplot(x=ecdf1.x, y=ecdf1.y,label="Bad User " + LAMBDA_DESCRIPTION[l], drawstyle='steps-post')
 
         else:
             selected_ds = data[data.name == attribute]
-            x = selected_ds.value.to_numpy()           
+            x = selected_ds[value].to_numpy()           
             ecdf = ECDF(x)
             plt.step(ecdf.x, ecdf.y, label=LAMBDA_DESCRIPTION[l], where='post')
 
-    title = "ECDF (" + MODE_DESCRIPTION[mode] + ") for " + attribute + (" with " + str(len(users)) + " users" if show is 'aggregate' else "")
+    title = "ECDF (" + MODE_DESCRIPTION[mode] + ") for " + value + " " +  attribute + (" with " + str(len(users)) + " users" if show is 'aggregate' else "")
     plt.title(title)
     plt.legend()
     
@@ -460,8 +474,8 @@ def multi_ecdf_sca(mode, lambdas, attribute, users=range(0, NUM_USERS), save=Fal
     return 
 
 
-def ecdf_sca(mode, lambda_val, attribute, show='single', users=range(0, NUM_USERS), save=False):
-    multi_ecdf_sca(mode, lambdas=[lambda_val], attribute=attribute, show=show, users=users,save=save)
+def ecdf_sca(mode, lambda_val, attribute, value='mean', show='single', users=range(0, NUM_USERS), save=False):
+    multi_ecdf_sca(mode, lambdas=[lambda_val], attribute=attribute, show=show, users=users,save=save, value=value)
     return
 
 
@@ -502,11 +516,11 @@ def plot_ecdf_vec(data, attribute, iteration=0, sample_size=1000, replace=False)
 #                      IID                         #
 ####################################################
 
-def check_iid_sca(data, attribute, aggregate=False, users=range(0, NUM_USERS), save=False):
+def check_iid_sca(data, attribute, aggregate=False, users=range(0, NUM_USERS), save=False, value='mean'):
     if aggregate:
         samples = data[data.name.isin([attribute + '-' + str(i) for i in users])].groupby('run').mean()
     else:
-        samples = data[data.name == attribute].value
+        samples = data[data.name == attribute][value]
     check_iid(samples, attribute, aggregate=aggregate, save=save)
     return
 
@@ -617,23 +631,23 @@ def unibin_ci_plot(lambda_val, attr, bin_mode='bin', ci=95, save=False):
 
 def plot_to_img(mode, lambdas):
     for l in lambdas:
-        all_lorenz(mode, l, 'mean:rspTimeUser', save=True)
+        all_lorenz(mode, l, 'rspTimeUser', value='mean', save=True)
     return
 
 
 # this function works only with "nameSignal-user" kind of statistics 
 # (responseTime-#numuser or tptUser-#numuser)
-def histo_users(mode, lambda_val, attribute, ci=95, users=range(0, NUM_USERS), save=False):
+def histo_users(mode, lambda_val, attribute, ci=95, users=range(0, NUM_USERS), save=False, value='mean'):
     stats = scalar_stats(scalar_parse(mode, lambda_val))
 
     for u in users:
         attr =  attribute + '-' + str(u)
-        bar = stats['mean'][attr]
+        bar = stats[value][attr]
         error = np.array([bar - stats['ci' + str(ci) + '_l'][attr], stats['ci' + str(ci) + '_h'][attr] - bar]).reshape(2,1)
         plt.bar('User '+ str(u), bar, yerr=error, align='center', alpha=0.95, ecolor='k', capsize=7)
 
     # Show graphic
-    plt.title(attribute + ": " + MODE_DESCRIPTION[mode] + " and " + LAMBDA_DESCRIPTION[lambda_val])
+    plt.title(value + " " + attribute + ": " + MODE_DESCRIPTION[mode] + " and " + LAMBDA_DESCRIPTION[lambda_val])
     if save:
         plt.savefig("histousers_" + attribute + "_" + mode + "_" + lambda_val + ".pdf", bbox_inches="tight")
         plt.clf()
@@ -693,11 +707,9 @@ def class_plot(mode, lambda_val, y_attr='mean:rspTimeUser'):
     return
 
 
-
-def tidy_scalar(mode, lambda_val):
+def tidy_scalar_csv(path_to_csv):
     tidy_data = pd.DataFrame()
-    
-    data = scalar_parse(mode, lambda_val)
+    data = scalar_parse_csv(path_to_csv)
     sel = data[data.name.str.contains('-')].reset_index().drop('index', axis=1)
     sel[['attr', 'user']] = sel.name.str.split('-', expand=True)
     sel = sel.drop('name', axis=1)
@@ -705,10 +717,15 @@ def tidy_scalar(mode, lambda_val):
     tidy_data['user']  = 'user-' + sel[sel.attr == sel.attr.iloc[0]].user.values # any dynsignal will be fine, because all of them have 100 instances
     tidy_data['run']   = sel[sel.attr == sel.attr.iloc[0]].run.values # same
     for attr_name in sel.attr.unique():
-        tidy_data[attr_name] = sel[sel.attr == attr_name].value.values
+        for val in ['value', 'count', 'mean', 'min', 'max', 'stddev']:
+            tidy_data[attr_name + ':' + val] = sel[sel.attr == attr_name][val].values
 
-    tidy_data['class'] = tidy_data['mean:CQIUser'].apply(lambda x: CQI_to_class(x))
+    tidy_data['class'] = tidy_data['CQIUser:mean'].apply(lambda x: CQI_to_class(x))
     return tidy_data
+
+
+def tidy_scalar(mode, lambda_val):
+    return tidy_scalar_csv(data_path(mode, lambda_val))
 
 
 def model_validation(lambda_val, cqis=["2", "13"], attribute="mean:CQIUser", ci=95):
@@ -750,9 +767,9 @@ def load_data_test():
 
 
 
-def catplot(cat, y):
+def catplot(cat, y, mode='uni'):
     data = multi_tidy_scalar()
-    sns.catplot(x=cat, y=y, jitter=False, data=data)
+    sns.catplot(x=cat, y=y, jitter=False, data=data[data.cqi_mode == mode])
     plt.show()
     return
 
