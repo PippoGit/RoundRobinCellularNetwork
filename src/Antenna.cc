@@ -269,20 +269,11 @@ void Antenna::downlinkPropagation()
 
     if (simTime() > getSimulation()->getWarmupPeriod()) {
         EV_DEBUG << "[ANTENNA] Emitting signals for global statistics " << endl;
-
         emit(throughputAntenna_s, (double) numSentBytesPerTimeslot/timeslot);   //Tpt defined as bytes sent per timeslot
         emit(numServedUser_s, numServedUsersPerTimeslot); // Tpt defined as num of served users per timeslot
         emit(numberRBAntenna_s, frame->getAllocatedRBs());
         emit(numberPktAntenna_s, numPacketsPerTimeslot);
         
-        // emit signals about users' queues
-        //for(auto u:users)
-        //{
-        // //   emit(u.getNqSignal(), u.getQueue()->getLength());
-       //     EV_DEBUG << "PROVA:    " << u.getQueue()->getLength() << endl;
-        //}
-
-
         for(auto ta : in_frame_arrivalTime)
         {
             emit(responseTimeAntenna_s,  simTime() - ta);
