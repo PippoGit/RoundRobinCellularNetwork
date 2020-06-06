@@ -163,7 +163,7 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
 
             // WHEN A PACKET INSERTED IN FRAME, START-FRAME-TIME
             p->setFrameTime(simTime());
-            in_frame_arrivalTime.push_back(simTime());
+            in_frame_arrivalTime.push_back(p->getArrivalTime());
 
             // The packet will be put somewhere in the frame, so decrease the number
             // of bytes available in the frame (for this user)
