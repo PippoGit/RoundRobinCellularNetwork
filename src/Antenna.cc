@@ -20,12 +20,14 @@ simsignal_t Antenna::createDynamicSignal(std::string prefix, std::string templat
 
 void Antenna::initialize()
 {
-    //signals (Per il momento lascio i segnali...)
-    throughput_s          = registerSignal("throughput");
-    numServedUser_s       = registerSignal("numServedUser");
-    numberRB_s            = registerSignal("numberRB");
-    numberPkt_s           = registerSignal("numberPkt");
+    timeslot = getParentModule()->par("timeslot");
 
+    //signals (Per il momento lascio i segnali...)
+    throughputAntenna_s   = registerSignal("throughput");
+    numServedUser_s       = registerSignal("numServedUser");
+    numberRBAntenna_s     = registerSignal("numberRB");
+    numberPktAntenna_s    = registerSignal("numberPkt");
+    responseTimeAntenna_s = registerSignal("responseTime");
 
     EV_DEBUG << "[ANTENNA-INITIALIZE] Initializing antenna..." << endl;
     NUM_USERS = this->getParentModule()->par("nUsers");
@@ -161,6 +163,7 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
 
             // WHEN A PACKET INSERTED IN FRAME, START-FRAME-TIME
             p->setFrameTime(simTime());
+            in_frame_arrivalTime.push_back(simTime());
 
             // The packet will be put somewhere in the frame, so decrease the number
             // of bytes available in the frame (for this user)
@@ -257,10 +260,11 @@ void Antenna::downlinkPropagation()
 
     if (simTime() > getSimulation()->getWarmupPeriod()) {
         EV_DEBUG << "[ANTENNA] Emitting signals for global statistics " << endl;
-        emit(throughput_s,    numSentBytesPerTimeslot);   //Tpt defined as bytes sent per timeslot
+
+        emit(throughputAntenna_s, (double) numSentBytesPerTimeslot/timeslot);   //Tpt defined as bytes sent per timeslot
         emit(numServedUser_s, numServedUsersPerTimeslot); // Tpt defined as num of served users per timeslot
-        emit(numberRB_s, frame->getAllocatedRBs());
-        emit(numberPkt_s, numPacketsPerTimeslot);
+        emit(numberRBAntenna_s, frame->getAllocatedRBs());
+        emit(numberPktAntenna_s, numPacketsPerTimeslot);
         
         // emit signals about users' queues
         for(auto u:users)
@@ -268,9 +272,16 @@ void Antenna::downlinkPropagation()
             emit(u.getNqSignal(), u.getQueue()->getLength());
             EV_DEBUG << "PROVA:    " << u.getQueue()->getLength() << endl;
         }
+
+        for(auto ta : in_frame_arrivalTime)
+        {
+            emit(responseTimeAntenna_s,  simTime() - ta);
+        }
     }
 
+
     broadcastFrame(frame);
+    in_frame_arrivalTime.clear();
 }
 
 

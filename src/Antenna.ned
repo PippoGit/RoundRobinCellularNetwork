@@ -7,6 +7,9 @@ simple Antenna
     	//signals
         @signal[throughput](type=long);
     	@statistic[throughput](source="throughput"; record=sum, stats, vector);  
+
+        @signal[responseTime](type=simtime_t);
+    	@statistic[responseTime](source="responseTime"; record=stats, vector);  
        
         @signal[numServedUser](type=long);
     	@statistic[numServedUser](source="numServedUser"; record=sum, stats, vector);       

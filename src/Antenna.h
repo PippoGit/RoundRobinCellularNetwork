@@ -28,6 +28,7 @@ class Antenna : public cSimpleModule
     int NUM_USERS;
     std::vector<UserInformation> users;
     cMessage *timer;
+    double timeslot;
 
     // stuff for roundrobin
     std::vector<UserInformation>::iterator currentUser;
@@ -44,9 +45,12 @@ class Antenna : public cSimpleModule
 
     // Global Stats Signal
     simsignal_t numServedUser_s;
-    simsignal_t throughput_s;
-    simsignal_t numberRB_s;
-    simsignal_t numberPkt_s;
+    simsignal_t throughputAntenna_s;
+    simsignal_t numberRBAntenna_s;
+    simsignal_t numberPktAntenna_s;
+    simsignal_t responseTimeAntenna_s;
+
+    std::vector<simtime_t> in_frame_arrivalTime;
 
   protected:
     virtual void finish();
