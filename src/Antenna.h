@@ -35,13 +35,10 @@ class Antenna : public cSimpleModule
     Frame *frame;
 
     // Information that are useful for performance evaluation
-    std::vector<long> pendingPackets; // a list of the packet being in the current frame
-    std::map<long, Antenna::packet_info_t> packetsInformation;
-
     int  numServedUsersPerTimeslot;
     long numSentBytesPerTimeslot;
     long numPacketsPerTimeslot;
-
+    int  numInServicePkts;
 
     // Global Stats Signal
     simsignal_t numServedUser_s;
@@ -49,6 +46,7 @@ class Antenna : public cSimpleModule
     simsignal_t numberRBAntenna_s;
     simsignal_t numberPktAntenna_s;
     simsignal_t responseTimeAntenna_s;
+    simsignal_t numberPktInService_s;
 
     std::vector<simtime_t> in_frame_arrivalTime;
 
