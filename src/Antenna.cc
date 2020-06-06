@@ -210,7 +210,11 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
             delete p; // also delete the packet!
             
             // that packet now is IN service
-            emit(numberPktInService_s, ++numInServicePkts);
+            ++numInServicePkts;
+            if (simTime() > getSimulation()->getWarmupPeriod()) {
+                emit(currentUser->getNqSignal(), currentUser->getQueue()->getLength());
+                emit(numberPktInService_s, numInServicePkts);
+            }
 
         }
         else break;
@@ -272,11 +276,12 @@ void Antenna::downlinkPropagation()
         emit(numberPktAntenna_s, numPacketsPerTimeslot);
         
         // emit signals about users' queues
-        for(auto u:users)
-        {
-            emit(u.getNqSignal(), u.getQueue()->getLength());
-            EV_DEBUG << "PROVA:    " << u.getQueue()->getLength() << endl;
-        }
+        //for(auto u:users)
+        //{
+        // //   emit(u.getNqSignal(), u.getQueue()->getLength());
+       //     EV_DEBUG << "PROVA:    " << u.getQueue()->getLength() << endl;
+        //}
+
 
         for(auto ta : in_frame_arrivalTime)
         {
