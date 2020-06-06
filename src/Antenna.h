@@ -35,6 +35,8 @@ class Antenna : public cSimpleModule
     Frame *frame;
 
     // Information that are useful for performance evaluation
+    std::map<long, Antenna::packet_info_t> packetsInformation;
+
     int  numServedUsersPerTimeslot;
     long numSentBytesPerTimeslot;
     long numPacketsPerTimeslot;

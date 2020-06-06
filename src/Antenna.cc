@@ -210,7 +210,7 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
             delete p; // also delete the packet!
             
             // that packet now is IN service
-            emit(numberPktInService_s, ++numInServicePkts)
+            emit(numberPktInService_s, ++numInServicePkts);
 
         }
         else break;
