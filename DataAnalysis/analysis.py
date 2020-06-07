@@ -225,7 +225,7 @@ def scalar_parse(cqi, pkt_lambda, stats=True):
 
 
 def scalar_parse_csv(path_csv, stats=True):
-    cols = ['run', 'name', 'value'] + (['count', 'mean', 'stddev', 'max', 'min'] if stats else [])
+    cols = ['run', 'name'] + (['count', 'mean', 'stddev', 'max', 'min'] if stats else ['value'])
     data = pd.read_csv(path_csv, 
         usecols=cols + ['type'],
         converters = {
@@ -238,13 +238,15 @@ def scalar_parse_csv(path_csv, stats=True):
     data = data[data.type.isin(['scalar', 'statistic'])]
     data.reset_index(inplace=True, drop=True)
     
-    data_cln = data[data.value.isna()]    
-    data_sum_sig = data[data.value.notna()]
-    data_sum_sig.name = 'sum:' + data_sum_sig['name'].astype(str)
-    result = pd.concat([data_cln, data_sum_sig])
+    # data_cln = data[data.value.isna()]    
+    # data_sum_sig = data[data.value.notna()]
+    # data_sum_sig.name = 'sum:' + data_sum_sig['name'].astype(str)
+    # result = pd.concat([data_cln, data_sum_sig])
+
+    data['sum'] = data['count']*data['mean']
 
     # data['user'] = data.name.apply(lambda x: x.split['-'][1] if '-' in x else 'global')
-    return result[cols].sort_values(['run', 'name']).reset_index().drop(columns=['index'])
+    return data[cols + ['sum']].sort_values(['run', 'name']).reset_index().drop(columns=['index'])
 
 
 def describe_attribute_sca(data, name, value='mean'):

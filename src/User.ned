@@ -31,7 +31,7 @@ simple User
         @statisticTemplate[numberPktsUserTemplate](record=stats);
 
         @signal[servedUser*](type=long);
-        @statisticTemplate[servedUserTemplate](record=sum);
+        @statisticTemplate[servedUserTemplate](record=stats);
 
     gates:
         input in;
