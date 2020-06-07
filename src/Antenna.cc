@@ -212,10 +212,8 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
             // that packet now is IN service
             ++numInServicePkts;
             if (simTime() > getSimulation()->getWarmupPeriod()) {
-                emit(currentUser->getNqSignal(), currentUser->getQueue()->getLength());
                 emit(numberPktInService_s, numInServicePkts);
             }
-
         }
         else break;
     }
@@ -245,6 +243,12 @@ void Antenna::createFrame()
 
         // Fill the frame with current user's queue and update currentRB index
         fillFrameWithCurrentUser(currentRB, vframe.end());
+
+        // emit new queue state
+        if (simTime() > getSimulation()->getWarmupPeriod()) {
+            emit(currentUser->getNqSignal(), currentUser->getQueue()->getLength());
+        }
+
     } while(currentRB != vframe.end() && currentUser != lastUser );
 
     EV_DEBUG << " [ROUND ROBIN] The last user was " << currentUser->getId() << endl;
