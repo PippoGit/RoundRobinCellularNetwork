@@ -94,9 +94,9 @@ void User::inspectResourceBlock(const ResourceBlock &rb, rb_inspection_result_t 
             res.number_pkts++;
 
             emit(responseTime_s, simTime() - frag.arrivalTime);
-            emit(waitingTime_s, frag.servedTime - frag.arrivalTime);
-            emit(turnWaitingTime_s, frag.frameTime - frag.servedTime);
-            emit(serviceTime_s, simTime() - frag.servedTime);
+            emit(waitingTime_s, frag.servedTime - frag.arrivalTime);    // period between arrival time and the moment when the packet is considered for the first time
+            emit(turnWaitingTime_s, frag.frameTime - frag.servedTime);  // period between when it was considered for the first time and when it was put in a frame
+            emit(serviceTime_s, simTime() - frag.frameTime);            // period between when it was put in the frame and when it was propagated (should be always 1ms)
         }
     }
 }
