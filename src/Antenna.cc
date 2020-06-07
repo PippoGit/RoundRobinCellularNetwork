@@ -28,7 +28,6 @@ void Antenna::initialize()
     numberRBAntenna_s     = registerSignal("numberRB");
     numberPktAntenna_s    = registerSignal("numberPkt");
     responseTimeAntenna_s = registerSignal("responseTime");
-    numberPktInService_s  = registerSignal("numberPktInService");
 
     EV_DEBUG << "[ANTENNA-INITIALIZE] Initializing antenna..." << endl;
     NUM_USERS = this->getParentModule()->par("nUsers");
@@ -65,7 +64,6 @@ void Antenna::initRoundInformation()
     numServedUsersPerTimeslot = 0;
     numSentBytesPerTimeslot   = 0;
     numPacketsPerTimeslot     = 0;
-    numInServicePkts          = 0;
 }
 
 
@@ -208,12 +206,6 @@ void Antenna::fillFrameWithCurrentUser(std::vector<ResourceBlock>::iterator &fro
 
             queue->remove(p);
             delete p; // also delete the packet!
-            
-            // that packet now is IN service
-            ++numInServicePkts;
-            if (simTime() > getSimulation()->getWarmupPeriod()) {
-                emit(numberPktInService_s, numInServicePkts);
-            }
         }
         else break;
     }

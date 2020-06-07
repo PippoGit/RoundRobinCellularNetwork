@@ -19,9 +19,6 @@ simple Antenna
 
        	@signal[numberPkt](type=long);
     	@statistic[numberPkt](source="numberPkt"; record=stats, vector);  
-		
-		@signal[numberPktInService](type=long);
-    	@statistic[numberPktInService](source="numberPktInService"; record=stats, vector);  
        
         @signal[numQ*](type=long);
         @statisticTemplate[numQTemplate](record=stats, vector);
