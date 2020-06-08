@@ -44,9 +44,11 @@ void User::initialize()
 void User::sendCQI(){
     bool isBinomial = getParentModule()->par("isBinomial");
     double successProbGroup1 = getParentModule()->par("successProbGroup1");
-    // double successProbGroup2 = getParentModule()->par("successProbGroup2");
+    //double successProbGroup2 = getParentModule()->par("successProbGroup2");
     double successProbGroup3 = getParentModule()->par("successProbGroup3");
 
+    //double p = (userID==2||userID==5||userID==8)? successProbGroup1: (userID==1||userID==4||userID==7||userID==9)? successProbGroup2: successProbGroup3; //caso 3 prob
+    //double p =   (userID==2)?successProbGroup3:successProbGroup1;
     double p =  (userID % 2 == 0) ? successProbGroup3: successProbGroup1;
     int cqi  = (isBinomial) ? binomial(BINOMIAL_N, p,RNG_CQI_BIN)+1 : intuniform(MIN_CQI, MAX_CQI, RNG_CQI_UNI);
 
@@ -122,7 +124,7 @@ void User::handleFrame(Frame* f)
 
     }
 
-    // delete del frame ora che � stato consumato
+    // delete del frame ora che ï¿½ stato consumato
     delete(f);
 }
 
