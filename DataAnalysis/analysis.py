@@ -8,8 +8,12 @@ import math
 import scipy
 from scipy import stats
 import statsmodels.api as sm
+from statsmodels.stats.anova import anova_lm
 
 from statsmodels.distributions.empirical_distribution import ECDF, _conf_set
+
+import uncertainties
+from uncertainties import unumpy
 
 # plotty stuff
 import matplotlib.pyplot as plt
@@ -75,6 +79,7 @@ CSV_PATH = {
 
 CQI_CLASSES = [
     'LOW',
+    'MID',
     'HIGH'
 ]
 
@@ -226,6 +231,8 @@ def scalar_parse(cqi, pkt_lambda, stats=True):
 
 def scalar_parse_csv(path_csv, stats=True):
     cols = ['run', 'name'] + (['count', 'mean', 'stddev', 'max', 'min'] if stats else ['value'])
+    add_cols = ['sum', 'ci95', 'ci99']
+
     data = pd.read_csv(path_csv, 
         usecols=cols + ['type'],
         converters = {
@@ -235,7 +242,7 @@ def scalar_parse_csv(path_csv, stats=True):
     )
     
     # remove useless rows (first 100-ish rows)
-    data = data[data.type.isin(['scalar', 'statistic'])]
+    data = data[data.type == 'statistic']
     data.reset_index(inplace=True, drop=True)
     
     # data_cln = data[data.value.isna()]    
@@ -243,10 +250,12 @@ def scalar_parse_csv(path_csv, stats=True):
     # data_sum_sig.name = 'sum:' + data_sum_sig['name'].astype(str)
     # result = pd.concat([data_cln, data_sum_sig])
 
-    data['sum'] = data['count']*data['mean']
+    data['sum']  = data['count']*data['mean']
+    data['ci95'] = 1.96*(data['stddev']/np.sqrt(data['count']))
+    data['ci99'] = 2.58*(data['stddev']/np.sqrt(data['count']))
 
     # data['user'] = data.name.apply(lambda x: x.split['-'][1] if '-' in x else 'global')
-    return data[cols + ['sum']].sort_values(['run', 'name']).reset_index().drop(columns=['index'])
+    return data[cols + add_cols].sort_values(['run', 'name']).reset_index().drop(columns=['index'])
 
 
 def describe_attribute_sca(data, name, value='mean'):
@@ -639,22 +648,17 @@ def plot_to_img(mode, lambdas):
 
 # this function works only with "nameSignal-user" kind of statistics 
 # (responseTime-#numuser or tptUser-#numuser)
-def histo_users(mode, lambda_val, attribute, ci=95, users=range(0, NUM_USERS), save=False, value='mean'):
-    stats = scalar_stats(scalar_parse(mode, lambda_val))
+def histo_users(mode, lambda_val, attribute, value='mean', ci="95", hue=None, title=None, palette=None):
+    t = title if title else "Mean " + attribute + " per user, CI=" + ci + " (" + MODE_DESCRIPTION[mode] + ", " + LAMBDA_DESCRIPTION[lambda_val]  + ")"
+    data = tidy_scalar(mode, lambda_val)
 
-    for u in users:
-        attr =  attribute + '-' + str(u)
-        bar = stats[value][attr]
-        error = np.array([bar - stats['ci' + str(ci) + '_l'][attr], stats['ci' + str(ci) + '_h'][attr] - bar]).reshape(2,1)
-        plt.bar('User '+ str(u), bar, yerr=error, align='center', alpha=0.95, ecolor='k', capsize=7)
-
-    # Show graphic
-    plt.title(value + " " + attribute + ": " + MODE_DESCRIPTION[mode] + " and " + LAMBDA_DESCRIPTION[lambda_val])
-    if save:
-        plt.savefig("histousers_" + attribute + "_" + mode + "_" + lambda_val + ".pdf", bbox_inches="tight")
-        plt.clf()
-    else:
-        plt.show()
+    grp = data.groupby(['user'])    
+    md = grp.mean()
+    err = md[attribute + ':ci'+ci]
+    
+    sns.catplot(x='user', y=attribute + ':' + value, data=data, kind='bar', yerr=err, capsize=0 , errwidth=0, dodge=False, hue=hue, palette=palette)
+    plt.title(t)
+    plt.show()
     return
 
 
@@ -685,30 +689,18 @@ def scatterplot_mean(mode, lambda_val, x_attr, y_attr, users=range(0, NUM_USERS)
 
 # does it make sense?
 def CQI_to_class(cqi):
-    if cqi < 4: return CQI_CLASSES[0]
-    # if cqi < 7: return 'MID'
-    return CQI_CLASSES[1]
+    if cqi < 3: return CQI_CLASSES[0]
+    if cqi < 9: return CQI_CLASSES[1]
+    return CQI_CLASSES[2]
 
 
 
-def class_plot(mode, lambda_val, y_attr='mean:rspTimeUser'):
-    data = tidy_scalar(mode, lambda_val)
-
-    sns.catplot(x='class', y=y_attr, hue='user', data=data, order=CQI_CLASSES)
-    plt.title("Class plot for " + y_attr + " (" + MODE_DESCRIPTION[mode] + ", " + LAMBDA_DESCRIPTION[lambda_val]  + ")")
-    plt.show()    
-
-    sns.catplot(x='class', y=y_attr, hue='user', data=data, order=CQI_CLASSES, kind='bar', capsize=0.05)
-    plt.title("Class Barplot for " + y_attr + " (" + MODE_DESCRIPTION[mode] + ", " + LAMBDA_DESCRIPTION[lambda_val]  + ")")
-    plt.show()
-
-    sns.catplot(x='class', y=y_attr, hue='user', data=data, order=CQI_CLASSES, kind='box')
-    plt.title("Class Boxplot for " + y_attr + " (" + MODE_DESCRIPTION[mode] + ", " + LAMBDA_DESCRIPTION[lambda_val]  + ")")
-    plt.show()
-
+def class_plot(mode, lambda_val, y_attr='rspTimeUser', value='mean', ci='95'):
+    colors = [sns.xkcd_rgb["pale red"],sns.xkcd_rgb["medium green"], sns.xkcd_rgb["denim blue"]]
+    histo_users('bin', 'l15', 'rspTimeUser', hue='class', ci=ci, value='mean', palette=colors)
     return
 
-
+# TIDY SCALAR CONTAINS ONLY USER SIGNALS!!!!!!!!!!!
 def tidy_scalar_csv(path_to_csv):
     tidy_data = pd.DataFrame()
     data = scalar_parse_csv(path_to_csv)
@@ -719,8 +711,12 @@ def tidy_scalar_csv(path_to_csv):
     tidy_data['user']  = 'user-' + sel[sel.attr == sel.attr.iloc[0]].user.values # any dynsignal will be fine, because all of them have 100 instances
     tidy_data['run']   = sel[sel.attr == sel.attr.iloc[0]].run.values # same
     for attr_name in sel.attr.unique():
-        for val in ['value', 'count', 'mean', 'min', 'max', 'stddev']:
+        for val in ['sum', 'count', 'mean', 'min', 'max', 'stddev', 'ci95', 'ci99']:
             tidy_data[attr_name + ':' + val] = sel[sel.attr == attr_name][val].values
+        # tidy_data[attr_name + ":ci95"] = 1.96*(tidy_data[attr_name + ':stddev']/np.sqrt(tidy_data[attr_name + ':count']))
+        # tidy_data[attr_name + ":ci95_u"] = tidy_data[attr_name + ':mean'] + 1.96*(tidy_data[attr_name + ':stddev']/np.sqrt(tidy_data[attr_name + ':count']))
+        # tidy_data[attr_name + ":ci99_l"] = tidy_data[attr_name + ':mean'] - 2.58*(tidy_data[attr_name + ':stddev']/np.sqrt(tidy_data[attr_name + ':count']))
+        # tidy_data[attr_name + ":ci99"] = 2.58*(tidy_data[attr_name + ':stddev']/np.sqrt(tidy_data[attr_name + ':count']))
 
     tidy_data['class'] = tidy_data['CQIUser:mean'].apply(lambda x: CQI_to_class(x))
     return tidy_data
