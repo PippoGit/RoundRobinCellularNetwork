@@ -47,7 +47,8 @@ void User::sendCQI(){
     //double successProbGroup2 = getParentModule()->par("successProbGroup2");
     double successProbGroup3 = getParentModule()->par("successProbGroup3");
 
-    //double p =   (userID==0||userID==3||userID==6||userID==9)? successProbGroup1: (userID==1||userID==2||userID==8)? successProbGroup2: successProbGroup3; //caso 3 prob
+    //double p = (userID==2||userID==5||userID==8)? successProbGroup1: (userID==1||userID==4||userID==7||userID==9)? successProbGroup2: successProbGroup3; //caso 3 prob
+    //double p =   (userID==2)?successProbGroup3:successProbGroup1;
     double p =  (userID % 2 == 0) ? successProbGroup3: successProbGroup1;
     int cqi  = (isBinomial) ? binomial(BINOMIAL_N, p,RNG_CQI_BIN)+1 : intuniform(MIN_CQI, MAX_CQI, RNG_CQI_UNI);
 
