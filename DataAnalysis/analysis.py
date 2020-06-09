@@ -294,7 +294,8 @@ def aggregate_users_signals(data, signal, users=range(0, NUM_USERS), value='mean
     # meanResponseTime => dato il mean response time di un utente per ogni run, calcolo la media dei
     # mean response time dell'utente su tutte le run. E poi faccio la media per tutti gli utenti per
     # ottenere il mean responsetime medio per tutti gli utenti.
-    return data[data.name.isin([signal + '-' + str(i) for i in users])].groupby('run').mean().describe(percentiles=[.25, .50, .75, .95])
+    return data[data.name.isin([signal + '-' + str(i) for i in users])].groupby('run').mean().describe(percentiles=[.01, .05, .25, .50, .75, .95, .99])
+
 
 def scalar_stats(mode, lval, attributes=None, users=range(0,NUM_USERS), value='mean'):
     data = scalar_parse(mode, lval)
@@ -303,7 +304,7 @@ def scalar_stats(mode, lval, attributes=None, users=range(0,NUM_USERS), value='m
 
     # STATS FOR EACH SIGNAL
     for attr in attributes: 
-        stats[attr] = data[data.name == attr][value].describe(percentiles=[.25, .50, .75, .95])
+        stats[attr] = data[data.name == attr][value].describe(percentiles=[.01, .05, .25, .50, .75, .95, .99])
 
     # Transpose...
     stats = stats.T
@@ -529,7 +530,8 @@ def plot_ecdf_vec(data, attribute, iteration=0, sample_size=1000, replace=False)
 #                      IID                         #
 ####################################################
 
-def check_iid_sca(data, attribute, aggregate=False, users=range(0, NUM_USERS), save=False, value='mean'):
+def check_iid_sca(mode, lambda_val, attribute, aggregate=False, users=range(0, NUM_USERS), save=False, value='mean'):
+    data = scalar_parse(mode, lambda_val)
     if aggregate:
         samples = data[data.name.isin([attribute + '-' + str(i) for i in users])].groupby('run').mean()
     else:
@@ -612,7 +614,7 @@ def stats_to_csv():
     for m in exp.keys():
         for l in exp[m]:
             data = scalar_parse(m, l)
-            stats = scalar_stats(data)
+            stats = scalar_stats(m, l)
             stats.to_csv('stats_' + m + '_' + l + '.csv')
     return
 
@@ -620,8 +622,8 @@ def stats_to_csv():
 
 def unibin_ci_plot(lambda_val, attr, bin_mode='bin', ci=95, save=False):
     # get the data...
-    stats1 = scalar_stats(scalar_parse('uni', lambda_val))
-    stats2 = scalar_stats(scalar_parse(bin_mode, lambda_val))
+    stats1 = scalar_stats('uni', lambda_val)
+    stats2 = scalar_stats(bin_mode, lambda_val)
 
     bar1 = stats1['mean'][attr]    
     bar2 = stats2['mean'][attr]
@@ -839,35 +841,15 @@ def test_ecdf_vect(data, attribute):
 
 
 def main():
-    lambdas = ['l02', 'l1', 'l15']
-
-
-    print("\n\nPerformance Evaluation - Python Data Analysis\n")
-    print("*" * 30, "\n")
-
-    print("Testing UNIFORM" )
-    for l in lambdas:
-        print("LAMBDA VALUE: " + LAMBDA_DESCRIPTION[l])
-        data = scalar_parse('uni', l)
-        tidy = tidy_scalar('uni', l)
-        
-        print("Scalar Stats: ")
-        print(scalar_stats(data).to_string())
-        
-        print("Checking IID for aggregated mean responseTime")
-        check_iid_sca(data, 'mean:rspTimeUser', aggregate=True)
-
-        print("Checking IID for aggregated mean throughput")
-        check_iid_sca(data, 'mean:tptUser', aggregate=True)
-
-
-
-        input("Press enter to continue...")
-        
-
+    an={}
+    #Script da copiare e incollare in console
+    # an.scalar_stats('uni', 'l02', ['responseTime', 'throughput', 'numberRB'])
+    # an.histo_all_lambdas('uni', attribute='turnWaitingTimeUser', palette='magma', ci="99")
+    # an.histo_all_lambdas('uni', attribute='responseTime', palette='magma', ci="99", antenna=True)
+    # an.class_plot('bin', 'l15', ci="99")
+    # an.multi_ecdf_sca('uni', an.uni_lambdas, 'numServedUser')
+    # an.check_iid_sca(an.scalar_parse('uni', 'l15'), 'numServedUser')
     
-
-
 
     return 
 
