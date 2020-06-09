@@ -706,16 +706,17 @@ def scatterplot_mean(mode, lambda_val, x_attr, y_attr, users=range(0, NUM_USERS)
 
 # does it make sense?
 def CQI_to_class(cqi):
-    if cqi < 3: return CQI_CLASSES[0]
-    if cqi < 9: return CQI_CLASSES[1]
+    if cqi < 4: return CQI_CLASSES[0]
+    if cqi < 10: return CQI_CLASSES[1]
     return CQI_CLASSES[2]
 
 
 
 def class_plot(mode, lambda_val, y_attr='rspTimeUser', value='mean', ci='95'):
-    colors = [sns.xkcd_rgb["pale red"],sns.xkcd_rgb["medium green"], sns.xkcd_rgb["denim blue"]]
-    histo_users('bin', 'l15', 'rspTimeUser', hue='class', ci=ci, value='mean', palette=colors)
+    colors = [sns.xkcd_rgb["pale red"], sns.xkcd_rgb["denim blue"]]# sns.xkcd_rgb["medium green"], sns.xkcd_rgb["denim blue"]]
+    histo_users('bin', 'l15', y_attr, hue='class', ci=ci, value='mean', palette=colors)
     return
+
 
 # TIDY SCALAR CONTAINS ONLY USER SIGNALS!!!!!!!!!!!
 def tidy_scalar_csv(path_to_csv):
