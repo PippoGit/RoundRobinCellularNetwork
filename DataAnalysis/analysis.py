@@ -255,6 +255,7 @@ def scalar_parse_csv(path_csv, stats=True):
     # data_sum_sig.name = 'sum:' + data_sum_sig['name'].astype(str)
     # result = pd.concat([data_cln, data_sum_sig])
 
+    data['ci99'] = 2.58*(data['stddev']/np.sqrt(data['count']))
     data['sum']  = data['count']*data['mean']
     data['ci95'] = 1.96*(data['stddev']/np.sqrt(data['count']))
     data['ci99'] = 2.58*(data['stddev']/np.sqrt(data['count']))
@@ -295,19 +296,14 @@ def aggregate_users_signals(data, signal, users=range(0, NUM_USERS), value='mean
     # ottenere il mean responsetime medio per tutti gli utenti.
     return data[data.name.isin([signal + '-' + str(i) for i in users])].groupby('run').mean().describe(percentiles=[.25, .50, .75, .95])
 
-def scalar_stats(data, attr=None, users=range(0,NUM_USERS), value='mean'):
+def scalar_stats(mode, lval, attributes=None, users=range(0,NUM_USERS), value='mean'):
+    data = scalar_parse(mode, lval)
     stats = pd.DataFrame()
-    attributes = data.name.unique() if attr is None else attr
+    attributes = data.name.unique() if attributes is None else attributes
 
     # STATS FOR EACH SIGNAL
     for attr in attributes: 
         stats[attr] = data[data.name == attr][value].describe(percentiles=[.25, .50, .75, .95])
-
-    # Aggregate dynamic stats (one signal per user):
-    # stats['aggrResponseTime'] = aggregate_users_signals(data, 'rspTimeUser', value=value, users=users)
-    # stats['aggrThroughput']   = aggregate_users_signals(data, 'tptUser', value=value, users=users)
-    # stats['aggrCQI']          = aggregate_users_signals(data, 'CQIUser', value=value, users=users)
-    # stats['aggrNumRBs']       = aggregate_users_signals(data, 'numRBsUser', value=value, users=users) 
 
     # Transpose...
     stats = stats.T
