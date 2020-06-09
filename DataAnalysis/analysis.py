@@ -50,6 +50,7 @@ LAMBDA_DESCRIPTION = {
     'l14' : "1/λ = 1.4ms",
     'l15' : "1/λ = 1.5ms",
     'l2'  : "1/λ = 2.0ms",
+    'l25' : "1/λ = 2.5ms",
     'l5'  : "1/λ = 5.0ms"
 }
 
@@ -69,6 +70,7 @@ LAMBDA_PATH = {
     'l14' : "lambda14/",
     'l15' : "lambda15/",
     'l2'  : "lambda2/",
+    'l25' : "lambda25/",
     'l5'  : "lambda5/"
 }
 
@@ -82,6 +84,9 @@ CQI_CLASSES = [
     'MID',
     'HIGH'
 ]
+
+uni_lambdas=['l02', 'l07', 'l1', 'l15', 'l2', 'l25']
+
 
 # Just to not fuck things up
 np.random.seed(SEED_SAMPLING)
@@ -322,9 +327,9 @@ def users_bandwidth_sca(data, group=False):
 
     bandwidth = pd.DataFrame()
     bandwidth['user'] = sel['index'].str.split('-', expand=True)[1].astype(int)
-    bandwidth['mean_Mbps'] = (sel['mean'] / TIMESLOT)/125000
-    bandwidth['max_Mbps']  = (sel['max']  / TIMESLOT)/125000
-    bandwidth['min_Mbps']  = (sel['min']  / TIMESLOT)/125000
+    bandwidth['mean_Mbps'] = (sel['mean'])/125000
+    bandwidth['max_Mbps']  = (sel['max'])/125000
+    bandwidth['min_Mbps']  = (sel['min'])/125000
     
     bandwidth.index = bandwidth['user'] 
     bandwidth = bandwidth.drop('user', axis=1)
@@ -475,7 +480,8 @@ def multi_ecdf_sca(mode, lambdas, attribute, users=range(0, NUM_USERS), save=Fal
 
     title = "ECDF (" + MODE_DESCRIPTION[mode] + ") for " + value + " " +  attribute + (" with " + str(len(users)) + " users" if show is 'aggregate' else "")
     plt.title(title)
-    plt.legend()
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),
+          fancybox=True, shadow=True, ncol=6)
     
     if save:
         plt.savefig("ecdf_" + attribute + ".pdf", bbox_inches="tight")
@@ -656,10 +662,21 @@ def histo_users(mode, lambda_val, attribute, value='mean', ci="95", hue=None, ti
     md = grp.mean()
     err = md[attribute + ':ci'+ci]
     
-    sns.catplot(x='user', y=attribute + ':' + value, data=data, kind='bar', yerr=err, capsize=0 , errwidth=0, dodge=False, hue=hue, palette=palette)
+    sns.catplot(x='user', y=attribute + ':' + value, data=data, kind='bar', capsize=0.6, errwidth=1.4, dodge=False, hue=hue, palette=palette, ci=int(ci))
     plt.title(t)
     plt.show()
     return
+
+
+def histo_all_lambdas(mode, lambdas=['l02', 'l07', 'l1', 'l15', 'l2', 'l25'], attribute='rspTimeUser', value='mean', hue=None, title=None, palette=None, ci="95", antenna=False):
+    t = title if title else "Mean " + attribute + " per workload, CI=" + ci + " (" + MODE_DESCRIPTION[mode] +  ")"
+
+    multi_tidy = multi_tidy_scalar({mode:lambdas}, antenna=antenna)
+    sns.catplot(x='lambda', y=attribute + ':' + value, data=multi_tidy, kind='bar', capsize=0.6, errwidth=1.4, dodge=False, hue=hue, palette=palette, ci=int(ci))
+    plt.title(t)
+    plt.show()
+    return
+
 
 
 def scatterplot_mean(mode, lambda_val, x_attr, y_attr, users=range(0, NUM_USERS), save=False, group=None, hue='user', col=None):
@@ -722,8 +739,20 @@ def tidy_scalar_csv(path_to_csv):
     return tidy_data
 
 
-def tidy_scalar(mode, lambda_val):
-    return tidy_scalar_csv(data_path(mode, lambda_val))
+def tidy_scalar(mode, lambda_val, antenna=False):
+    return tidy_scalar_antenna_csv(data_path(mode, lambda_val)) if antenna else tidy_scalar_csv(data_path(mode, lambda_val))
+
+
+def tidy_scalar_antenna_csv(path_to_csv):
+    tidy_data = pd.DataFrame()
+    data = scalar_parse_csv(path_to_csv)
+    sel = data[~data.name.str.contains('-')].reset_index().drop('index', axis=1)
+
+    tidy_data['run']   = sel[sel.name == sel.name.iloc[0]].run.values # same
+    for attr_name in sel.name.unique():
+        for val in ['sum', 'count', 'mean', 'min', 'max', 'stddev', 'ci95', 'ci99']:
+            tidy_data[attr_name + ':' + val] = sel[sel.name == attr_name][val].values
+    return tidy_data
 
 
 def model_validation(lambda_val, cqis=["2", "13"], attribute="mean:CQIUser", ci=95):
@@ -779,13 +808,21 @@ def correlation(x, y):
     return
 
 
-def multi_tidy_scalar(lambdas={'uni': ['l02', 'l07', 'l1', 'l15'], 'bin': ['l07', 'l1', 'l15']}):
+def plot_correlation_tpt_lambda(mode='uni', lambdas=['l02', 'l07', 'l1', 'l15', 'l2', 'l25'], value='mean'):
+    data = multi_tidy_scalar({mode:lambdas})
+    sns.scatterplot('tptUser' + ':' +  value,'lambda',  data=data, hue='lambda')
+    plt.show()
+    return data
+
+
+
+def multi_tidy_scalar(lambdas={'uni': ['l02', 'l07', 'l1', 'l15'], 'bin': ['l07', 'l1', 'l15']}, antenna=False):
     x = pd.DataFrame()
     for k in lambdas.keys():
         for l in lambdas[k]:
-            y = tidy_scalar(k, l)
-            y['lambda'] = l
-            y['cqi_mode'] = k
+            y = tidy_scalar(k, l, antenna=antenna)
+            y['lambda'] = LAMBDA_DESCRIPTION[l]
+            y['cqi_mode'] = MODE_DESCRIPTION[k]
             x = x.append(y, ignore_index=True)
     return x
 
