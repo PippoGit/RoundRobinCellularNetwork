@@ -319,6 +319,18 @@ def scalar_stats(mode, lval, attributes=None, users=range(0,NUM_USERS), value='m
     return stats
 
 
+def antenna_bandwidth_sca(mode, l, group=False):
+    stats = scalar_stats(mode, l, attributes=['throughput'])
+
+    bandwidth = pd.DataFrame()
+    bandwidth['mean_Mbps'] = (stats['mean'])/125000
+    bandwidth['max_Mbps']  = (stats['max'])/125000
+    bandwidth['min_Mbps']  = (stats['min'])/125000
+
+    return bandwidth
+
+
+
 def users_bandwidth_sca(mode, l, group=False):
     stats = scalar_stats(mode, l)
     index = [row for row in stats.index if row.startswith('tptUser-')]
@@ -480,7 +492,7 @@ def multi_ecdf_sca(mode, lambdas, attribute, users=range(0, NUM_USERS), save=Fal
     title = "ECDF (" + MODE_DESCRIPTION[mode] + ") for " + value + " " +  attribute + (" with " + str(len(users)) + " users" if show is 'aggregate' else "")
     plt.title(title)
     plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),
-          fancybox=True, shadow=True, ncol=6)
+          fancybox=True, shadow=True, ncol=7)
     
     if save:
         plt.savefig("ecdf_" + attribute + ".pdf", bbox_inches="tight")
