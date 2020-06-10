@@ -43,6 +43,7 @@ MODE_DESCRIPTION = {
 LAMBDA_DESCRIPTION = {
     'l01' : "1/λ = 0.1ms",
     'l02' : "1/λ = 0.2ms",
+    'l03' : "1/λ = 0.3ms",
     'l07' : "1/λ = 0.7ms",
     'l09' : "1/λ = 0.9ms",
     'l1'  : "1/λ = 1.0ms",
@@ -63,6 +64,7 @@ MODE_PATH = {
 LAMBDA_PATH = {
     'l01' : "lambda01/",
     'l02' : "lambda02/",
+    'l03' : "lambda03/",
     'l07' : "lambda07/",
     'l09' : "lambda09/",
     'l1'  : "lambda1/",
@@ -85,7 +87,7 @@ CQI_CLASSES = [
     'HIGH'
 ]
 
-uni_lambdas=['l02', 'l07', 'l1', 'l15', 'l2', 'l25']
+uni_lambdas=['l02', 'l03', 'l07', 'l1', 'l15', 'l2', 'l25']
 
 
 # Just to not fuck things up
@@ -310,15 +312,15 @@ def scalar_stats(mode, lval, attributes=None, users=range(0,NUM_USERS), value='m
     stats = stats.T
 
     # COMPUTE CI 
-    stats['ci95_l'] = stats['mean'] - 1.96*(stats['std']/np.sqrt(stats['count']))
-    stats['ci95_h'] = stats['mean'] + 1.96*(stats['std']/np.sqrt(stats['count']))
-    stats['ci99_l'] = stats['mean'] - 2.58*(stats['std']/np.sqrt(stats['count']))
-    stats['ci99_h'] = stats['mean'] + 2.58*(stats['std']/np.sqrt(stats['count']))
+    stats['ci95_l'] =  1.96*(stats['std']/np.sqrt(stats['count']))
+    stats['ci95_h'] =  1.96*(stats['std']/np.sqrt(stats['count']))
+    stats['ci99_l'] =  2.58*(stats['std']/np.sqrt(stats['count']))
+    stats['ci99_h'] =  2.58*(stats['std']/np.sqrt(stats['count']))
     return stats
 
 
-def users_bandwidth_sca(data, group=False):
-    stats = scalar_stats(data)
+def users_bandwidth_sca(mode, l, group=False):
+    stats = scalar_stats(mode, l)
     index = [row for row in stats.index if row.startswith('tptUser-')]
     sel = stats.loc[index, :].reset_index()
 
@@ -666,14 +668,38 @@ def histo_users(mode, lambda_val, attribute, value='mean', ci="95", hue=None, ti
     return
 
 
-def histo_all_lambdas(mode, lambdas=['l02', 'l07', 'l1', 'l15', 'l2', 'l25'], attribute='rspTimeUser', value='mean', hue=None, title=None, palette=None, ci="95", antenna=False):
+def histo_all_lambdas(mode, lambdas=['l02', 'l03', 'l07', 'l1', 'l15', 'l2', 'l25'], attribute='rspTimeUser', value='mean', hue=None, title=None, palette=None, ci="95", antenna=False):
     t = title if title else "Mean " + attribute + " per workload, CI=" + ci + " (" + MODE_DESCRIPTION[mode] +  ")"
 
     multi_tidy = multi_tidy_scalar({mode:lambdas}, antenna=antenna)
-    sns.catplot(x='lambda', y=attribute + ':' + value, data=multi_tidy, kind='bar', capsize=0.6, errwidth=1.4, dodge=False, hue=hue, palette=palette, ci=int(ci))
+    ax = sns.catplot(x='lambda', y=attribute + ':' + value, data=multi_tidy, kind='bar', capsize=0.6, errwidth=1.4, dodge=False, hue=hue, palette=palette, ci=int(ci))
+    ax.set(xlabel='Workload', ylabel=attribute)
+
     plt.title(t)
     plt.show()
     return
+
+
+def timing_lambdas(mode, lambdas=['l02', 'l03', 'l07', 'l1', 'l15', 'l2', 'l25'], value='mean', ci='99', title=None):
+    t = "Temporal characteristics with multiple workloads (CI: " + ci + " )"
+    attributes = ['rspTimeUser', 'serviceTimeUser','waitingTimeUser', 'turnWaitingTimeUser']
+    multi_tidy = multi_tidy_scalar({mode:lambdas})[[a+":"+value for a in attributes] + ['user', 'lambda']]
+    multi_tidy = multi_tidy[multi_tidy.user == 'user-0']
+    data = []
+    for _, row in multi_tidy.iterrows():
+        data = data + ([{'timing':row[a + ":" + value], 'signal':a, 'lambda':row['lambda']} for a in attributes])
+    td = pd.DataFrame(data)
+
+    ax = sns.catplot(x='lambda', y='timing', data=td, kind='bar', capsize=0.05, errwidth=1.4, hue='signal', ci=int(ci), dodge=True, legend_out=False)
+    ax.set(xlabel='Workload', ylabel='Temporal characteristics')
+
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1),
+          fancybox=True, shadow=True, ncol=6)
+    plt.title(t)
+    plt.show()
+    return
+
+
 
 
 
@@ -843,12 +869,14 @@ def test_ecdf_vect(data, attribute):
 def main():
     an={}
     #Script da copiare e incollare in console
-    # an.scalar_stats('uni', 'l02', ['responseTime', 'throughput', 'numberRB'])
+    # for l in an.uni_lambdas:
+    # an.scalar_stats('uni', l, ['responseTime', 'throughput', 'numberRB', 'numServedUser'])
     # an.histo_all_lambdas('uni', attribute='turnWaitingTimeUser', palette='magma', ci="99")
     # an.histo_all_lambdas('uni', attribute='responseTime', palette='magma', ci="99", antenna=True)
     # an.class_plot('bin', 'l15', ci="99")
     # an.multi_ecdf_sca('uni', an.uni_lambdas, 'numServedUser')
     # an.check_iid_sca(an.scalar_parse('uni', 'l15'), 'numServedUser')
+    # an.all_lorenz('uni', 'l15', 'responseTime')
     
 
     return 
