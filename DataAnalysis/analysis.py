@@ -87,7 +87,11 @@ CQI_CLASSES = [
     'HIGH'
 ]
 
-uni_lambdas=['l02', 'l03', 'l07', 'l1', 'l15', 'l2', 'l25']
+default_lambdas = {
+    'uni' : ['l02', 'l03', 'l07', 'l1', 'l15', 'l2', 'l25'],
+    'bin' : ['l07', 'l1', 'l15', 'l2', 'l25']
+}
+
 
 
 # Just to not fuck things up
@@ -455,7 +459,9 @@ def all_lorenz(mode, lambda_val, attribute, users=range(0, NUM_USERS), iteration
 ####################################################
 
 
-def multi_ecdf_sca(mode, lambdas, attribute, users=range(0, NUM_USERS), save=False, show='single', hide_users=False, hide_mean=False, value='mean'):
+def multi_ecdf_sca(mode, lambdas=None, attribute='responseTime', users=range(0, NUM_USERS), save=False, show='single', hide_users=False, hide_mean=False, value='mean'):
+    lambdas = default_lambdas[mode] if lambdas is None else lambdas
+
     for l in lambdas:
         data = scalar_parse(mode, l)
     
@@ -666,7 +672,7 @@ def plot_to_img(mode, lambdas):
 
 # this function works only with "nameSignal-user" kind of statistics 
 # (responseTime-#numuser or tptUser-#numuser)
-def histo_users(mode, lambda_val, attribute, value='mean', ci="95", hue=None, title=None, palette=None):
+def histo_users(mode, lambda_val, attribute, value='mean', ci="95", hue=None, title=None, palette=None, dodge=False):
     t = title if title else "Mean " + attribute + " per user, CI=" + ci + " (" + MODE_DESCRIPTION[mode] + ", " + LAMBDA_DESCRIPTION[lambda_val]  + ")"
     data = tidy_scalar(mode, lambda_val)
 
@@ -674,17 +680,18 @@ def histo_users(mode, lambda_val, attribute, value='mean', ci="95", hue=None, ti
     md = grp.mean()
     err = md[attribute + ':ci'+ci]
     
-    sns.catplot(x='user', y=attribute + ':' + value, data=data, kind='bar', capsize=0.6, errwidth=1.4, dodge=False, hue=hue, palette=palette, ci=int(ci), order=['user-'+str(u).zfill(2) for u in range(0, NUM_USERS)])
+    sns.catplot(x='user', y=attribute + ':' + value, data=data, kind='bar', capsize=0.6, errwidth=1.4, dodge=dodge, hue=hue, palette=palette, ci=int(ci), order=['user-'+str(u).zfill(2) for u in range(0, NUM_USERS)])
     plt.title(t)
     plt.show()
     return
 
 
-def histo_all_lambdas(mode, lambdas=['l02', 'l03', 'l07', 'l1', 'l15', 'l2', 'l25'], attribute='rspTimeUser', value='mean', hue=None, title=None, palette=None, ci="95", antenna=False):
+def histo_all_lambdas(mode, lambdas=None, attribute='rspTimeUser', value='mean', hue=None, title=None, palette=None, ci="95", antenna=False, dodge=False, capsize=0.6):
+    lambdas = default_lambdas[mode] if lambdas is None else lambdas
     t = title if title else "Mean " + attribute + " per workload, CI=" + ci + " (" + MODE_DESCRIPTION[mode] +  ")"
 
     multi_tidy = multi_tidy_scalar({mode:lambdas}, antenna=antenna)
-    ax = sns.catplot(x='lambda', y=attribute + ':' + value, data=multi_tidy, kind='bar', capsize=0.6, errwidth=1.4, dodge=False, hue=hue, palette=palette, ci=int(ci))
+    ax = sns.catplot(x='lambda', y=attribute + ':' + value, data=multi_tidy, kind='bar', capsize=capsize, errwidth=1.4, dodge=dodge, hue=hue, palette=palette, ci=int(ci))
     ax.set(xlabel='Workload', ylabel=attribute)
 
     plt.title(t)
@@ -692,11 +699,14 @@ def histo_all_lambdas(mode, lambdas=['l02', 'l03', 'l07', 'l1', 'l15', 'l2', 'l2
     return
 
 
-def timing_lambdas(mode, lambdas=['l02', 'l03', 'l07', 'l1', 'l15', 'l2', 'l25'], value='mean', ci='99', title=None):
+def timing_lambdas(mode, lambdas=None, value='mean', ci='99', title=None, nuser=1):
+    lambdas = default_lambdas[mode] if lambdas is None else lambdas
     t = "Temporal characteristics with multiple workloads (CI: " + ci + " )"
     attributes = ['rspTimeUser', 'serviceTimeUser','waitingTimeUser', 'turnWaitingTimeUser']
     multi_tidy = multi_tidy_scalar({mode:lambdas})[[a+":"+value for a in attributes] + ['user', 'lambda']]
-    multi_tidy = multi_tidy[multi_tidy.user == 'user-0']
+
+    multi_tidy = multi_tidy[multi_tidy.user.isin(['user-' + str(u).zfill(2) for u in range(0, nuser)])]
+
     data = []
     for _, row in multi_tidy.iterrows():
         data = data + ([{'timing':row[a + ":" + value], 'signal':a, 'lambda':row['lambda']} for a in attributes])
@@ -852,7 +862,8 @@ def correlation(x, y):
     return
 
 
-def plot_correlation_tpt_lambda(mode='uni', lambdas=['l02', 'l07', 'l1', 'l15', 'l2', 'l25'], value='mean'):
+def plot_correlation_tpt_lambda(mode='uni', lambdas=None, value='mean'):
+    lambdas = default_lambdas[mode] if lambdas is None else lambdas
     data = multi_tidy_scalar({mode:lambdas})
     sns.scatterplot('tptUser' + ':' +  value,'lambda',  data=data, hue='lambda')
     plt.show()
@@ -860,7 +871,7 @@ def plot_correlation_tpt_lambda(mode='uni', lambdas=['l02', 'l07', 'l1', 'l15', 
 
 
 
-def multi_tidy_scalar(lambdas={'uni': ['l02', 'l07', 'l1', 'l15'], 'bin': ['l07', 'l1', 'l15']}, antenna=False):
+def multi_tidy_scalar(lambdas=default_lambdas, antenna=False):
     x = pd.DataFrame()
     for k in lambdas.keys():
         for l in lambdas[k]:
@@ -888,7 +899,8 @@ def test_ecdf_vect(data, attribute):
 def main():
     an={}
     #Script da copiare e incollare in console
-    # for l in an.uni_lambdas:
+    # mode = 'bin'
+    # for l in default_lambdas[mode]:
     # an.scalar_stats('uni', l, ['responseTime', 'throughput', 'numberRB', 'numServedUser'])
     # an.histo_all_lambdas('uni', attribute='turnWaitingTimeUser', palette='magma', ci="99")
     # an.histo_all_lambdas('uni', attribute='responseTime', palette='magma', ci="99", antenna=True)
@@ -896,6 +908,7 @@ def main():
     # an.multi_ecdf_sca('uni', an.uni_lambdas, 'numServedUser')
     # an.check_iid_sca(an.scalar_parse('uni', 'l15'), 'numServedUser')
     # an.all_lorenz('uni', 'l15', 'responseTime')
+    # an.timing_lambdas(mode)
     
 
     return 
