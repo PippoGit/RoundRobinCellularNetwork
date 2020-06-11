@@ -459,7 +459,7 @@ def multi_ecdf_sca(mode, lambdas, attribute, users=range(0, NUM_USERS), save=Fal
     for l in lambdas:
         data = scalar_parse(mode, l)
     
-        if show is 'aggregate':
+        if show == 'aggregate':
             x = pd.DataFrame()
             for u in users:
                 stats = data[data.name == attribute + '-' + str(u)]
@@ -474,7 +474,7 @@ def multi_ecdf_sca(mode, lambdas, attribute, users=range(0, NUM_USERS), save=Fal
                 ecdf  = ECDF(mean.to_numpy())
                 sns.lineplot(x=ecdf.x, y=ecdf.y,label="AVG User " + LAMBDA_DESCRIPTION[l], drawstyle='steps-post')
         
-        elif show is 'class':
+        elif show == 'class':
             x0 = data[data.name == attribute + '-0']
             x1 = data[data.name == attribute + '-1']
 
@@ -489,7 +489,7 @@ def multi_ecdf_sca(mode, lambdas, attribute, users=range(0, NUM_USERS), save=Fal
             ecdf = ECDF(x)
             plt.step(ecdf.x, ecdf.y, label=LAMBDA_DESCRIPTION[l], where='post')
 
-    title = "ECDF (" + MODE_DESCRIPTION[mode] + ") for " + value + " " +  attribute + (" with " + str(len(users)) + " users" if show is 'aggregate' else "")
+    title = "ECDF (" + MODE_DESCRIPTION[mode] + ") for " + value + " " +  attribute + (" with " + str(len(users)) + " users" if show == 'aggregate' else "")
     plt.title(title)
     plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),
           fancybox=True, shadow=True, ncol=7)
@@ -674,7 +674,7 @@ def histo_users(mode, lambda_val, attribute, value='mean', ci="95", hue=None, ti
     md = grp.mean()
     err = md[attribute + ':ci'+ci]
     
-    sns.catplot(x='user', y=attribute + ':' + value, data=data, kind='bar', capsize=0.6, errwidth=1.4, dodge=False, hue=hue, palette=palette, ci=int(ci))
+    sns.catplot(x='user', y=attribute + ':' + value, data=data, kind='bar', capsize=0.6, errwidth=1.4, dodge=False, hue=hue, palette=palette, ci=int(ci), order=['user-'+str(u).zfill(2) for u in range(0, NUM_USERS)])
     plt.title(t)
     plt.show()
     return
@@ -761,8 +761,11 @@ def tidy_scalar_csv(path_to_csv):
     sel = data[data.name.str.contains('-')].reset_index().drop('index', axis=1)
     sel[['attr', 'user']] = sel.name.str.split('-', expand=True)
     sel = sel.drop('name', axis=1)
+    
+    sel['user'] = sel['user'].str.zfill(2)
 
     tidy_data['user']  = 'user-' + sel[sel.attr == sel.attr.iloc[0]].user.values # any dynsignal will be fine, because all of them have 100 instances
+    
     tidy_data['run']   = sel[sel.attr == sel.attr.iloc[0]].run.values # same
     for attr_name in sel.attr.unique():
         for val in ['sum', 'count', 'mean', 'min', 'max', 'stddev', 'ci95', 'ci99']:
