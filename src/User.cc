@@ -50,7 +50,9 @@ void User::sendCQI(){
     //double p = (userID==2||userID==5||userID==8)? successProbGroup1: (userID==1||userID==4||userID==7||userID==9)? successProbGroup2: successProbGroup3; //caso 3 prob
     //double p =   (userID==2)?successProbGroup3:successProbGroup1;
     double p =  (userID % 2 == 0) ? successProbGroup3: successProbGroup1;
-    int cqi  = userID+1; //(isBinomial) ? binomial(BINOMIAL_N, p,RNG_CQI_BIN)+1 : intuniform(MIN_CQI, MAX_CQI, RNG_CQI_UNI);
+
+    int cqi  = (isBinomial) ? binomial(BINOMIAL_N, p,RNG_CQI_BIN)+1 : intuniform(MIN_CQI, MAX_CQI, RNG_CQI_UNI);
+    // TEST PER MULTI CQI int cqi  = userID+1; //(isBinomial) ? binomial(BINOMIAL_N, p,RNG_CQI_BIN)+1 : intuniform(MIN_CQI, MAX_CQI, RNG_CQI_UNI);
 
     PacketCQI *newCQI = new PacketCQI();
     newCQI->setUserId(userID);

@@ -748,8 +748,12 @@ def CQI_to_class(cqi):
 
 
 
-def class_plot(mode, lambda_val, y_attr='rspTimeUser', value='mean', ci='95'):
-    colors = [sns.xkcd_rgb["pale red"], sns.xkcd_rgb["denim blue"]]# sns.xkcd_rgb["medium green"], sns.xkcd_rgb["denim blue"]]
+def class_plot(mode, lambda_val, y_attr='rspTimeUser', value='mean', ci='95', nc=2):
+    colors = [sns.xkcd_rgb["pale red"], sns.xkcd_rgb["medium green"], sns.xkcd_rgb["denim blue"]]
+
+    if nc == 2:
+        colors.pop(1)
+
     histo_users('bin', 'l15', y_attr, hue='class', ci=ci, value='mean', palette=colors)
     return
 
