@@ -672,7 +672,7 @@ def plot_to_img(mode, lambdas):
 
 # this function works only with "nameSignal-user" kind of statistics 
 # (responseTime-#numuser or tptUser-#numuser)
-def histo_users(mode, lambda_val, attribute, value='mean', ci="95", hue=None, title=None, palette=None, dodge=False):
+def histo_users(mode, lambda_val, attribute, value='mean', ci="99", hue=None, title=None, palette=None, dodge=False):
     t = title if title else "Mean " + attribute + " per user, CI=" + ci + " (" + MODE_DESCRIPTION[mode] + ", " + LAMBDA_DESCRIPTION[lambda_val]  + ")"
     data = tidy_scalar(mode, lambda_val)
 
@@ -686,7 +686,7 @@ def histo_users(mode, lambda_val, attribute, value='mean', ci="95", hue=None, ti
     return
 
 
-def histo_all_lambdas(mode, lambdas=None, attribute='rspTimeUser', value='mean', hue=None, title=None, palette=None, ci="95", antenna=False, dodge=False, capsize=0.6):
+def histo_all_lambdas(mode, lambdas=None, attribute='rspTimeUser', value='mean', hue=None, title=None, palette=None, ci="99", antenna=False, dodge=False, capsize=0.6):
     lambdas = default_lambdas[mode] if lambdas is None else lambdas
     t = title if title else "Mean " + attribute + " per workload, CI=" + ci + " (" + MODE_DESCRIPTION[mode] +  ")"
 
@@ -909,7 +909,8 @@ def main():
     # an.check_iid_sca(an.scalar_parse('uni', 'l15'), 'numServedUser')
     # an.all_lorenz('uni', 'l15', 'responseTime')
     # an.timing_lambdas(mode)
-    
+    # an.histo_all_lambdas('bin', attribute='rspTimeUser', palette=colors, hue='class', ci="99", dodge=True, capsize=0.25)
+    # an.histo_users()
 
     return 
 
