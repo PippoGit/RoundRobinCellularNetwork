@@ -303,8 +303,14 @@ def aggregate_users_signals(data, signal, users=range(0, NUM_USERS), value='mean
     return data[data.name.isin([signal + '-' + str(i) for i in users])].groupby('run').mean().describe(percentiles=[.01, .05, .25, .50, .75, .95, .99])
 
 
-def scalar_stats(mode, lval, attributes=None, users=range(0,NUM_USERS), value='mean'):
-    data = scalar_parse(mode, lval)
+
+def scalar_stats(mode, lval, attributes=None, value='mean'):
+    return scalar_stats_csv(data_path(mode,lval), attributes,  value)
+
+
+
+def scalar_stats_csv(path, attributes=None, value='mean'):
+    data = scalar_parse_csv(path)
     stats = pd.DataFrame()
     attributes = data.name.unique() if attributes is None else attributes
 
@@ -322,6 +328,20 @@ def scalar_stats(mode, lval, attributes=None, users=range(0,NUM_USERS), value='m
     stats['ci99_h'] =  2.58*(stats['std']/np.sqrt(stats['count']))
     return stats
 
+
+def scalar_stats_classed(lval, attributes=None, value='mean'):
+    ci = pd.DataFrame()
+
+    td = tidy_scalar('bin', lval)
+    means = td.groupby(['class']).mean()
+    std   = td.groupby(['class']).std()
+    count = td.groupby(['class']).count()
+
+    # COMPUTE CI 
+    for a in attributes:
+        ci[a] =  2.58*(std[a+":"+value]/np.sqrt(count[a+":"+value]))
+
+    return means[[a+":"+value for a in attributes]], std[[a+":"+value for a in attributes]], ci
 
 def antenna_bandwidth_sca(mode, l, group=False):
     stats = scalar_stats(mode, l, attributes=['throughput'])
@@ -676,9 +696,9 @@ def histo_users(mode, lambda_val, attribute, value='mean', ci="99", hue=None, ti
     t = title if title else "Mean " + attribute + " per user, CI=" + ci + " (" + MODE_DESCRIPTION[mode] + ", " + LAMBDA_DESCRIPTION[lambda_val]  + ")"
     data = tidy_scalar(mode, lambda_val)
 
-    grp = data.groupby(['user'])    
-    md = grp.mean()
-    err = md[attribute + ':ci'+ci]
+    # grp = data.groupby(['user'])    
+    # md = grp.mean()
+    # err = md[attribute + ':ci'+ci]
     
     sns.catplot(x='user', y=attribute + ':' + value, data=data, kind='bar', capsize=0.6, errwidth=1.4, dodge=dodge, hue=hue, palette=palette, ci=int(ci), order=['user-'+str(u).zfill(2) for u in range(0, NUM_USERS)])
     plt.title(t)
@@ -896,12 +916,25 @@ def test_ecdf_vect(data, attribute):
     return
 
 
+def test_cqis(path, title=None, hue=None, palette='viridis', ci="99", hide_lbl=True):
+    t = title if title else "CQIs Test"
+    data = tidy_scalar_csv(path)
+   
+    g = sns.barplot(x='user', y='rspTimeUser:mean', data=data,  capsize=0.6, errwidth=1.4, dodge=False, hue=hue, palette=palette, ci=int(ci))
+    
+    if hide_lbl is False:
+        g.text(1, 0, "0.0016", color='black', ha="center")
+    
+    plt.title(t)
+    plt.show()
+
+
 def main():
     an={}
     #Script da copiare e incollare in console
     # mode = 'bin'
-    # for l in default_lambdas[mode]:
-    # an.scalar_stats('uni', l, ['responseTime', 'throughput', 'numberRB', 'numServedUser'])
+    # for l in an.default_lambdas[mode]:
+    # an.scalar_stats(mode, l, ['responseTime', 'throughput', 'numberRB', 'numServedUser'])
     # an.histo_all_lambdas('uni', attribute='turnWaitingTimeUser', palette='magma', ci="99")
     # an.histo_all_lambdas('uni', attribute='responseTime', palette='magma', ci="99", antenna=True)
     # an.class_plot('bin', 'l15', ci="99")
@@ -911,6 +944,9 @@ def main():
     # an.timing_lambdas(mode)
     # an.histo_all_lambdas('bin', attribute='rspTimeUser', palette=colors, hue='class', ci="99", dodge=True, capsize=0.25)
     # an.histo_users()
+
+    # an.NUM_USERS = 15
+    # an.histo_users('bin', 'l1', attribute='rspTimeUser', palette='viridis', ci="99", title="CQI's impact on response time")
 
     return 
 
